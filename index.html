@@ -207,7 +207,7 @@
 
     /* ==================== CAMERA & PROCESSING STATES ==================== */
     .camera-bg {
-      background: #1a1a1a;
+      background: #fef9f4;
       position: relative;
       overflow: hidden;
     }
@@ -215,34 +215,26 @@
     .camera-bg::after {
       content: '';
       position: absolute;
-      left: -20%;
-      width: 140%;
-      height: 45%;
       border-radius: 50%;
       pointer-events: none;
       z-index: 0;
+      filter: blur(60px);
     }
     .camera-bg::before {
-      top: -18%;
-      background: radial-gradient(ellipse at 50% 80%, rgba(237, 100, 54, 0.35) 0%, rgba(245, 140, 60, 0.15) 40%, transparent 70%);
+      top: -10%;
+      right: -20%;
+      width: 70%;
+      height: 50%;
+      background: rgba(245, 165, 120, 0.45);
     }
     .camera-bg::after {
-      bottom: -18%;
-      background: radial-gradient(ellipse at 50% 20%, rgba(237, 72, 54, 0.30) 0%, rgba(245, 130, 60, 0.12) 40%, transparent 70%);
+      bottom: 5%;
+      left: -15%;
+      width: 60%;
+      height: 40%;
+      background: rgba(250, 190, 150, 0.35);
     }
     .camera-bg > * { position: relative; z-index: 1; }
-    .camera-bg .header { background: transparent; }
-    .camera-bg .bottom-bar { background: transparent; }
-    .camera-bg .btn-back {
-      border-color: #ed4836;
-      background: transparent;
-    }
-    .camera-bg .btn-back svg { stroke: #ed4836; }
-    .camera-bg .btn-circle {
-      background: rgba(237, 72, 54, 0.18);
-      border-color: rgba(237, 72, 54, 0.35);
-    }
-    .camera-bg .btn-circle svg { stroke: #ed4836; }
     .camera-bg .captured-thumb {
       border-color: rgba(237, 72, 54, 0.35);
       background: rgba(237, 72, 54, 0.18);
