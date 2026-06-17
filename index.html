@@ -645,32 +645,20 @@
       </div>
       <div style="width:36px"></div>
     </div>
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:16px">
-      <div class="frame-container">
-        <div class="frame-card" id="tpl-frame" style="opacity:0;transform:scale(0.92)">
-          <div class="photo-slot">
-            <div class="placeholder">
-              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              <span>Photo 1</span>
-            </div>
-            <div class="photo-fill one" id="pf1">
-              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            </div>
-            <div class="shimmer" id="sh1"></div>
-          </div>
-          <div class="photo-slot">
-            <div class="placeholder">
-              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              <span>Photo 2</span>
-            </div>
-            <div class="photo-fill two" id="pf2">
-              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            </div>
-            <div class="shimmer delay" id="sh2"></div>
-          </div>
-          <div class="brand-mark">
-            <span id="brand-text" style="opacity:0">@LOLPHOTOBOOTH.CO</span>
-          </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:16px">
+      <div style="width:65%;aspect-ratio:1/1;position:relative">
+        <div id="tpl-frame" style="width:100%;height:100%;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(0.92);position:relative">
+          <div class="shimmer" id="sh1" style="border-radius:16px"></div>
+          <!-- Photo sparkle icon -->
+          <svg id="proc-icon" viewBox="0 0 64 64" style="width:56px;height:56px;opacity:0.4">
+            <rect x="4" y="10" width="44" height="44" rx="8" fill="none" stroke="#2c2c2c" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="18" cy="26" r="4" fill="none" stroke="#2c2c2c" stroke-width="3" />
+            <polyline points="4 44 18 32 28 42 36 36 48 48" fill="none" stroke="#2c2c2c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Sparkles -->
+            <path d="M49 6 L51 12 L57 14 L51 16 L49 22 L47 16 L41 14 L47 12 Z" fill="#ed4836"/>
+            <path d="M57 20 L58 23 L61 24 L58 25 L57 28 L56 25 L53 24 L56 23 Z" fill="#ed4836"/>
+            <path d="M42 2 L43 4.5 L45.5 5.5 L43 6.5 L42 9 L41 6.5 L38.5 5.5 L41 4.5 Z" fill="#ed4836"/>
+          </svg>
         </div>
       </div>
       <div style="text-align:center">
@@ -942,14 +930,14 @@
   }
 
   function resetProcessing() {
-    var ids = ['tpl-frame','pf1','pf2','sh1','sh2','brand-text','status-text','dot-loader','circle-prog'];
+    var ids = ['tpl-frame','sh1','status-text','dot-loader','circle-prog'];
     ids.forEach(function(id) {
       var e = document.getElementById(id);
       if (e) { e.style.transition = ''; e.style.opacity = '0'; }
     });
     document.getElementById('tpl-frame').style.transform = 'scale(0.92)';
-    document.getElementById('pf1').style.clipPath = 'circle(0% at 50% 50%)';
-    document.getElementById('pf2').style.clipPath = 'circle(0% at 50% 50%)';
+    var icon = document.getElementById('proc-icon');
+    if (icon) { icon.style.transition = ''; icon.style.opacity = '0.4'; }
     document.getElementById('prog-c').style.strokeDashoffset = '150.8';
     document.getElementById('prog-num').textContent = '0%';
     document.getElementById('status-text').textContent = 'Processing Photo...';
@@ -981,30 +969,22 @@
   }
 
   function injectPhotos() {
-    var pf1 = document.getElementById('pf1');
-    var pf2 = document.getElementById('pf2');
     var df1 = document.getElementById('done-pf1');
     var df2 = document.getElementById('done-pf2');
 
     if (photos.length >= 1) {
-      pf1.style.backgroundImage = 'url(' + photos[0] + ')';
-      pf1.style.backgroundSize = 'cover';
-      pf1.style.backgroundPosition = 'center';
-      pf1.querySelector('svg').style.display = 'none';
       df1.style.backgroundImage = 'url(' + photos[0] + ')';
       df1.style.backgroundSize = 'cover';
       df1.style.backgroundPosition = 'center';
-      df1.querySelector('svg').style.display = 'none';
+      var svg1 = df1.querySelector('svg');
+      if (svg1) svg1.style.display = 'none';
     }
     if (photos.length >= 2) {
-      pf2.style.backgroundImage = 'url(' + photos[1] + ')';
-      pf2.style.backgroundSize = 'cover';
-      pf2.style.backgroundPosition = 'center';
-      pf2.querySelector('svg').style.display = 'none';
       df2.style.backgroundImage = 'url(' + photos[1] + ')';
       df2.style.backgroundSize = 'cover';
       df2.style.backgroundPosition = 'center';
-      df2.querySelector('svg').style.display = 'none';
+      var svg2 = df2.querySelector('svg');
+      if (svg2) svg2.style.display = 'none';
     }
   }
 
@@ -1018,12 +998,9 @@
     var tf = document.getElementById('tpl-frame');
     var cp = document.getElementById('circle-prog');
     var sh1 = document.getElementById('sh1');
-    var sh2 = document.getElementById('sh2');
-    var pf1 = document.getElementById('pf1');
-    var pf2 = document.getElementById('pf2');
+    var icon = document.getElementById('proc-icon');
     var pc = document.getElementById('prog-c');
     var pn = document.getElementById('prog-num');
-    var bt = document.getElementById('brand-text');
 
     setTimeout(function() {
       st.style.transition = 'opacity 0.5s';
@@ -1043,8 +1020,6 @@
     setTimeout(function() {
       sh1.style.transition = 'opacity 0.3s';
       sh1.style.opacity = '1';
-      sh2.style.transition = 'opacity 0.3s';
-      sh2.style.opacity = '1';
     }, 800);
 
     var p = 0;
@@ -1056,22 +1031,9 @@
       pc.style.strokeDashoffset = offset.toFixed(1);
       pn.textContent = p + '%';
 
-      if (p === 40) {
-        pf1.style.transition = 'clip-path 2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        pf1.style.clipPath = 'circle(75% at 50% 50%)';
-        pf2.style.transition = 'clip-path 2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        pf2.style.clipPath = 'circle(75% at 50% 50%)';
-        setTimeout(function() {
-          sh1.style.transition = 'opacity 0.5s';
-          sh1.style.opacity = '0';
-          sh2.style.transition = 'opacity 0.5s';
-          sh2.style.opacity = '0';
-        }, 1500);
-      }
-
-      if (p === 85) {
-        bt.style.transition = 'opacity 0.5s';
-        bt.style.opacity = '1';
+      if (p === 60) {
+        sh1.style.transition = 'opacity 0.5s';
+        sh1.style.opacity = '0';
       }
 
       if (p === 100) {
@@ -1135,8 +1097,8 @@
     resetProcessing();
     resetDone();
 
-    // Reset photo fills background images and restore SVG icons
-    ['pf1','pf2','done-pf1','done-pf2'].forEach(function(id) {
+    // Reset done photo fills and confirm previews
+    ['done-pf1','done-pf2','confirm-pf1','confirm-pf2'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) {
         el.style.backgroundImage = '';
