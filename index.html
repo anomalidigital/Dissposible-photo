@@ -206,9 +206,31 @@
     /* ==================== CAMERA & PROCESSING STATES ==================== */
     .camera-bg {
       background: #1a1a1a;
+      position: relative;
+      overflow: hidden;
     }
-    .camera-bg .header { background: #1a1a1a; }
-    .camera-bg .bottom-bar { background: #1a1a1a; }
+    .camera-bg::before,
+    .camera-bg::after {
+      content: '';
+      position: absolute;
+      left: -20%;
+      width: 140%;
+      height: 45%;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .camera-bg::before {
+      top: -22%;
+      background: radial-gradient(ellipse at 50% 80%, rgba(237, 72, 54, 0.18) 0%, rgba(237, 120, 54, 0.08) 40%, transparent 70%);
+    }
+    .camera-bg::after {
+      bottom: -22%;
+      background: radial-gradient(ellipse at 50% 20%, rgba(237, 72, 54, 0.15) 0%, rgba(245, 130, 60, 0.06) 40%, transparent 70%);
+    }
+    .camera-bg > * { position: relative; z-index: 1; }
+    .camera-bg .header { background: transparent; }
+    .camera-bg .bottom-bar { background: transparent; }
     .camera-bg .btn-back {
       border-color: #ed4836;
       background: transparent;
