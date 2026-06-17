@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>Disposable Photo - LOL Photobooth</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(165deg, #fef9f4 0%, #fdf0e6 40%, #fef5ed 100%);
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .app {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      max-width: 430px;
+      margin: 0 auto;
+    }
+
+    .state {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+    }
+    .state.active { display: flex; }
+
+    /* Header */
+    .header {
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-top: max(16px, env(safe-area-inset-top));
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 18px;
+      background: #ed4836;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
+    .badge.green { background: #27ae60; }
+
+    .btn-back {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid #ed4836;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-back svg { width: 18px; height: 18px; stroke: #ed4836; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* Snap button */
+    .btn-snap {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: #ed4836;
+      border: 3px solid rgba(237, 72, 54, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 0 6px rgba(237, 72, 54, 0.15);
+      transition: transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-snap:active { transform: scale(0.92); }
+    .btn-snap svg { width: 28px; height: 28px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    .btn-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(237, 72, 54, 0.12);
+      border: 1.5px solid rgba(237, 72, 54, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-circle svg { width: 20px; height: 20px; stroke: #ed4836; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* Action buttons */
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 24px;
+      border-radius: 25px;
+      border: 1.5px solid #ed4836;
+      background: transparent;
+      color: #ed4836;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s, background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-outline:active { transform: scale(0.96); background: rgba(237, 72, 54, 0.06); }
+    .btn-outline svg { width: 14px; height: 14px; stroke: #ed4836; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+    .btn-solid {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 28px;
+      border-radius: 25px;
+      border: none;
+      background: #ed4836;
+      color: #fff;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-solid:active { transform: scale(0.96); }
+    .btn-solid svg { width: 14px; height: 14px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* Frame */
+    .frame-container {
+      width: 85%;
+      aspect-ratio: 1 / 1;
+      position: relative;
+    }
+    .frame-card {
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    }
+    .photo-slot {
+      position: absolute;
+      left: 4%;
+      width: 92%;
+      height: 42%;
+      background: #f5f5f5;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .photo-slot:first-child { top: 4%; }
+    .photo-slot:nth-child(2) { top: 50%; }
+    .photo-slot .placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .photo-slot .placeholder svg { width: 32px; height: 32px; stroke: #ed4836; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.5; }
+    .photo-slot .placeholder span { font-size: 10px; color: rgba(237, 72, 54, 0.4); font-weight: 600; }
+    .photo-fill {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      clip-path: circle(0% at 50% 50%);
+    }
+    .photo-fill.one { background: linear-gradient(135deg, #f8c9a0, #f0a07a); }
+    .photo-fill.two { background: linear-gradient(135deg, #f0a07a, #e8836a); }
+    .photo-fill svg { width: 32px; height: 32px; stroke: rgba(255,255,255,0.7); fill: none; stroke-width: 1.5; }
+    .shimmer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(237, 72, 54, 0.06) 50%, transparent 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      opacity: 0;
+    }
+    .shimmer.delay { animation-delay: 0.4s; }
+    .brand-mark {
+      position: absolute;
+      bottom: 1%;
+      left: 4%;
+      width: 92%;
+      height: 6%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .brand-mark span {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 8px;
+      color: rgba(0, 0, 0, 0.15);
+      letter-spacing: 2px;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-right: 8px;
+    }
+
+    /* Dots loader */
+    .dots span {
+      display: inline-block;
+      animation: dotPulse 1.4s infinite;
+      font-size: 28px;
+      line-height: 1;
+      color: #ed4836;
+    }
+    .dots span:nth-child(2) { animation-delay: 0.2s; }
+    .dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    /* Animations */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    @keyframes dotPulse { 0%, 80%, 100% { opacity: 0.3; } 40% { opacity: 1; } }
+
+    /* Bottom safe area */
+    .bottom-bar {
+      padding: 20px 24px;
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- STATE 1: Camera -->
+  <div class="state active" id="s1">
+    <div class="header">
+      <div class="btn-back">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
+      <div style="flex:1;display:flex;justify-content:center">
+        <div class="badge">1 of 2</div>
+      </div>
+      <div style="width:36px"></div>
+    </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px">
+      <div style="width:88%;aspect-ratio:1/1;background:#111;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center">
+        <svg style="width:48px;height:48px;stroke:rgba(255,255,255,0.15);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+      </div>
+    </div>
+    <div class="bottom-bar" style="display:flex;align-items:center;justify-content:center;gap:32px">
+      <div class="btn-circle">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </div>
+      <div class="btn-snap" onclick="goToProcessing()">
+        <svg viewBox="0 0 24 24">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+      </div>
+      <div class="btn-circle">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATE 2: Processing -->
+  <div class="state" id="s2">
+    <div class="header">
+      <div style="width:36px"></div>
+      <div style="flex:1;display:flex;justify-content:center">
+        <div class="badge"><div class="spinner"></div>Processing</div>
+      </div>
+      <div style="width:36px"></div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:16px">
+
+      <div class="frame-container">
+        <div class="frame-card" id="tpl-frame" style="opacity:0;transform:scale(0.92)">
+          <div class="photo-slot">
+            <div class="placeholder">
+              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Photo 1</span>
+            </div>
+            <div class="photo-fill one" id="pf1">
+              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="shimmer" id="sh1"></div>
+          </div>
+          <div class="photo-slot">
+            <div class="placeholder">
+              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Photo 2</span>
+            </div>
+            <div class="photo-fill two" id="pf2">
+              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="shimmer delay" id="sh2"></div>
+          </div>
+          <div class="brand-mark">
+            <span id="brand-text" style="opacity:0">@LOLPHOTOBOOTH.CO</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:center">
+        <p id="status-text" style="font-size:16px;font-weight:700;color:#2c2c2c;margin:0 0 6px;opacity:0">Processing Photo...</p>
+        <div id="dot-loader" style="opacity:0" class="dots"><span>.</span><span>.</span><span>.</span></div>
+      </div>
+
+      <div id="circle-prog" style="position:relative;width:56px;height:56px;opacity:0">
+        <svg width="56" height="56" viewBox="0 0 56 56">
+          <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(237,72,54,0.1)" stroke-width="3"/>
+          <circle id="prog-c" cx="28" cy="28" r="24" fill="none" stroke="#ed4836" stroke-width="3" stroke-linecap="round" stroke-dasharray="150.8" stroke-dashoffset="150.8" transform="rotate(-90 28 28)" style="transition:stroke-dashoffset 0.4s ease"/>
+        </svg>
+        <span id="prog-num" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#ed4836">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATE 3: Done -->
+  <div class="state" id="s3">
+    <div class="header">
+      <div style="width:36px"></div>
+      <div style="flex:1;display:flex;justify-content:center">
+        <div class="badge green">
+          <svg style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;margin-right:6px" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Ready
+        </div>
+      </div>
+      <div style="width:36px"></div>
+    </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px">
+      <div class="frame-container">
+        <div class="frame-card" id="done-frame" style="opacity:0;transform:scale(0.85);box-shadow:0 8px 32px rgba(0,0,0,0.1)">
+          <div class="photo-slot">
+            <div class="photo-fill one" style="clip-path:circle(75% at 50% 50%)">
+              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+          </div>
+          <div class="photo-slot">
+            <div class="photo-fill two" style="clip-path:circle(75% at 50% 50%)">
+              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+          </div>
+          <div class="brand-mark"><span>@LOLPHOTOBOOTH.CO</span></div>
+        </div>
+        <div id="success-ring" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0;pointer-events:none">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="35" fill="rgba(237,72,54,0.12)" stroke="#ed4836" stroke-width="2.5"/>
+            <path id="check-path" d="M24 40 L35 51 L56 28" fill="none" stroke="#ed4836" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="55" stroke-dashoffset="55"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div style="padding:0 24px;text-align:center">
+      <p id="done-title" style="font-size:20px;font-weight:800;color:#2c2c2c;margin:0 0 4px;opacity:0">Photo ready!</p>
+      <p id="done-sub" style="font-size:14px;font-weight:600;color:#888;margin:0 0 20px;opacity:0">Looking great, confirm to save</p>
+    </div>
+    <div class="bottom-bar" style="display:flex;align-items:center;justify-content:space-between" id="done-btns">
+      <div class="btn-outline" style="opacity:0" onclick="restart()">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Start Over
+      </div>
+      <div class="btn-solid" style="opacity:0">
+        Confirm
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentState = 1;
+  let procInterval;
+
+  function show(n) {
+    currentState = n;
+    document.querySelectorAll('.state').forEach(function(s) {
+      s.style.display = 'none';
+      s.classList.remove('active');
+    });
+    var el = document.getElementById('s' + n);
+    if (el) {
+      el.style.display = 'flex';
+      el.classList.add('active');
+    }
+  }
+
+  function resetProcessing() {
+    var ids = ['tpl-frame','pf1','pf2','sh1','sh2','brand-text','status-text','dot-loader','circle-prog'];
+    ids.forEach(function(id) {
+      var e = document.getElementById(id);
+      if (e) { e.style.transition = ''; e.style.opacity = '0'; }
+    });
+    document.getElementById('tpl-frame').style.transform = 'scale(0.92)';
+    document.getElementById('pf1').style.clipPath = 'circle(0% at 50% 50%)';
+    document.getElementById('pf2').style.clipPath = 'circle(0% at 50% 50%)';
+    document.getElementById('prog-c').style.strokeDashoffset = '150.8';
+    document.getElementById('prog-num').textContent = '0%';
+    document.getElementById('status-text').textContent = 'Processing Photo...';
+  }
+
+  function resetDone() {
+    document.getElementById('done-frame').style.transform = 'scale(0.85)';
+    document.getElementById('done-frame').style.opacity = '0';
+    document.getElementById('done-frame').style.transition = '';
+    document.getElementById('success-ring').style.opacity = '0';
+    document.getElementById('success-ring').style.transition = '';
+    document.getElementById('check-path').style.strokeDashoffset = '55';
+    document.getElementById('check-path').style.transition = '';
+    document.getElementById('done-title').style.opacity = '0';
+    document.getElementById('done-title').style.transition = '';
+    document.getElementById('done-sub').style.opacity = '0';
+    document.getElementById('done-sub').style.transition = '';
+    document.getElementById('done-btns').querySelectorAll('.btn-outline,.btn-solid').forEach(function(b) {
+      b.style.opacity = '0';
+      b.style.transition = '';
+    });
+  }
+
+  function goToProcessing() {
+    resetProcessing();
+    resetDone();
+    show(2);
+    startProcessing();
+  }
+
+  function startProcessing() {
+    if (procInterval) clearInterval(procInterval);
+
+    var st = document.getElementById('status-text');
+    var dl = document.getElementById('dot-loader');
+    var tf = document.getElementById('tpl-frame');
+    var cp = document.getElementById('circle-prog');
+    var sh1 = document.getElementById('sh1');
+    var sh2 = document.getElementById('sh2');
+    var pf1 = document.getElementById('pf1');
+    var pf2 = document.getElementById('pf2');
+    var pc = document.getElementById('prog-c');
+    var pn = document.getElementById('prog-num');
+    var bt = document.getElementById('brand-text');
+
+    setTimeout(function() {
+      st.style.transition = 'opacity 0.5s';
+      st.style.opacity = '1';
+      dl.style.transition = 'opacity 0.4s 0.2s';
+      dl.style.opacity = '1';
+    }, 100);
+
+    setTimeout(function() {
+      tf.style.transition = 'all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      tf.style.opacity = '1';
+      tf.style.transform = 'scale(1)';
+      cp.style.transition = 'opacity 0.4s';
+      cp.style.opacity = '1';
+    }, 400);
+
+    setTimeout(function() {
+      sh1.style.transition = 'opacity 0.3s';
+      sh1.style.opacity = '1';
+      sh2.style.transition = 'opacity 0.3s';
+      sh2.style.opacity = '1';
+    }, 800);
+
+    var p = 0;
+    procInterval = setInterval(function() {
+      p += 1;
+      if (p > 100) { clearInterval(procInterval); return; }
+
+      var offset = 150.8 - (150.8 * p / 100);
+      pc.style.strokeDashoffset = offset.toFixed(1);
+      pn.textContent = p + '%';
+
+      if (p === 40) {
+        pf1.style.transition = 'clip-path 2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        pf1.style.clipPath = 'circle(75% at 50% 50%)';
+        pf2.style.transition = 'clip-path 2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        pf2.style.clipPath = 'circle(75% at 50% 50%)';
+        setTimeout(function() {
+          sh1.style.transition = 'opacity 0.5s';
+          sh1.style.opacity = '0';
+          sh2.style.transition = 'opacity 0.5s';
+          sh2.style.opacity = '0';
+        }, 1500);
+      }
+
+      if (p === 85) {
+        bt.style.transition = 'opacity 0.5s';
+        bt.style.opacity = '1';
+      }
+
+      if (p === 100) {
+        st.textContent = 'All done!';
+        dl.style.transition = 'opacity 0.3s';
+        dl.style.opacity = '0';
+        setTimeout(function() { goToDone(); }, 800);
+      }
+    }, 55);
+  }
+
+  function goToDone() {
+    resetDone();
+    show(3);
+
+    var df = document.getElementById('done-frame');
+    var sr = document.getElementById('success-ring');
+    var ck = document.getElementById('check-path');
+    var dt = document.getElementById('done-title');
+    var ds = document.getElementById('done-sub');
+    var db = document.getElementById('done-btns');
+
+    setTimeout(function() {
+      df.style.transition = 'all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      df.style.transform = 'scale(1)';
+      df.style.opacity = '1';
+    }, 100);
+
+    setTimeout(function() {
+      sr.style.transition = 'opacity 0.4s';
+      sr.style.opacity = '1';
+      ck.style.transition = 'stroke-dashoffset 0.5s ease 0.2s';
+      ck.style.strokeDashoffset = '0';
+    }, 400);
+
+    setTimeout(function() {
+      sr.style.transition = 'opacity 0.6s';
+      sr.style.opacity = '0';
+    }, 1800);
+
+    setTimeout(function() {
+      dt.style.transition = 'opacity 0.4s';
+      dt.style.opacity = '1';
+      ds.style.transition = 'opacity 0.4s 0.1s';
+      ds.style.opacity = '1';
+    }, 800);
+
+    setTimeout(function() {
+      db.querySelectorAll('.btn-outline,.btn-solid').forEach(function(b, i) {
+        b.style.transition = 'opacity 0.4s ease ' + (i * 0.15) + 's';
+        b.style.opacity = '1';
+      });
+    }, 1200);
+  }
+
+  function restart() {
+    if (procInterval) clearInterval(procInterval);
+    resetProcessing();
+    resetDone();
+    show(1);
+  }
+
+  show(1);
+</script>
+
+</body>
+</html>
