@@ -111,14 +111,16 @@
       display: inline-flex;
       align-items: center;
       padding: 6px 18px;
-      background: #ed4836;
+      background: #fff;
+      border: 1.5px solid #ed4836;
       border-radius: 20px;
       font-size: 13px;
       font-weight: 700;
-      color: #fff;
+      color: #ed4836;
       letter-spacing: 0.5px;
     }
-    .badge.green { background: #27ae60; }
+    .badge.solid { background: #ed4836; color: #fff; border-color: #ed4836; }
+    .badge.green { background: #27ae60; color: #fff; border-color: #27ae60; }
 
     .btn-back {
       width: 36px;
@@ -221,12 +223,12 @@
       z-index: 0;
     }
     .camera-bg::before {
-      top: -22%;
-      background: radial-gradient(ellipse at 50% 80%, rgba(237, 72, 54, 0.18) 0%, rgba(237, 120, 54, 0.08) 40%, transparent 70%);
+      top: -18%;
+      background: radial-gradient(ellipse at 50% 80%, rgba(237, 100, 54, 0.35) 0%, rgba(245, 140, 60, 0.15) 40%, transparent 70%);
     }
     .camera-bg::after {
-      bottom: -22%;
-      background: radial-gradient(ellipse at 50% 20%, rgba(237, 72, 54, 0.15) 0%, rgba(245, 130, 60, 0.06) 40%, transparent 70%);
+      bottom: -18%;
+      background: radial-gradient(ellipse at 50% 20%, rgba(237, 72, 54, 0.30) 0%, rgba(245, 130, 60, 0.12) 40%, transparent 70%);
     }
     .camera-bg > * { position: relative; z-index: 1; }
     .camera-bg .header { background: transparent; }
@@ -600,12 +602,46 @@
     </div>
   </div>
 
+  <!-- STATE 1b: Confirm Photos -->
+  <div class="state camera-bg" id="s1b">
+    <div class="header">
+      <div style="width:36px"></div>
+      <div style="flex:1;display:flex;justify-content:center">
+        <div class="badge">2 of 2</div>
+      </div>
+      <div style="width:36px"></div>
+    </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px">
+      <div class="frame-container">
+        <div class="frame-card" id="confirm-frame" style="box-shadow:0 8px 32px rgba(0,0,0,0.15)">
+          <div class="photo-slot">
+            <div class="photo-fill one" id="confirm-pf1" style="clip-path:circle(75% at 50% 50%)"></div>
+          </div>
+          <div class="photo-slot">
+            <div class="photo-fill two" id="confirm-pf2" style="clip-path:circle(75% at 50% 50%)"></div>
+          </div>
+          <div class="brand-mark"><span>@LOLPHOTOBOOTH.CO</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-bar" style="display:flex;align-items:center;justify-content:space-between">
+      <button class="btn-outline" onclick="retakePhotos()">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Retake
+      </button>
+      <button class="btn-solid" onclick="confirmPhotos()">
+        Continue
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+
   <!-- STATE 2: Processing -->
   <div class="state processing-bg" id="s2">
     <div class="header">
       <div style="width:36px"></div>
       <div style="flex:1;display:flex;justify-content:center">
-        <div class="badge"><div class="spinner"></div>Processing</div>
+        <div class="badge solid"><div class="spinner"></div>Processing</div>
       </div>
       <div style="width:36px"></div>
     </div>
@@ -840,7 +876,7 @@
     if (photoCount >= totalPhotos) {
       setTimeout(function() {
         stopCamera();
-        goToProcessing();
+        goToConfirm();
       }, 500);
     }
   }
@@ -871,6 +907,38 @@
     }
     var video = document.getElementById('cam-video');
     video.srcObject = null;
+  }
+
+  function goToConfirm() {
+    // Inject photos into confirm frame
+    var cp1 = document.getElementById('confirm-pf1');
+    var cp2 = document.getElementById('confirm-pf2');
+    if (photos[0]) {
+      cp1.style.backgroundImage = 'url(' + photos[0] + ')';
+      cp1.style.backgroundSize = 'cover';
+      cp1.style.backgroundPosition = 'center';
+    }
+    if (photos[1]) {
+      cp2.style.backgroundImage = 'url(' + photos[1] + ')';
+      cp2.style.backgroundSize = 'cover';
+      cp2.style.backgroundPosition = 'center';
+    }
+    show('1b');
+  }
+
+  function retakePhotos() {
+    photoCount = 0;
+    photos = [];
+    // Clear confirm previews
+    document.getElementById('confirm-pf1').style.backgroundImage = '';
+    document.getElementById('confirm-pf2').style.backgroundImage = '';
+    updateCameraUI();
+    show(1);
+    requestCamera();
+  }
+
+  function confirmPhotos() {
+    goToProcessing();
   }
 
   function resetProcessing() {
