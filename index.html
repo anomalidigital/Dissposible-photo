@@ -365,28 +365,14 @@
       line-height: 1.5;
     }
 
-    /* Photo counter pill */
-    .photo-counter {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: rgba(0,0,0,0.6);
-      color: #fff;
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 700;
-      z-index: 3;
-    }
-
     /* Captured preview thumbnail */
     .captured-thumb {
       width: 44px;
       height: 44px;
-      border-radius: 8px;
+      border-radius: 50%;
       overflow: hidden;
-      border: 2px solid rgba(237, 72, 54, 0.4);
-      background: #222;
+      border: 1.5px solid rgba(237, 72, 54, 0.4);
+      background: rgba(237, 72, 54, 0.12);
     }
     .captured-thumb img {
       width: 100%;
@@ -402,9 +388,11 @@
     .captured-thumb.empty svg {
       width: 20px;
       height: 20px;
-      stroke: rgba(255,255,255,0.2);
+      stroke: #ed4836;
       fill: none;
-      stroke-width: 1.5;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .frame-container {
@@ -546,8 +534,6 @@
         <video id="cam-video" autoplay playsinline muted></video>
         <canvas id="cam-canvas"></canvas>
         <div class="flash-overlay" id="flash"></div>
-        <div class="photo-counter" id="photo-counter">1 / 2</div>
-
         <!-- Permission request overlay -->
         <div class="cam-permission" id="cam-perm">
           <svg viewBox="0 0 24 24">
@@ -839,15 +825,12 @@
 
   function updateCameraUI() {
     var badge = document.getElementById('photo-badge');
-    var counter = document.getElementById('photo-counter');
     var thumb = document.getElementById('thumb-box');
 
     badge.textContent = (photoCount + 1) + ' of ' + totalPhotos;
-    counter.textContent = (photoCount + 1) + ' / ' + totalPhotos;
 
     if (photoCount >= totalPhotos) {
       badge.textContent = totalPhotos + ' of ' + totalPhotos;
-      counter.textContent = totalPhotos + ' / ' + totalPhotos;
     }
 
     if (photoCount > 0) {
