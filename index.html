@@ -204,7 +204,31 @@
     .btn-solid svg { width: 14px; height: 14px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
     /* ==================== CAMERA & PROCESSING STATES ==================== */
-    .camera-bg, .processing-bg, .done-bg {
+    .camera-bg {
+      background: #1a1a1a;
+    }
+    .camera-bg .header { background: #1a1a1a; }
+    .camera-bg .bottom-bar { background: #1a1a1a; }
+    .camera-bg .btn-back {
+      border-color: #ed4836;
+      background: transparent;
+    }
+    .camera-bg .btn-back svg { stroke: #ed4836; }
+    .camera-bg .btn-circle {
+      background: rgba(237, 72, 54, 0.18);
+      border-color: rgba(237, 72, 54, 0.35);
+    }
+    .camera-bg .btn-circle svg { stroke: #ed4836; }
+    .camera-bg .captured-thumb {
+      border-color: rgba(237, 72, 54, 0.35);
+      background: rgba(237, 72, 54, 0.18);
+    }
+    .camera-bg .btn-snap {
+      box-shadow: 0 0 0 6px rgba(237, 72, 54, 0.2);
+      border-color: rgba(237, 72, 54, 0.4);
+    }
+
+    .processing-bg, .done-bg {
       background: linear-gradient(165deg, #fef9f4 0%, #fdf0e6 40%, #fef5ed 100%);
     }
 
