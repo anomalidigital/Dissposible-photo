@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
   <title>Disposable Photo - LOL Photobooth</title>
+  <link rel="icon" type="image/png" href="assets/logo-ico.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Satisfy&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
@@ -14,7 +15,6 @@
       width: 100%;
       overflow: hidden;
       font-family: 'Nunito', sans-serif;
-      background: linear-gradient(165deg, #fef9f4 0%, #fdf0e6 40%, #fef5ed 100%);
       -webkit-tap-highlight-color: transparent;
       -webkit-user-select: none;
       user-select: none;
@@ -38,7 +38,68 @@
     }
     .state.active { display: flex; }
 
-    /* Header */
+    /* ==================== LANDING PAGE ==================== */
+    .landing {
+      background: #e8e8e8 url('assets/bg-landing-page.png') center / cover no-repeat;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: 40px 32px;
+      padding-top: max(40px, env(safe-area-inset-top));
+      padding-bottom: max(40px, env(safe-area-inset-bottom));
+    }
+    .landing-header {
+      width: 85%;
+      max-width: 300px;
+      margin-bottom: auto;
+      padding-top: 32px;
+    }
+    .landing-header img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .landing-event {
+      font-family: 'Nunito', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: #2c2c2c;
+      text-align: center;
+      margin-bottom: auto;
+    }
+    .btn-snap-landing {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 36px;
+      background: #ed4836;
+      color: #fff;
+      border: none;
+      border-radius: 30px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(237, 72, 54, 0.35);
+      transition: transform 0.15s, box-shadow 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      margin-bottom: 16px;
+    }
+    .btn-snap-landing:active {
+      transform: scale(0.95);
+      box-shadow: 0 2px 12px rgba(237, 72, 54, 0.3);
+    }
+    .btn-snap-landing svg {
+      width: 22px;
+      height: 22px;
+      stroke: #fff;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* ==================== SHARED COMPONENTS ==================== */
     .header {
       padding: 16px;
       display: flex;
@@ -46,7 +107,6 @@
       gap: 12px;
       padding-top: max(16px, env(safe-area-inset-top));
     }
-
     .badge {
       display: inline-flex;
       align-items: center;
@@ -74,7 +134,6 @@
     }
     .btn-back svg { width: 18px; height: 18px; stroke: #ed4836; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
-    /* Snap button */
     .btn-snap {
       width: 68px;
       height: 68px;
@@ -106,7 +165,6 @@
     }
     .btn-circle svg { width: 20px; height: 20px; stroke: #ed4836; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-    /* Action buttons */
     .btn-outline {
       display: inline-flex;
       align-items: center;
@@ -145,7 +203,11 @@
     .btn-solid:active { transform: scale(0.96); }
     .btn-solid svg { width: 14px; height: 14px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
-    /* Frame */
+    /* ==================== CAMERA & PROCESSING STATES ==================== */
+    .camera-bg, .processing-bg, .done-bg {
+      background: linear-gradient(165deg, #fef9f4 0%, #fdf0e6 40%, #fef5ed 100%);
+    }
+
     .frame-container {
       width: 85%;
       aspect-ratio: 1 / 1;
@@ -220,7 +282,6 @@
       letter-spacing: 2px;
     }
 
-    /* Spinner */
     .spinner {
       width: 16px;
       height: 16px;
@@ -230,8 +291,6 @@
       animation: spin 0.7s linear infinite;
       margin-right: 8px;
     }
-
-    /* Dots loader */
     .dots span {
       display: inline-block;
       animation: dotPulse 1.4s infinite;
@@ -242,26 +301,40 @@
     .dots span:nth-child(2) { animation-delay: 0.2s; }
     .dots span:nth-child(3) { animation-delay: 0.4s; }
 
-    /* Animations */
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-    @keyframes dotPulse { 0%, 80%, 100% { opacity: 0.3; } 40% { opacity: 1; } }
-
-    /* Bottom safe area */
     .bottom-bar {
       padding: 20px 24px;
       padding-bottom: max(20px, env(safe-area-inset-bottom));
     }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    @keyframes dotPulse { 0%, 80%, 100% { opacity: 0.3; } 40% { opacity: 1; } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
 
 <div class="app">
 
+  <!-- STATE 0: Landing Page -->
+  <div class="state landing active" id="s0">
+    <div class="landing-header" style="animation: fadeInUp 0.8s ease both">
+      <img src="assets/capture-every-moment.png" alt="Capture Every Moment with LOL Photobooth">
+    </div>
+    <p class="landing-event" style="animation: fadeInUp 0.8s ease 0.2s both">Project Test 2026</p>
+    <button class="btn-snap-landing" onclick="goToCamera()" style="animation: fadeInUp 0.8s ease 0.4s both">
+      <svg viewBox="0 0 24 24">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+        <circle cx="12" cy="13" r="4"/>
+      </svg>
+      Snap your photo now
+    </button>
+  </div>
+
   <!-- STATE 1: Camera -->
-  <div class="state active" id="s1">
+  <div class="state camera-bg" id="s1">
     <div class="header">
-      <div class="btn-back">
+      <div class="btn-back" onclick="restart()">
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       </div>
       <div style="flex:1;display:flex;justify-content:center">
@@ -294,7 +367,7 @@
   </div>
 
   <!-- STATE 2: Processing -->
-  <div class="state" id="s2">
+  <div class="state processing-bg" id="s2">
     <div class="header">
       <div style="width:36px"></div>
       <div style="flex:1;display:flex;justify-content:center">
@@ -303,7 +376,6 @@
       <div style="width:36px"></div>
     </div>
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:16px">
-
       <div class="frame-container">
         <div class="frame-card" id="tpl-frame" style="opacity:0;transform:scale(0.92)">
           <div class="photo-slot">
@@ -331,12 +403,10 @@
           </div>
         </div>
       </div>
-
       <div style="text-align:center">
         <p id="status-text" style="font-size:16px;font-weight:700;color:#2c2c2c;margin:0 0 6px;opacity:0">Processing Photo...</p>
         <div id="dot-loader" style="opacity:0" class="dots"><span>.</span><span>.</span><span>.</span></div>
       </div>
-
       <div id="circle-prog" style="position:relative;width:56px;height:56px;opacity:0">
         <svg width="56" height="56" viewBox="0 0 56 56">
           <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(237,72,54,0.1)" stroke-width="3"/>
@@ -348,7 +418,7 @@
   </div>
 
   <!-- STATE 3: Done -->
-  <div class="state" id="s3">
+  <div class="state done-bg" id="s3">
     <div class="header">
       <div style="width:36px"></div>
       <div style="flex:1;display:flex;justify-content:center">
@@ -401,8 +471,8 @@
 </div>
 
 <script>
-  let currentState = 1;
-  let procInterval;
+  var currentState = 0;
+  var procInterval;
 
   function show(n) {
     currentState = n;
@@ -415,6 +485,10 @@
       el.style.display = 'flex';
       el.classList.add('active');
     }
+  }
+
+  function goToCamera() {
+    show(1);
   }
 
   function resetProcessing() {
@@ -577,10 +651,10 @@
     if (procInterval) clearInterval(procInterval);
     resetProcessing();
     resetDone();
-    show(1);
+    show(0);
   }
 
-  show(1);
+  show(0);
 </script>
 
 </body>
