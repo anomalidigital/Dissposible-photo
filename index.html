@@ -208,6 +208,181 @@
       background: linear-gradient(165deg, #fef9f4 0%, #fdf0e6 40%, #fef5ed 100%);
     }
 
+    /* Camera viewfinder */
+    .viewfinder-wrap {
+      width: 88%;
+      aspect-ratio: 1 / 1;
+      background: #111;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+    .viewfinder-wrap video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .viewfinder-wrap video.mirror {
+      transform: scaleX(-1);
+    }
+    .viewfinder-wrap canvas {
+      display: none;
+    }
+    .flash-overlay {
+      position: absolute;
+      inset: 0;
+      background: #fff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .flash-overlay.flash {
+      animation: flashAnim 0.35s ease-out;
+    }
+    @keyframes flashAnim {
+      0% { opacity: 0.9; }
+      100% { opacity: 0; }
+    }
+
+    .cam-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: rgba(255,255,255,0.4);
+    }
+    .cam-placeholder svg {
+      width: 48px;
+      height: 48px;
+      stroke: rgba(255,255,255,0.15);
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .cam-placeholder span {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* Camera permission overlay */
+    .cam-permission {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      background: rgba(0,0,0,0.85);
+      z-index: 10;
+      padding: 24px;
+      text-align: center;
+    }
+    .cam-permission.hidden { display: none; }
+    .cam-permission svg {
+      width: 48px;
+      height: 48px;
+      stroke: #ed4836;
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .cam-permission p {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.5;
+    }
+    .cam-permission .btn-allow {
+      padding: 12px 32px;
+      background: #ed4836;
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cam-permission .btn-allow:active { transform: scale(0.95); }
+
+    .cam-denied {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: rgba(0,0,0,0.9);
+      z-index: 10;
+      padding: 24px;
+      text-align: center;
+    }
+    .cam-denied.show { display: flex; }
+    .cam-denied svg {
+      width: 40px;
+      height: 40px;
+      stroke: #ed4836;
+      fill: none;
+      stroke-width: 1.5;
+    }
+    .cam-denied p {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.5;
+    }
+
+    /* Photo counter pill */
+    .photo-counter {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      z-index: 3;
+    }
+
+    /* Captured preview thumbnail */
+    .captured-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid rgba(237, 72, 54, 0.4);
+      background: #222;
+    }
+    .captured-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .captured-thumb.empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .captured-thumb.empty svg {
+      width: 20px;
+      height: 20px;
+      stroke: rgba(255,255,255,0.2);
+      fill: none;
+      stroke-width: 1.5;
+    }
+
     .frame-container {
       width: 85%;
       aspect-ratio: 1 / 1;
@@ -252,8 +427,8 @@
       justify-content: center;
       clip-path: circle(0% at 50% 50%);
     }
-    .photo-fill.one { background: linear-gradient(135deg, #f8c9a0, #f0a07a); }
-    .photo-fill.two { background: linear-gradient(135deg, #f0a07a, #e8836a); }
+    .photo-fill.one { background: linear-gradient(135deg, #f8c9a0, #f0a07a); background-size: cover; background-position: center; }
+    .photo-fill.two { background: linear-gradient(135deg, #f0a07a, #e8836a); background-size: cover; background-position: center; }
     .photo-fill svg { width: 32px; height: 32px; stroke: rgba(255,255,255,0.7); fill: none; stroke-width: 1.5; }
     .shimmer {
       position: absolute;
@@ -338,29 +513,56 @@
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       </div>
       <div style="flex:1;display:flex;justify-content:center">
-        <div class="badge">1 of 2</div>
+        <div class="badge" id="photo-badge">1 of 2</div>
       </div>
       <div style="width:36px"></div>
     </div>
     <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px">
-      <div style="width:88%;aspect-ratio:1/1;background:#111;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center">
-        <svg style="width:48px;height:48px;stroke:rgba(255,255,255,0.15);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24">
-          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-          <circle cx="12" cy="13" r="4"/>
-        </svg>
+      <div class="viewfinder-wrap" id="viewfinder">
+        <video id="cam-video" autoplay playsinline muted></video>
+        <canvas id="cam-canvas"></canvas>
+        <div class="flash-overlay" id="flash"></div>
+        <div class="photo-counter" id="photo-counter">1 / 2</div>
+
+        <!-- Permission request overlay -->
+        <div class="cam-permission" id="cam-perm">
+          <svg viewBox="0 0 24 24">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          <p>We need access to your camera to take photos</p>
+          <button class="btn-allow" onclick="requestCamera()">Allow Camera</button>
+        </div>
+
+        <!-- Denied overlay -->
+        <div class="cam-denied" id="cam-denied">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+          </svg>
+          <p>Camera access denied.<br>Please allow camera in your browser settings and reload.</p>
+        </div>
+
+        <!-- Placeholder when no camera yet -->
+        <div class="cam-placeholder" id="cam-ph">
+          <svg viewBox="0 0 24 24">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          <span>Camera loading...</span>
+        </div>
       </div>
     </div>
     <div class="bottom-bar" style="display:flex;align-items:center;justify-content:center;gap:32px">
-      <div class="btn-circle">
+      <div class="captured-thumb empty" id="thumb-box">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
       </div>
-      <div class="btn-snap" onclick="goToProcessing()">
+      <div class="btn-snap" id="btn-capture" onclick="capturePhoto()">
         <svg viewBox="0 0 24 24">
           <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
           <circle cx="12" cy="13" r="4"/>
         </svg>
       </div>
-      <div class="btn-circle">
+      <div class="btn-circle" onclick="flipCamera()">
         <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
       </div>
     </div>
@@ -433,12 +635,12 @@
       <div class="frame-container">
         <div class="frame-card" id="done-frame" style="opacity:0;transform:scale(0.85);box-shadow:0 8px 32px rgba(0,0,0,0.1)">
           <div class="photo-slot">
-            <div class="photo-fill one" style="clip-path:circle(75% at 50% 50%)">
+            <div class="photo-fill one" id="done-pf1" style="clip-path:circle(75% at 50% 50%)">
               <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
           </div>
           <div class="photo-slot">
-            <div class="photo-fill two" style="clip-path:circle(75% at 50% 50%)">
+            <div class="photo-fill two" id="done-pf2" style="clip-path:circle(75% at 50% 50%)">
               <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
           </div>
@@ -473,6 +675,11 @@
 <script>
   var currentState = 0;
   var procInterval;
+  var cameraStream = null;
+  var facingMode = 'user';
+  var photos = [];
+  var photoCount = 0;
+  var totalPhotos = 2;
 
   function show(n) {
     currentState = n;
@@ -488,7 +695,153 @@
   }
 
   function goToCamera() {
+    photoCount = 0;
+    photos = [];
+    updateCameraUI();
     show(1);
+
+    // Show permission overlay — user must tap "Allow Camera"
+    document.getElementById('cam-perm').classList.remove('hidden');
+    document.getElementById('cam-denied').classList.remove('show');
+    document.getElementById('cam-ph').style.display = 'none';
+  }
+
+  function requestCamera() {
+    var perm = document.getElementById('cam-perm');
+    var denied = document.getElementById('cam-denied');
+    var ph = document.getElementById('cam-ph');
+
+    perm.classList.add('hidden');
+    denied.classList.remove('show');
+    ph.style.display = 'flex';
+
+    startCamera();
+  }
+
+  function startCamera() {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(function(t) { t.stop(); });
+      cameraStream = null;
+    }
+
+    var constraints = {
+      video: {
+        facingMode: facingMode,
+        width: { ideal: 1080 },
+        height: { ideal: 1080 }
+      },
+      audio: false
+    };
+
+    navigator.mediaDevices.getUserMedia(constraints)
+      .then(function(stream) {
+        cameraStream = stream;
+        var video = document.getElementById('cam-video');
+        video.srcObject = stream;
+        video.play();
+
+        if (facingMode === 'user') {
+          video.classList.add('mirror');
+        } else {
+          video.classList.remove('mirror');
+        }
+
+        document.getElementById('cam-ph').style.display = 'none';
+        document.getElementById('cam-perm').classList.add('hidden');
+        document.getElementById('cam-denied').classList.remove('show');
+      })
+      .catch(function(err) {
+        console.log('Camera error:', err.name);
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          document.getElementById('cam-ph').style.display = 'none';
+          document.getElementById('cam-perm').classList.add('hidden');
+          document.getElementById('cam-denied').classList.add('show');
+        } else {
+          document.getElementById('cam-ph').querySelector('span').textContent = 'Camera not available';
+        }
+      });
+  }
+
+  function flipCamera() {
+    facingMode = (facingMode === 'user') ? 'environment' : 'user';
+    if (cameraStream) {
+      startCamera();
+    }
+  }
+
+  function capturePhoto() {
+    if (photoCount >= totalPhotos) return;
+
+    var video = document.getElementById('cam-video');
+    if (!video.srcObject) return;
+
+    var canvas = document.getElementById('cam-canvas');
+    var size = Math.min(video.videoWidth, video.videoHeight);
+    canvas.width = size;
+    canvas.height = size;
+
+    var ctx = canvas.getContext('2d');
+    var sx = (video.videoWidth - size) / 2;
+    var sy = (video.videoHeight - size) / 2;
+
+    if (facingMode === 'user') {
+      ctx.translate(size, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+    } else {
+      ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
+    }
+
+    var dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    photos.push(dataUrl);
+    photoCount++;
+
+    // Flash effect
+    var flash = document.getElementById('flash');
+    flash.classList.remove('flash');
+    void flash.offsetWidth;
+    flash.classList.add('flash');
+
+    updateCameraUI();
+
+    if (photoCount >= totalPhotos) {
+      setTimeout(function() {
+        stopCamera();
+        goToProcessing();
+      }, 500);
+    }
+  }
+
+  function updateCameraUI() {
+    var badge = document.getElementById('photo-badge');
+    var counter = document.getElementById('photo-counter');
+    var thumb = document.getElementById('thumb-box');
+
+    badge.textContent = (photoCount + 1) + ' of ' + totalPhotos;
+    counter.textContent = (photoCount + 1) + ' / ' + totalPhotos;
+
+    if (photoCount >= totalPhotos) {
+      badge.textContent = totalPhotos + ' of ' + totalPhotos;
+      counter.textContent = totalPhotos + ' / ' + totalPhotos;
+    }
+
+    if (photoCount > 0) {
+      thumb.classList.remove('empty');
+      thumb.innerHTML = '<img src="' + photos[photos.length - 1] + '" alt="Photo">';
+    } else {
+      thumb.classList.add('empty');
+      thumb.innerHTML = '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
+    }
+  }
+
+  function stopCamera() {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(function(t) { t.stop(); });
+      cameraStream = null;
+    }
+    var video = document.getElementById('cam-video');
+    video.srcObject = null;
   }
 
   function resetProcessing() {
@@ -530,8 +883,38 @@
     startProcessing();
   }
 
+  function injectPhotos() {
+    var pf1 = document.getElementById('pf1');
+    var pf2 = document.getElementById('pf2');
+    var df1 = document.getElementById('done-pf1');
+    var df2 = document.getElementById('done-pf2');
+
+    if (photos.length >= 1) {
+      pf1.style.backgroundImage = 'url(' + photos[0] + ')';
+      pf1.style.backgroundSize = 'cover';
+      pf1.style.backgroundPosition = 'center';
+      pf1.querySelector('svg').style.display = 'none';
+      df1.style.backgroundImage = 'url(' + photos[0] + ')';
+      df1.style.backgroundSize = 'cover';
+      df1.style.backgroundPosition = 'center';
+      df1.querySelector('svg').style.display = 'none';
+    }
+    if (photos.length >= 2) {
+      pf2.style.backgroundImage = 'url(' + photos[1] + ')';
+      pf2.style.backgroundSize = 'cover';
+      pf2.style.backgroundPosition = 'center';
+      pf2.querySelector('svg').style.display = 'none';
+      df2.style.backgroundImage = 'url(' + photos[1] + ')';
+      df2.style.backgroundSize = 'cover';
+      df2.style.backgroundPosition = 'center';
+      df2.querySelector('svg').style.display = 'none';
+    }
+  }
+
   function startProcessing() {
     if (procInterval) clearInterval(procInterval);
+
+    injectPhotos();
 
     var st = document.getElementById('status-text');
     var dl = document.getElementById('dot-loader');
@@ -649,8 +1032,32 @@
 
   function restart() {
     if (procInterval) clearInterval(procInterval);
+    stopCamera();
+    photoCount = 0;
+    photos = [];
     resetProcessing();
     resetDone();
+
+    // Reset photo fills background images and restore SVG icons
+    ['pf1','pf2','done-pf1','done-pf2'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) {
+        el.style.backgroundImage = '';
+        var svg = el.querySelector('svg');
+        if (svg) svg.style.display = '';
+      }
+    });
+
+    // Reset thumbnail
+    var thumb = document.getElementById('thumb-box');
+    thumb.classList.add('empty');
+    thumb.innerHTML = '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
+
+    // Reset permission overlay
+    document.getElementById('cam-perm').classList.remove('hidden');
+    document.getElementById('cam-denied').classList.remove('show');
+    document.getElementById('cam-ph').style.display = 'none';
+
     show(0);
   }
 
