@@ -235,10 +235,6 @@
       background: rgba(250, 190, 150, 0.35);
     }
     .camera-bg > * { position: relative; z-index: 1; }
-    .camera-bg .captured-thumb {
-      border-color: rgba(237, 72, 54, 0.35);
-      background: rgba(237, 72, 54, 0.18);
-    }
     .camera-bg .btn-snap {
       box-shadow: 0 0 0 6px rgba(237, 72, 54, 0.2);
       border-color: rgba(237, 72, 54, 0.4);
@@ -381,36 +377,6 @@
       line-height: 1.5;
     }
 
-    /* Captured preview thumbnail */
-    .captured-thumb {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      overflow: hidden;
-      border: 1.5px solid rgba(237, 72, 54, 0.4);
-      background: rgba(237, 72, 54, 0.12);
-    }
-    .captured-thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .captured-thumb.empty {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .captured-thumb.empty svg {
-      width: 20px;
-      height: 20px;
-      stroke: #ed4836;
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
     .frame-container {
       width: 85%;
       aspect-ratio: 1 / 1;
@@ -545,12 +511,11 @@
       </div>
       <div style="width:36px"></div>
     </div>
-    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px">
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px 16px 0">
       <div class="viewfinder-wrap" id="viewfinder">
         <video id="cam-video" autoplay playsinline muted></video>
         <canvas id="cam-canvas"></canvas>
         <div class="flash-overlay" id="flash"></div>
-        <!-- Permission request overlay -->
         <div class="cam-permission" id="cam-perm">
           <svg viewBox="0 0 24 24">
             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
@@ -559,16 +524,12 @@
           <p>We need access to your camera to take photos</p>
           <button class="btn-allow" onclick="requestCamera()">Allow Camera</button>
         </div>
-
-        <!-- Denied overlay -->
         <div class="cam-denied" id="cam-denied">
           <svg viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
           </svg>
           <p>Camera access denied.<br>Please allow camera in your browser settings and reload.</p>
         </div>
-
-        <!-- Placeholder when no camera yet -->
         <div class="cam-placeholder" id="cam-ph">
           <svg viewBox="0 0 24 24">
             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
@@ -579,7 +540,7 @@
       </div>
     </div>
     <div class="bottom-bar" style="display:flex;align-items:center;justify-content:center;gap:32px">
-      <div class="captured-thumb empty" id="thumb-box">
+      <div class="btn-circle">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
       </div>
       <div class="btn-snap" id="btn-capture" onclick="capturePhoto()">
@@ -594,34 +555,26 @@
     </div>
   </div>
 
-  <!-- STATE 1b: Confirm Photos -->
+  <!-- STATE 1b: Confirm single photo -->
   <div class="state camera-bg" id="s1b">
     <div class="header">
       <div style="width:36px"></div>
       <div style="flex:1;display:flex;justify-content:center">
-        <div class="badge">2 of 2</div>
+        <div class="badge" id="confirm-badge">1 of 2</div>
       </div>
       <div style="width:36px"></div>
     </div>
-    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px">
-      <div class="frame-container">
-        <div class="frame-card" id="confirm-frame" style="box-shadow:0 8px 32px rgba(0,0,0,0.15)">
-          <div class="photo-slot">
-            <div class="photo-fill one" id="confirm-pf1" style="clip-path:circle(75% at 50% 50%)"></div>
-          </div>
-          <div class="photo-slot">
-            <div class="photo-fill two" id="confirm-pf2" style="clip-path:circle(75% at 50% 50%)"></div>
-          </div>
-          <div class="brand-mark"><span>@LOLPHOTOBOOTH.CO</span></div>
-        </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px 16px 0">
+      <div style="width:88%;aspect-ratio:1/1;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08)">
+        <img id="confirm-img" src="" alt="Preview" style="width:100%;height:100%;object-fit:cover;display:block">
       </div>
     </div>
     <div class="bottom-bar" style="display:flex;align-items:center;justify-content:space-between">
-      <button class="btn-outline" onclick="retakePhotos()">
+      <button class="btn-outline" onclick="retakePhoto()">
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         Retake
       </button>
-      <button class="btn-solid" onclick="confirmPhotos()">
+      <button class="btn-solid" onclick="confirmPhoto()">
         Continue
         <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
@@ -728,6 +681,7 @@
   var photos = [];
   var photoCount = 0;
   var totalPhotos = 2;
+  var lastCaptured = null;
 
   function show(n) {
     currentState = n;
@@ -745,24 +699,18 @@
   function goToCamera() {
     photoCount = 0;
     photos = [];
-    updateCameraUI();
+    lastCaptured = null;
+    document.getElementById('photo-badge').textContent = '1 of ' + totalPhotos;
     show(1);
-
-    // Show permission overlay — user must tap "Allow Camera"
     document.getElementById('cam-perm').classList.remove('hidden');
     document.getElementById('cam-denied').classList.remove('show');
     document.getElementById('cam-ph').style.display = 'none';
   }
 
   function requestCamera() {
-    var perm = document.getElementById('cam-perm');
-    var denied = document.getElementById('cam-denied');
-    var ph = document.getElementById('cam-ph');
-
-    perm.classList.add('hidden');
-    denied.classList.remove('show');
-    ph.style.display = 'flex';
-
+    document.getElementById('cam-perm').classList.add('hidden');
+    document.getElementById('cam-denied').classList.remove('show');
+    document.getElementById('cam-ph').style.display = 'flex';
     startCamera();
   }
 
@@ -771,55 +719,35 @@
       cameraStream.getTracks().forEach(function(t) { t.stop(); });
       cameraStream = null;
     }
-
-    var constraints = {
-      video: {
-        facingMode: facingMode,
-        width: { ideal: 1080 },
-        height: { ideal: 1080 }
-      },
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: facingMode, width: { ideal: 1080 }, height: { ideal: 1080 } },
       audio: false
-    };
-
-    navigator.mediaDevices.getUserMedia(constraints)
-      .then(function(stream) {
-        cameraStream = stream;
-        var video = document.getElementById('cam-video');
-        video.srcObject = stream;
-        video.play();
-
-        if (facingMode === 'user') {
-          video.classList.add('mirror');
-        } else {
-          video.classList.remove('mirror');
-        }
-
+    }).then(function(stream) {
+      cameraStream = stream;
+      var video = document.getElementById('cam-video');
+      video.srcObject = stream;
+      video.play();
+      video.classList.toggle('mirror', facingMode === 'user');
+      document.getElementById('cam-ph').style.display = 'none';
+      document.getElementById('cam-perm').classList.add('hidden');
+      document.getElementById('cam-denied').classList.remove('show');
+    }).catch(function(err) {
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         document.getElementById('cam-ph').style.display = 'none';
         document.getElementById('cam-perm').classList.add('hidden');
-        document.getElementById('cam-denied').classList.remove('show');
-      })
-      .catch(function(err) {
-        console.log('Camera error:', err.name);
-        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-          document.getElementById('cam-ph').style.display = 'none';
-          document.getElementById('cam-perm').classList.add('hidden');
-          document.getElementById('cam-denied').classList.add('show');
-        } else {
-          document.getElementById('cam-ph').querySelector('span').textContent = 'Camera not available';
-        }
-      });
+        document.getElementById('cam-denied').classList.add('show');
+      } else {
+        document.getElementById('cam-ph').querySelector('span').textContent = 'Camera not available';
+      }
+    });
   }
 
   function flipCamera() {
     facingMode = (facingMode === 'user') ? 'environment' : 'user';
-    if (cameraStream) {
-      startCamera();
-    }
+    if (cameraStream) startCamera();
   }
 
   function capturePhoto() {
-    if (photoCount >= totalPhotos) return;
-
     var video = document.getElementById('cam-video');
     if (!video.srcObject) return;
 
@@ -827,7 +755,6 @@
     var size = Math.min(video.videoWidth, video.videoHeight);
     canvas.width = size;
     canvas.height = size;
-
     var ctx = canvas.getContext('2d');
     var sx = (video.videoWidth - size) / 2;
     var sy = (video.videoHeight - size) / 2;
@@ -835,49 +762,21 @@
     if (facingMode === 'user') {
       ctx.translate(size, 0);
       ctx.scale(-1, 1);
-      ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-    } else {
-      ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
     }
+    ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-    var dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-    photos.push(dataUrl);
-    photoCount++;
+    lastCaptured = canvas.toDataURL('image/jpeg', 0.9);
 
-    // Flash effect
     var flash = document.getElementById('flash');
     flash.classList.remove('flash');
     void flash.offsetWidth;
     flash.classList.add('flash');
 
-    updateCameraUI();
-
-    if (photoCount >= totalPhotos) {
-      setTimeout(function() {
-        stopCamera();
-        goToConfirm();
-      }, 500);
-    }
-  }
-
-  function updateCameraUI() {
-    var badge = document.getElementById('photo-badge');
-    var thumb = document.getElementById('thumb-box');
-
-    badge.textContent = (photoCount + 1) + ' of ' + totalPhotos;
-
-    if (photoCount >= totalPhotos) {
-      badge.textContent = totalPhotos + ' of ' + totalPhotos;
-    }
-
-    if (photoCount > 0) {
-      thumb.classList.remove('empty');
-      thumb.innerHTML = '<img src="' + photos[photos.length - 1] + '" alt="Photo">';
-    } else {
-      thumb.classList.add('empty');
-      thumb.innerHTML = '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
-    }
+    setTimeout(function() {
+      stopCamera();
+      goToConfirm();
+    }, 400);
   }
 
   function stopCamera() {
@@ -885,40 +784,34 @@
       cameraStream.getTracks().forEach(function(t) { t.stop(); });
       cameraStream = null;
     }
-    var video = document.getElementById('cam-video');
-    video.srcObject = null;
+    document.getElementById('cam-video').srcObject = null;
   }
 
   function goToConfirm() {
-    // Inject photos into confirm frame
-    var cp1 = document.getElementById('confirm-pf1');
-    var cp2 = document.getElementById('confirm-pf2');
-    if (photos[0]) {
-      cp1.style.backgroundImage = 'url(' + photos[0] + ')';
-      cp1.style.backgroundSize = 'cover';
-      cp1.style.backgroundPosition = 'center';
-    }
-    if (photos[1]) {
-      cp2.style.backgroundImage = 'url(' + photos[1] + ')';
-      cp2.style.backgroundSize = 'cover';
-      cp2.style.backgroundPosition = 'center';
-    }
+    document.getElementById('confirm-img').src = lastCaptured;
+    document.getElementById('confirm-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
     show('1b');
   }
 
-  function retakePhotos() {
-    photoCount = 0;
-    photos = [];
-    // Clear confirm previews
-    document.getElementById('confirm-pf1').style.backgroundImage = '';
-    document.getElementById('confirm-pf2').style.backgroundImage = '';
-    updateCameraUI();
+  function retakePhoto() {
+    lastCaptured = null;
+    document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
     show(1);
     requestCamera();
   }
 
-  function confirmPhotos() {
-    goToProcessing();
+  function confirmPhoto() {
+    photos.push(lastCaptured);
+    photoCount++;
+    lastCaptured = null;
+
+    if (photoCount >= totalPhotos) {
+      goToProcessing();
+    } else {
+      document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
+      show(1);
+      requestCamera();
+    }
   }
 
   function resetProcessing() {
@@ -1086,11 +979,11 @@
     stopCamera();
     photoCount = 0;
     photos = [];
+    lastCaptured = null;
     resetProcessing();
     resetDone();
 
-    // Reset done photo fills and confirm previews
-    ['done-pf1','done-pf2','confirm-pf1','confirm-pf2'].forEach(function(id) {
+    ['done-pf1','done-pf2'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) {
         el.style.backgroundImage = '';
@@ -1099,12 +992,6 @@
       }
     });
 
-    // Reset thumbnail
-    var thumb = document.getElementById('thumb-box');
-    thumb.classList.add('empty');
-    thumb.innerHTML = '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
-
-    // Reset permission overlay
     document.getElementById('cam-perm').classList.remove('hidden');
     document.getElementById('cam-denied').classList.remove('show');
     document.getElementById('cam-ph').style.display = 'none';
