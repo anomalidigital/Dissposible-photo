@@ -593,13 +593,6 @@
 
   <!-- STATE 2: Processing -->
   <div class="state processing-bg" id="s2">
-    <div class="header">
-      <div style="width:36px"></div>
-      <div style="flex:1;display:flex;justify-content:center">
-        <div class="badge solid"><div class="spinner"></div>Processing</div>
-      </div>
-      <div style="width:36px"></div>
-    </div>
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:16px 16px 0">
       <div style="width:85%;aspect-ratio:1/1;position:relative">
         <div id="tpl-frame" style="width:100%;height:100%;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(0.92);position:relative">
@@ -630,16 +623,6 @@
 
   <!-- STATE 3: Done -->
   <div class="state done-bg" id="s3">
-    <div class="header">
-      <div style="width:36px"></div>
-      <div style="flex:1;display:flex;justify-content:center">
-        <div class="badge green">
-          <svg style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;margin-right:6px" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-          Ready
-        </div>
-      </div>
-      <div style="width:36px"></div>
-    </div>
     <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px">
       <div class="frame-container">
         <div class="frame-card" id="done-frame" style="opacity:0;transform:scale(0.85);box-shadow:0 8px 32px rgba(0,0,0,0.1)">
@@ -654,12 +637,6 @@
             </div>
           </div>
           <div class="brand-mark"><span>@LOLPHOTOBOOTH.CO</span></div>
-        </div>
-        <div id="success-ring" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0;pointer-events:none">
-          <svg width="80" height="80" viewBox="0 0 80 80">
-            <circle cx="40" cy="40" r="35" fill="rgba(237,72,54,0.12)" stroke="#ed4836" stroke-width="2.5"/>
-            <path id="check-path" d="M24 40 L35 51 L56 28" fill="none" stroke="#ed4836" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="55" stroke-dashoffset="55"/>
-          </svg>
         </div>
       </div>
     </div>
@@ -840,10 +817,6 @@
     document.getElementById('done-frame').style.transform = 'scale(0.85)';
     document.getElementById('done-frame').style.opacity = '0';
     document.getElementById('done-frame').style.transition = '';
-    document.getElementById('success-ring').style.opacity = '0';
-    document.getElementById('success-ring').style.transition = '';
-    document.getElementById('check-path').style.strokeDashoffset = '55';
-    document.getElementById('check-path').style.transition = '';
     document.getElementById('done-title').style.opacity = '0';
     document.getElementById('done-title').style.transition = '';
     document.getElementById('done-sub').style.opacity = '0';
@@ -943,8 +916,6 @@
     show(3);
 
     var df = document.getElementById('done-frame');
-    var sr = document.getElementById('success-ring');
-    var ck = document.getElementById('check-path');
     var dt = document.getElementById('done-title');
     var ds = document.getElementById('done-sub');
     var db = document.getElementById('done-btns');
@@ -954,18 +925,6 @@
       df.style.transform = 'scale(1)';
       df.style.opacity = '1';
     }, 100);
-
-    setTimeout(function() {
-      sr.style.transition = 'opacity 0.4s';
-      sr.style.opacity = '1';
-      ck.style.transition = 'stroke-dashoffset 0.5s ease 0.2s';
-      ck.style.strokeDashoffset = '0';
-    }, 400);
-
-    setTimeout(function() {
-      sr.style.transition = 'opacity 0.6s';
-      sr.style.opacity = '0';
-    }, 1800);
 
     setTimeout(function() {
       dt.style.transition = 'opacity 0.4s';
