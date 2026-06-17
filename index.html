@@ -596,16 +596,12 @@
   <div class="state processing-bg" id="s2">
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:16px 16px 0">
       <div class="frame-container">
-        <div class="frame-card" id="tpl-frame" style="opacity:0;transform:scale(0.92)">
-          <div class="photo-slot">
-            <div class="shimmer" id="sh1"></div>
-          </div>
-          <div class="photo-slot">
-            <div class="shimmer delay" id="sh2"></div>
-          </div>
+        <div class="frame-card" id="tpl-frame" style="opacity:0;transform:scale(0.92);border:1.5px solid #ddd">
+          <div style="position:absolute;top:5%;left:5%;right:5%;bottom:12%;border:1.5px solid #ccc;border-radius:6px"></div>
           <div class="brand-mark"><span>@LOLPHOTOBOOTH.CO</span></div>
-          <div id="proc-icon" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.3;z-index:2">
-            <svg viewBox="0 0 64 64" style="width:52px;height:52px">
+          <div class="shimmer" id="sh1" style="border-radius:12px"></div>
+          <div id="proc-icon" style="position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);opacity:0.3;z-index:2">
+            <svg viewBox="0 0 64 64" style="width:48px;height:48px">
               <rect x="2" y="8" width="44" height="44" rx="7" fill="none" stroke="#ed4836" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
               <circle cx="16" cy="24" r="4" fill="none" stroke="#ed4836" stroke-width="2.5"/>
               <polyline points="2 42 14 30 24 40 32 32 46 46" fill="none" stroke="#ed4836" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -809,7 +805,7 @@
   }
 
   function resetProcessing() {
-    var ids = ['tpl-frame','sh1','sh2','status-text','dot-loader','circle-prog'];
+    var ids = ['tpl-frame','sh1','status-text','dot-loader','circle-prog'];
     ids.forEach(function(id) {
       var e = document.getElementById(id);
       if (e) { e.style.transition = ''; e.style.opacity = '0'; }
@@ -873,7 +869,6 @@
     var tf = document.getElementById('tpl-frame');
     var cp = document.getElementById('circle-prog');
     var sh1 = document.getElementById('sh1');
-    var sh2 = document.getElementById('sh2');
     var icon = document.getElementById('proc-icon');
     var pc = document.getElementById('prog-c');
     var pn = document.getElementById('prog-num');
@@ -896,8 +891,6 @@
     setTimeout(function() {
       sh1.style.transition = 'opacity 0.3s';
       sh1.style.opacity = '1';
-      sh2.style.transition = 'opacity 0.3s 0.2s';
-      sh2.style.opacity = '1';
     }, 800);
 
     var p = 0;
@@ -912,8 +905,6 @@
       if (p === 60) {
         sh1.style.transition = 'opacity 0.5s';
         sh1.style.opacity = '0';
-        sh2.style.transition = 'opacity 0.5s';
-        sh2.style.opacity = '0';
       }
 
       if (p === 100) {
