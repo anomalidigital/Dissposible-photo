@@ -433,13 +433,30 @@
     .photo-fill.one { background: linear-gradient(135deg, #f8c9a0, #f0a07a); background-size: cover; background-position: center; }
     .photo-fill.two { background: linear-gradient(135deg, #f0a07a, #e8836a); background-size: cover; background-position: center; }
     .photo-fill svg { width: 32px; height: 32px; stroke: rgba(255,255,255,0.7); fill: none; stroke-width: 1.5; }
-    .shimmer {
+    .proc-inner {
       position: absolute;
-      inset: 0;
-      background: linear-gradient(225deg, transparent 30%, rgba(255, 255, 255, 0.5) 45%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0.5) 55%, transparent 70%);
-      background-size: 300% 300%;
-      animation: shimmer 2s ease-in-out infinite;
-      opacity: 0;
+      top: 5%;
+      left: 5%;
+      right: 5%;
+      bottom: 11%;
+      border: 1.5px solid #ccc;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #fafafa;
+    }
+    .proc-inner::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(225deg, transparent 40%, rgba(237, 72, 54, 0.08) 48%, rgba(255, 255, 255, 0.7) 50%, rgba(237, 72, 54, 0.08) 52%, transparent 60%);
+      animation: shimmerDiag 2.5s ease-in-out infinite;
+    }
+    @keyframes shimmerDiag {
+      0% { transform: translate(50%, -50%); }
+      100% { transform: translate(-50%, 50%); }
     }
     .brand-mark {
       position: absolute;
@@ -485,7 +502,6 @@
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes shimmer { 0% { background-position: 100% 0%; } 100% { background-position: 0% 100%; } }
     @keyframes dotPulse { 0%, 80%, 100% { opacity: 0.3; } 40% { opacity: 1; } }
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
   </style>
@@ -595,12 +611,10 @@
   <div class="state processing-bg" id="s2">
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:16px 16px 0">
       <div class="frame-container">
-        <div class="frame-card" id="tpl-frame" style="opacity:0;transform:scale(0.92);border:2px solid #d0d0d0">
-          <div id="inner-frame" style="position:absolute;top:4%;left:4%;right:4%;bottom:10%;border:2px solid #bbb;border-radius:8px;overflow:hidden;background:rgba(237,72,54,0.04)">
-            <div class="shimmer" id="sh1"></div>
-          </div>
+        <div class="frame-card" id="tpl-frame" style="opacity:0;transform:scale(0.92);border:1.5px solid #d5d5d5">
+          <div class="proc-inner"></div>
           <div class="brand-mark"><span>@LOLPHOTOBOOTH.CO</span></div>
-          <div id="proc-icon" style="position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);opacity:0.3;z-index:2">
+          <div id="proc-icon" style="position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);opacity:0.25;z-index:2">
             <svg viewBox="0 0 64 64" style="width:48px;height:48px">
               <rect x="2" y="8" width="44" height="44" rx="7" fill="none" stroke="#ed4836" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
               <circle cx="16" cy="24" r="4" fill="none" stroke="#ed4836" stroke-width="2.5"/>
@@ -805,7 +819,7 @@
   }
 
   function resetProcessing() {
-    var ids = ['tpl-frame','sh1','status-text','dot-loader','circle-prog'];
+    var ids = ['tpl-frame','status-text','dot-loader','circle-prog'];
     ids.forEach(function(id) {
       var e = document.getElementById(id);
       if (e) { e.style.transition = ''; e.style.opacity = '0'; }
@@ -868,7 +882,6 @@
     var dl = document.getElementById('dot-loader');
     var tf = document.getElementById('tpl-frame');
     var cp = document.getElementById('circle-prog');
-    var sh1 = document.getElementById('sh1');
     var icon = document.getElementById('proc-icon');
     var pc = document.getElementById('prog-c');
     var pn = document.getElementById('prog-num');
@@ -888,11 +901,6 @@
       cp.style.opacity = '1';
     }, 400);
 
-    setTimeout(function() {
-      sh1.style.transition = 'opacity 0.3s';
-      sh1.style.opacity = '1';
-    }, 800);
-
     var p = 0;
     procInterval = setInterval(function() {
       p += 1;
@@ -901,11 +909,6 @@
       var offset = 150.8 - (150.8 * p / 100);
       pc.style.strokeDashoffset = offset.toFixed(1);
       pn.textContent = p + '%';
-
-      if (p === 60) {
-        sh1.style.transition = 'opacity 0.5s';
-        sh1.style.opacity = '0';
-      }
 
       if (p === 100) {
         st.textContent = 'All done!';
