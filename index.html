@@ -870,8 +870,8 @@
       width: 92%;
       aspect-ratio: 1408 / 768;
       transform-origin: 42.54% 62.04%;
-      transform: translate(-42.54%, -155%) rotate(-16deg) scale(0.42);
-      animation: camIntro 2s cubic-bezier(0.5, 0.04, 0.2, 1) forwards;
+      transform: translate(-42.54%, -158%) rotate(-15deg) scale(0.4);
+      animation: camIntro 2.1s linear forwards;
       will-change: transform;
     }
     /* Transparent window punched into the camera LCD. Its huge box-shadow
@@ -885,8 +885,8 @@
       width: 26.99%;
       height: 34.77%;
       background-color: #111;
-      box-shadow: 0 0 0 0 rgba(17, 17, 17, 1);
-      animation: camReveal 2s cubic-bezier(0.5, 0.04, 0.2, 1) forwards;
+      box-shadow: 0 0 0 2000px rgba(17, 17, 17, 0);
+      animation: camReveal 2.1s ease-in-out forwards;
     }
     .cam-rig-img {
       position: absolute;
@@ -898,16 +898,18 @@
       filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.5));
     }
     @keyframes camIntro {
-      0%   { transform: translate(-42.54%, -155%) rotate(-16deg) scale(0.42); opacity: 0.35; }
-      12%  { transform: translate(-42.54%, -118%) rotate(-10deg) scale(0.48); opacity: 1; }
-      45%  { transform: translate(-42.54%, -62.04%) rotate(0deg) scale(0.6); }
-      54%  { transform: translate(-42.54%, -62.04%) rotate(0deg) scale(0.66); }
-      100% { transform: translate(-42.54%, -62.04%) rotate(0deg) scale(14); }
+      /* drop: soft ease-out landing */
+      0%   { transform: translate(-42.54%, -158%) rotate(-15deg) scale(0.4); opacity: 0.35; animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+      /* settle at centre, then dive: smooth ease-in-out so it never snaps */
+      42%  { transform: translate(-42.54%, -62.04%) rotate(0deg) scale(0.62); opacity: 1; animation-timing-function: cubic-bezier(0.45, 0, 0.3, 1); }
+      100% { transform: translate(-42.54%, -62.04%) rotate(0deg) scale(14); opacity: 1; }
     }
     @keyframes camReveal {
-      0%, 50%   { box-shadow: 0 0 0 0px rgba(17, 17, 17, 1); background-color: #111; }
-      57%       { box-shadow: 0 0 0 3000px rgba(17, 17, 17, 1); background-color: #111; }
-      66%, 100% { box-shadow: 0 0 0 3000px rgba(17, 17, 17, 1); background-color: rgba(17, 17, 17, 0); }
+      /* spread is constant (scales with the camera); only the alpha fades in,
+         so the dark grows WITH the camera instead of bursting from the centre */
+      0%, 42%   { box-shadow: 0 0 0 2000px rgba(17, 17, 17, 0); background-color: #111; }
+      58%       { box-shadow: 0 0 0 2000px rgba(17, 17, 17, 1); background-color: #111; }
+      68%, 100% { box-shadow: 0 0 0 2000px rgba(17, 17, 17, 1); background-color: rgba(17, 17, 17, 0); }
     }
   </style>
 </head>
@@ -1368,7 +1370,7 @@
     // Mid-animation: the dark mask has wiped over the landing and the LCD
     // window is still opaque, so swap the page behind the overlay from the
     // landing to the live photo session without any visible flash.
-    introTimer = setTimeout(function() { show(1); }, 1150);
+    introTimer = setTimeout(function() { show(1); }, 1220);
 
     var done = function(e) {
       if (e.animationName !== 'camIntro') return;
