@@ -249,7 +249,10 @@
       box-shadow: 0 0 0 3px #ed4836, 0 4px 12px rgba(237, 72, 54, 0.25);
     }
 
-    .processing-bg, .done-bg {
+    .processing-bg {
+      background: #111;
+    }
+    .done-bg {
       background: linear-gradient(165deg, #fef9f4 0%, #fdf0e6 40%, #fef5ed 100%);
     }
 
@@ -627,7 +630,7 @@
         </div>
       </div>
       <div style="text-align:center">
-        <p id="status-text" style="font-size:16px;font-weight:700;color:#2c2c2c;margin:0 0 6px;opacity:0">Processing Photo...</p>
+        <p id="status-text" style="font-size:16px;font-weight:700;color:#fff;margin:0 0 6px;opacity:0">Processing Photo...</p>
         <div id="dot-loader" style="opacity:0" class="dots"><span>.</span><span>.</span><span>.</span></div>
       </div>
       <div id="circle-prog" style="position:relative;width:56px;height:56px;opacity:0">
