@@ -619,8 +619,8 @@
 
     /* Design 1: hero + list */
     .hero-preview {
-      width: 38%;
-      max-width: 160px;
+      width: 55%;
+      max-width: 220px;
       align-self: center;
       margin-bottom: 18px;
     }
@@ -714,13 +714,19 @@
 
     /* Design 2 mini-preview at top */
     .grid-preview {
-      width: 26%;
-      max-width: 110px;
+      width: 44%;
+      max-width: 180px;
       align-self: center;
       margin-bottom: 16px;
     }
 
     /* Design 3: QR centered */
+    .qr-preview {
+      width: 40%;
+      max-width: 160px;
+      align-self: center;
+      margin-bottom: 14px;
+    }
     .qr-card {
       width: 62%;
       max-width: 220px;
@@ -776,8 +782,8 @@
     }
     .carousel::-webkit-scrollbar { display: none; }
     .car-card {
-      flex: 0 0 60%;
-      max-width: 200px;
+      flex: 0 0 78%;
+      max-width: 260px;
       scroll-snap-align: center;
       aspect-ratio: 2/3;
       border-radius: 12px;
@@ -1130,8 +1136,16 @@
       </div>
     </div>
     <div class="delivery-content" style="justify-content:center">
-      <p class="delivery-title">Scan to download</p>
-      <p class="delivery-sub">Get all photos on your device</p>
+      <p class="delivery-title">Your photo is ready</p>
+      <p class="delivery-sub">Preview · scan or download below</p>
+      <div class="qr-preview">
+        <div class="mini-frame" id="mini-3">
+          <div class="mini-brand">@LOLPHOTOBOOTH.CO</div>
+          <div class="mini-photo m1"></div>
+          <div class="mini-photo m2"></div>
+          <div class="mini-footer"><span>ARTWORKS</span><div class="mini-qr"></div></div>
+        </div>
+      </div>
       <div class="qr-card">
         <svg viewBox="0 0 50 50">
           <rect x="3" y="3" width="14" height="14" fill="#000"/>
@@ -1577,6 +1591,14 @@
     document.querySelectorAll('.mini-frame .mini-photo.m2').forEach(function(el) {
       el.style.backgroundImage = bg1;
     });
+
+    var m3 = document.getElementById('mini-3');
+    if (m3) {
+      var m3p1 = m3.querySelector('.mini-photo.m1');
+      var m3p2 = m3.querySelector('.mini-photo.m2');
+      if (m3p1) m3p1.style.backgroundImage = bg0;
+      if (m3p2) m3p2.style.backgroundImage = bg1;
+    }
 
     var t1 = document.getElementById('del-thumb1-1');
     var t2 = document.getElementById('del-thumb2-1');
