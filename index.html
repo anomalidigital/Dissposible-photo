@@ -852,6 +852,76 @@
       border-radius: 8px;
       text-align: center;
     }
+
+    /* ==================== CAMERA INTRO ANIMATION ==================== */
+    .cam-anim {
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      overflow: hidden;
+      display: none;
+      pointer-events: auto;
+      animation: camBg 1.9s ease forwards;
+    }
+    .cam-rig {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 92%;
+      aspect-ratio: 1408 / 768;
+      transform-origin: 42.54% 62.04%;
+      transform: translate(-42.54%, -155%) rotate(-16deg) scale(0.42);
+      animation: camIntro 1.9s cubic-bezier(0.5, 0.05, 0.2, 1) forwards;
+      will-change: transform;
+    }
+    .cam-rig-lcd {
+      position: absolute;
+      left: 29.05%;
+      top: 44.66%;
+      width: 26.99%;
+      height: 34.77%;
+      overflow: hidden;
+      background: #1b1b1b;
+    }
+    .cam-rig-lcd video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .cam-rig-lcd video.mirror { transform: scaleX(-1); }
+    .cam-rig-ph {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: #777;
+    }
+    .cam-rig-ph svg { width: 26px; height: 26px; stroke: rgba(237, 72, 54, 0.45); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .cam-rig-ph span { font-size: 9px; font-weight: 600; color: #888; }
+    .cam-rig-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      pointer-events: none;
+      filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.5));
+    }
+    @keyframes camIntro {
+      0%   { transform: translate(-42.54%, -155%) rotate(-16deg) scale(0.42); opacity: 0.3; }
+      12%  { transform: translate(-42.54%, -118%) rotate(-10deg) scale(0.48); opacity: 1; }
+      50%  { transform: translate(-42.54%, -62.04%) rotate(0deg) scale(0.6); }
+      62%  { transform: translate(-42.54%, -62.04%) rotate(0deg) scale(0.64); }
+      100% { transform: translate(-42.54%, -62.04%) rotate(0deg) scale(3.7); }
+    }
+    @keyframes camBg {
+      0%, 52%   { background-color: rgba(17, 17, 17, 0); }
+      80%, 100% { background-color: rgba(17, 17, 17, 1); }
+    }
   </style>
 </head>
 <body>
@@ -902,7 +972,8 @@
           <svg viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
           </svg>
-          <p>Camera access denied.<br>Please allow camera in your browser settings and reload.</p>
+          <p>Camera access denied.<br>Please allow camera in your browser settings.</p>
+          <button class="btn-allow" onclick="requestCamera()">Try Again</button>
         </div>
         <div class="cam-placeholder" id="cam-ph">
           <svg viewBox="0 0 24 24">
@@ -1247,6 +1318,20 @@
     </div>
   </div>
 
+  <!-- Camera intro animation overlay -->
+  <div class="cam-anim" id="cam-anim">
+    <div class="cam-rig" id="cam-rig">
+      <div class="cam-rig-lcd">
+        <div class="cam-rig-ph" id="cam-rig-ph">
+          <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span>Camera not available</span>
+        </div>
+        <video id="cam-rig-video" autoplay playsinline muted></video>
+      </div>
+      <img class="cam-rig-img" src="kamera.png" alt="">
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -1277,10 +1362,48 @@
     photos = [];
     lastCaptured = null;
     document.getElementById('photo-badge').textContent = '1 of ' + totalPhotos;
-    show(1);
-    document.getElementById('cam-perm').classList.remove('hidden');
+    document.getElementById('cam-perm').classList.add('hidden');
     document.getElementById('cam-denied').classList.remove('show');
-    document.getElementById('cam-ph').style.display = 'none';
+    document.getElementById('cam-ph').style.display = 'flex';
+    var rp = document.getElementById('cam-rig-ph');
+    if (rp) rp.style.display = 'flex';
+    playCameraIntro();
+    startCamera();
+  }
+
+  function playCameraIntro() {
+    var anim = document.getElementById('cam-anim');
+    var rig = document.getElementById('cam-rig');
+    anim.style.display = 'block';
+    anim.style.opacity = '1';
+    anim.style.transition = '';
+    // restart the CSS animations from frame 0
+    anim.style.animation = 'none';
+    rig.style.animation = 'none';
+    void rig.offsetWidth;
+    anim.style.animation = '';
+    rig.style.animation = '';
+
+    var done = function() {
+      rig.removeEventListener('animationend', done);
+      show(1);
+      anim.style.transition = 'opacity 0.3s ease';
+      anim.style.opacity = '0';
+      setTimeout(function() {
+        anim.style.display = 'none';
+        anim.style.transition = '';
+      }, 340);
+    };
+    rig.addEventListener('animationend', done);
+  }
+
+  function hideIntroOverlay() {
+    var anim = document.getElementById('cam-anim');
+    if (anim) {
+      anim.style.display = 'none';
+      anim.style.opacity = '1';
+      anim.style.transition = '';
+    }
   }
 
   function requestCamera() {
@@ -1288,6 +1411,16 @@
     document.getElementById('cam-denied').classList.remove('show');
     document.getElementById('cam-ph').style.display = 'flex';
     startCamera();
+  }
+
+  function attachStream(stream) {
+    ['cam-video', 'cam-rig-video'].forEach(function(id) {
+      var v = document.getElementById(id);
+      if (!v) return;
+      v.srcObject = stream;
+      v.play().catch(function() {});
+      v.classList.toggle('mirror', facingMode === 'user');
+    });
   }
 
   function startCamera() {
@@ -1300,13 +1433,12 @@
       audio: false
     }).then(function(stream) {
       cameraStream = stream;
-      var video = document.getElementById('cam-video');
-      video.srcObject = stream;
-      video.play();
-      video.classList.toggle('mirror', facingMode === 'user');
+      attachStream(stream);
       document.getElementById('cam-ph').style.display = 'none';
       document.getElementById('cam-perm').classList.add('hidden');
       document.getElementById('cam-denied').classList.remove('show');
+      var rp = document.getElementById('cam-rig-ph');
+      if (rp) rp.style.display = 'none';
     }).catch(function(err) {
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         document.getElementById('cam-ph').style.display = 'none';
@@ -1360,7 +1492,10 @@
       cameraStream.getTracks().forEach(function(t) { t.stop(); });
       cameraStream = null;
     }
-    document.getElementById('cam-video').srcObject = null;
+    ['cam-video', 'cam-rig-video'].forEach(function(id) {
+      var v = document.getElementById(id);
+      if (v) v.srcObject = null;
+    });
   }
 
   function goToConfirm() {
@@ -1530,6 +1665,7 @@
     resetProcessing();
     resetDone();
     resetDonePhotos();
+    hideIntroOverlay();
     document.getElementById('photo-badge').textContent = '1 of ' + totalPhotos;
     show(1);
     requestCamera();
@@ -1555,8 +1691,9 @@
     resetProcessing();
     resetDone();
     resetDonePhotos();
+    hideIntroOverlay();
 
-    document.getElementById('cam-perm').classList.remove('hidden');
+    document.getElementById('cam-perm').classList.add('hidden');
     document.getElementById('cam-denied').classList.remove('show');
     document.getElementById('cam-ph').style.display = 'none';
 
