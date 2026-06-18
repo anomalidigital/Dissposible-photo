@@ -860,8 +860,8 @@
       z-index: 100;
       overflow: hidden;
       display: none;
+      background: transparent;
       pointer-events: auto;
-      animation: camBg 1.9s ease forwards;
     }
     .cam-rig {
       position: absolute;
@@ -871,37 +871,23 @@
       aspect-ratio: 1408 / 768;
       transform-origin: 42.54% 62.04%;
       transform: translate(-42.54%, -155%) rotate(-16deg) scale(0.42);
-      animation: camIntro 1.9s cubic-bezier(0.5, 0.05, 0.2, 1) forwards;
+      animation: camIntro 2s cubic-bezier(0.5, 0.04, 0.2, 1) forwards;
       will-change: transform;
     }
-    .cam-rig-lcd {
+    /* Transparent window punched into the camera LCD. Its huge box-shadow
+       masks the screen around it, so as the rig scales up the window grows
+       and reveals the real photo-session page (s1) behind the overlay until
+       the camera body has expanded off-screen and vanished. */
+    .cam-window {
       position: absolute;
       left: 29.05%;
       top: 44.66%;
       width: 26.99%;
       height: 34.77%;
-      overflow: hidden;
-      background: #1b1b1b;
+      background-color: #111;
+      box-shadow: 0 0 0 0 rgba(17, 17, 17, 1);
+      animation: camReveal 2s cubic-bezier(0.5, 0.04, 0.2, 1) forwards;
     }
-    .cam-rig-lcd video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .cam-rig-lcd video.mirror { transform: scaleX(-1); }
-    .cam-rig-ph {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      color: #777;
-    }
-    .cam-rig-ph svg { width: 26px; height: 26px; stroke: rgba(237, 72, 54, 0.45); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-    .cam-rig-ph span { font-size: 9px; font-weight: 600; color: #888; }
     .cam-rig-img {
       position: absolute;
       inset: 0;
@@ -912,15 +898,16 @@
       filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.5));
     }
     @keyframes camIntro {
-      0%   { transform: translate(-42.54%, -155%) rotate(-16deg) scale(0.42); opacity: 0.3; }
+      0%   { transform: translate(-42.54%, -155%) rotate(-16deg) scale(0.42); opacity: 0.35; }
       12%  { transform: translate(-42.54%, -118%) rotate(-10deg) scale(0.48); opacity: 1; }
-      50%  { transform: translate(-42.54%, -62.04%) rotate(0deg) scale(0.6); }
-      62%  { transform: translate(-42.54%, -62.04%) rotate(0deg) scale(0.64); }
-      100% { transform: translate(-42.54%, -62.04%) rotate(0deg) scale(3.7); }
+      45%  { transform: translate(-42.54%, -62.04%) rotate(0deg) scale(0.6); }
+      54%  { transform: translate(-42.54%, -62.04%) rotate(0deg) scale(0.66); }
+      100% { transform: translate(-42.54%, -62.04%) rotate(0deg) scale(14); }
     }
-    @keyframes camBg {
-      0%, 52%   { background-color: rgba(17, 17, 17, 0); }
-      80%, 100% { background-color: rgba(17, 17, 17, 1); }
+    @keyframes camReveal {
+      0%, 50%   { box-shadow: 0 0 0 0px rgba(17, 17, 17, 1); background-color: #111; }
+      57%       { box-shadow: 0 0 0 3000px rgba(17, 17, 17, 1); background-color: #111; }
+      66%, 100% { box-shadow: 0 0 0 3000px rgba(17, 17, 17, 1); background-color: rgba(17, 17, 17, 0); }
     }
   </style>
 </head>
@@ -1321,13 +1308,7 @@
   <!-- Camera intro animation overlay -->
   <div class="cam-anim" id="cam-anim">
     <div class="cam-rig" id="cam-rig">
-      <div class="cam-rig-lcd">
-        <div class="cam-rig-ph" id="cam-rig-ph">
-          <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          <span>Camera not available</span>
-        </div>
-        <video id="cam-rig-video" autoplay playsinline muted></video>
-      </div>
+      <div class="cam-window" id="cam-window"></div>
       <img class="cam-rig-img" src="kamera.png" alt="">
     </div>
   </div>
@@ -1343,6 +1324,7 @@
   var photoCount = 0;
   var totalPhotos = 2;
   var lastCaptured = null;
+  var introTimer = null;
 
   function show(n) {
     currentState = n;
@@ -1365,8 +1347,6 @@
     document.getElementById('cam-perm').classList.add('hidden');
     document.getElementById('cam-denied').classList.remove('show');
     document.getElementById('cam-ph').style.display = 'flex';
-    var rp = document.getElementById('cam-rig-ph');
-    if (rp) rp.style.display = 'flex';
     playCameraIntro();
     startCamera();
   }
@@ -1374,30 +1354,37 @@
   function playCameraIntro() {
     var anim = document.getElementById('cam-anim');
     var rig = document.getElementById('cam-rig');
+    var win = document.getElementById('cam-window');
+    if (introTimer) { clearTimeout(introTimer); introTimer = null; }
+
     anim.style.display = 'block';
     anim.style.opacity = '1';
     anim.style.transition = '';
     // restart the CSS animations from frame 0
-    anim.style.animation = 'none';
-    rig.style.animation = 'none';
+    [rig, win].forEach(function(el) { el.style.animation = 'none'; });
     void rig.offsetWidth;
-    anim.style.animation = '';
-    rig.style.animation = '';
+    [rig, win].forEach(function(el) { el.style.animation = ''; });
 
-    var done = function() {
+    // Mid-animation: the dark mask has wiped over the landing and the LCD
+    // window is still opaque, so swap the page behind the overlay from the
+    // landing to the live photo session without any visible flash.
+    introTimer = setTimeout(function() { show(1); }, 1150);
+
+    var done = function(e) {
+      if (e.animationName !== 'camIntro') return;
       rig.removeEventListener('animationend', done);
-      show(1);
-      anim.style.transition = 'opacity 0.3s ease';
+      anim.style.transition = 'opacity 0.25s ease';
       anim.style.opacity = '0';
       setTimeout(function() {
         anim.style.display = 'none';
         anim.style.transition = '';
-      }, 340);
+      }, 280);
     };
     rig.addEventListener('animationend', done);
   }
 
   function hideIntroOverlay() {
+    if (introTimer) { clearTimeout(introTimer); introTimer = null; }
     var anim = document.getElementById('cam-anim');
     if (anim) {
       anim.style.display = 'none';
@@ -1414,13 +1401,11 @@
   }
 
   function attachStream(stream) {
-    ['cam-video', 'cam-rig-video'].forEach(function(id) {
-      var v = document.getElementById(id);
-      if (!v) return;
-      v.srcObject = stream;
-      v.play().catch(function() {});
-      v.classList.toggle('mirror', facingMode === 'user');
-    });
+    var v = document.getElementById('cam-video');
+    if (!v) return;
+    v.srcObject = stream;
+    v.play().catch(function() {});
+    v.classList.toggle('mirror', facingMode === 'user');
   }
 
   function startCamera() {
@@ -1437,8 +1422,6 @@
       document.getElementById('cam-ph').style.display = 'none';
       document.getElementById('cam-perm').classList.add('hidden');
       document.getElementById('cam-denied').classList.remove('show');
-      var rp = document.getElementById('cam-rig-ph');
-      if (rp) rp.style.display = 'none';
     }).catch(function(err) {
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         document.getElementById('cam-ph').style.display = 'none';
@@ -1492,10 +1475,8 @@
       cameraStream.getTracks().forEach(function(t) { t.stop(); });
       cameraStream = null;
     }
-    ['cam-video', 'cam-rig-video'].forEach(function(id) {
-      var v = document.getElementById(id);
-      if (v) v.srcObject = null;
-    });
+    var v = document.getElementById('cam-video');
+    if (v) v.srcObject = null;
   }
 
   function goToConfirm() {
