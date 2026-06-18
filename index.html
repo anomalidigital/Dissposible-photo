@@ -514,6 +514,293 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes dotPulse { 0%, 80%, 100% { opacity: 0.3; } 40% { opacity: 1; } }
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ==================== DELIVERY STATES ==================== */
+    .delivery-bg {
+      background: #111;
+    }
+    .delivery-top {
+      padding-top: max(16px, env(safe-area-inset-top));
+      display: flex;
+      justify-content: center;
+      padding-bottom: 8px;
+    }
+    .design-switcher {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 5px 8px;
+    }
+    .design-switcher button {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+      padding: 0;
+    }
+    .design-switcher button:active { transform: scale(0.9); }
+    .design-switcher button svg { width: 14px; height: 14px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .ds-label {
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      min-width: 78px;
+      text-align: center;
+    }
+    .delivery-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 8px 20px 0;
+      overflow-y: auto;
+    }
+    .delivery-content::-webkit-scrollbar { display: none; }
+    .delivery-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      text-align: center;
+      margin: 8px 0 4px;
+    }
+    .delivery-sub {
+      font-size: 13px;
+      font-weight: 600;
+      color: #888;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    /* Mini frame preview (reused across designs) */
+    .mini-frame {
+      background: #1a1a1a;
+      border-radius: 6px;
+      aspect-ratio: 2/3;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+    .mini-frame .mini-brand {
+      position: absolute;
+      top: 3%; right: 6%;
+      font-size: 5px; font-weight: 800;
+      color: #fff; letter-spacing: 0.5px;
+    }
+    .mini-frame .mini-photo {
+      position: absolute;
+      left: 7%; width: 86%; height: 39%;
+      background: #fff center/cover no-repeat;
+      border-radius: 1px;
+    }
+    .mini-frame .mini-photo.m1 { top: 6%; }
+    .mini-frame .mini-photo.m2 { top: 48%; }
+    .mini-frame .mini-footer {
+      position: absolute;
+      left: 7%; right: 7%; bottom: 4%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .mini-frame .mini-footer span { color: #fff; font-size: 7px; font-weight: 900; letter-spacing: 1px; }
+    .mini-frame .mini-qr {
+      width: 12px; height: 12px;
+      background: #fff;
+      border-radius: 1px;
+    }
+
+    /* Design 1: hero + list */
+    .hero-preview {
+      width: 38%;
+      max-width: 160px;
+      align-self: center;
+      margin-bottom: 18px;
+    }
+    .action-primary {
+      width: 100%;
+      padding: 15px;
+      background: #ed4836;
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 16px rgba(237, 72, 54, 0.3);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .action-primary:active { transform: scale(0.98); }
+    .action-primary svg { width: 17px; height: 17px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .action-secondary {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 12px;
+      color: #fff;
+      cursor: pointer;
+      margin-bottom: 8px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .action-secondary:active { transform: scale(0.98); }
+    .sec-thumb {
+      width: 40px; height: 40px;
+      border-radius: 6px;
+      background: #fff center/cover no-repeat;
+      flex-shrink: 0;
+    }
+    .sec-text { flex: 1; }
+    .sec-name { font-size: 13px; font-weight: 700; color: #fff; }
+    .sec-meta { font-size: 11px; color: #888; font-weight: 600; margin-top: 2px; }
+    .sec-icon {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: rgba(237, 72, 54, 0.15);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .sec-icon svg { width: 14px; height: 14px; stroke: #ed4836; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* Design 2: grid 2x2 */
+    .grid-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .grid-card {
+      aspect-ratio: 1/1;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .grid-card:active { transform: scale(0.97); }
+    .grid-card.primary {
+      background: rgba(237, 72, 54, 0.1);
+      border-color: rgba(237, 72, 54, 0.35);
+    }
+    .grid-card-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: rgba(237, 72, 54, 0.15);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .grid-card.primary .grid-card-icon { background: #ed4836; }
+    .grid-card-icon svg { width: 18px; height: 18px; stroke: #ed4836; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .grid-card.primary .grid-card-icon svg { stroke: #fff; }
+    .grid-card-name { font-size: 13px; font-weight: 800; color: #fff; margin-top: 6px; }
+    .grid-card-meta { font-size: 10px; color: #888; font-weight: 600; margin-top: 2px; }
+
+    /* Design 2 mini-preview at top */
+    .grid-preview {
+      width: 26%;
+      max-width: 110px;
+      align-self: center;
+      margin-bottom: 16px;
+    }
+
+    /* Design 3: QR centered */
+    .qr-card {
+      width: 62%;
+      max-width: 220px;
+      aspect-ratio: 1/1;
+      background: #fff;
+      border-radius: 16px;
+      padding: 16px;
+      margin: 8px auto 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+    .qr-card svg { width: 100%; height: 100%; display: block; }
+    .qr-hint {
+      text-align: center;
+      color: #888;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .qr-inline-pills {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .qr-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .qr-pill:active { transform: scale(0.96); }
+    .qr-pill svg { width: 12px; height: 12px; stroke: #ed4836; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* Design 4: Carousel */
+    .carousel-wrap {
+      margin: 0 -20px 16px;
+    }
+    .carousel {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding: 8px 20px 16px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .carousel::-webkit-scrollbar { display: none; }
+    .car-card {
+      flex: 0 0 60%;
+      max-width: 200px;
+      scroll-snap-align: center;
+      aspect-ratio: 2/3;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      background: #1a1a1a center/cover no-repeat;
+    }
+    .car-card .mini-frame { box-shadow: none; width: 100%; height: 100%; border-radius: 12px; }
+    .car-label {
+      position: absolute;
+      bottom: 10px; left: 10px; right: 10px;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -742,10 +1029,200 @@
         <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         Start Over
       </div>
-      <div class="btn-solid" style="opacity:0">
+      <div class="btn-solid" style="opacity:0" onclick="goToDelivery()">
         Confirm
         <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
+    </div>
+  </div>
+
+  <!-- STATE 4: Delivery — Design 1 (Hero + List) -->
+  <div class="state delivery-bg" id="s4">
+    <div class="delivery-top">
+      <div class="design-switcher">
+        <button onclick="prevDesign(1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <span class="ds-label">Design 1 / 4</span>
+        <button onclick="nextDesign(1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+    </div>
+    <div class="delivery-content">
+      <p class="delivery-title">Your artwork is ready</p>
+      <p class="delivery-sub">Save the framed photo or originals</p>
+      <div class="hero-preview">
+        <div class="mini-frame" id="mini-1">
+          <div class="mini-brand">@LOLPHOTOBOOTH.CO</div>
+          <div class="mini-photo m1"></div>
+          <div class="mini-photo m2"></div>
+          <div class="mini-footer"><span>ARTWORKS</span><div class="mini-qr"></div></div>
+        </div>
+      </div>
+      <button class="action-primary" onclick="downloadFramed()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Framed Photo
+      </button>
+      <div class="action-secondary" onclick="downloadRaw(0)">
+        <div class="sec-thumb" id="del-thumb1-1"></div>
+        <div class="sec-text"><div class="sec-name">Original Photo 1</div><div class="sec-meta">JPG · Raw shot</div></div>
+        <div class="sec-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+      </div>
+      <div class="action-secondary" onclick="downloadRaw(1)">
+        <div class="sec-thumb" id="del-thumb2-1"></div>
+        <div class="sec-text"><div class="sec-name">Original Photo 2</div><div class="sec-meta">JPG · Raw shot</div></div>
+        <div class="sec-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+      </div>
+    </div>
+    <div class="bottom-bar" style="display:flex;justify-content:center">
+      <div class="btn-outline" onclick="restart()">Done</div>
+    </div>
+  </div>
+
+  <!-- STATE 5: Delivery — Design 2 (Grid 2x2) -->
+  <div class="state delivery-bg" id="s5">
+    <div class="delivery-top">
+      <div class="design-switcher">
+        <button onclick="prevDesign(2)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <span class="ds-label">Design 2 / 4</span>
+        <button onclick="nextDesign(2)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+    </div>
+    <div class="delivery-content">
+      <div class="grid-preview">
+        <div class="mini-frame" id="mini-2">
+          <div class="mini-brand">@LOLPHOTOBOOTH.CO</div>
+          <div class="mini-photo m1"></div>
+          <div class="mini-photo m2"></div>
+          <div class="mini-footer"><span>ARTWORKS</span><div class="mini-qr"></div></div>
+        </div>
+      </div>
+      <p class="delivery-title">Save your photos</p>
+      <p class="delivery-sub">Tap a card to download</p>
+      <div class="grid-cards">
+        <div class="grid-card primary" onclick="downloadFramed()">
+          <div class="grid-card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+          <div><div class="grid-card-name">Framed</div><div class="grid-card-meta">PNG · Template</div></div>
+        </div>
+        <div class="grid-card" onclick="downloadRaw(0)">
+          <div class="grid-card-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+          <div><div class="grid-card-name">Photo 1</div><div class="grid-card-meta">JPG · Original</div></div>
+        </div>
+        <div class="grid-card" onclick="downloadRaw(1)">
+          <div class="grid-card-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+          <div><div class="grid-card-name">Photo 2</div><div class="grid-card-meta">JPG · Original</div></div>
+        </div>
+        <div class="grid-card" onclick="shareLink()">
+          <div class="grid-card-icon"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
+          <div><div class="grid-card-name">Share Link</div><div class="grid-card-meta">Copy URL</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-bar" style="display:flex;justify-content:center">
+      <div class="btn-outline" onclick="restart()">Done</div>
+    </div>
+  </div>
+
+  <!-- STATE 6: Delivery — Design 3 (QR centered) -->
+  <div class="state delivery-bg" id="s6">
+    <div class="delivery-top">
+      <div class="design-switcher">
+        <button onclick="prevDesign(3)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <span class="ds-label">Design 3 / 4</span>
+        <button onclick="nextDesign(3)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+    </div>
+    <div class="delivery-content" style="justify-content:center">
+      <p class="delivery-title">Scan to download</p>
+      <p class="delivery-sub">Get all photos on your device</p>
+      <div class="qr-card">
+        <svg viewBox="0 0 50 50">
+          <rect x="3" y="3" width="14" height="14" fill="#000"/>
+          <rect x="6" y="6" width="8" height="8" fill="#fff"/>
+          <rect x="8" y="8" width="4" height="4" fill="#000"/>
+          <rect x="33" y="3" width="14" height="14" fill="#000"/>
+          <rect x="36" y="6" width="8" height="8" fill="#fff"/>
+          <rect x="38" y="8" width="4" height="4" fill="#000"/>
+          <rect x="3" y="33" width="14" height="14" fill="#000"/>
+          <rect x="6" y="36" width="8" height="8" fill="#fff"/>
+          <rect x="8" y="38" width="4" height="4" fill="#000"/>
+          <g fill="#000">
+            <rect x="19" y="3" width="2" height="2"/><rect x="23" y="3" width="2" height="2"/>
+            <rect x="27" y="3" width="2" height="2"/><rect x="19" y="7" width="2" height="2"/>
+            <rect x="25" y="7" width="2" height="2"/><rect x="29" y="7" width="2" height="2"/>
+            <rect x="21" y="11" width="2" height="2"/><rect x="27" y="11" width="2" height="2"/>
+            <rect x="19" y="15" width="2" height="2"/><rect x="23" y="15" width="2" height="2"/>
+            <rect x="29" y="15" width="2" height="2"/><rect x="3" y="19" width="2" height="2"/>
+            <rect x="7" y="19" width="2" height="2"/><rect x="11" y="19" width="2" height="2"/>
+            <rect x="15" y="19" width="2" height="2"/><rect x="19" y="19" width="2" height="2"/>
+            <rect x="25" y="19" width="2" height="2"/><rect x="29" y="19" width="2" height="2"/>
+            <rect x="33" y="19" width="2" height="2"/><rect x="37" y="19" width="2" height="2"/>
+            <rect x="41" y="19" width="2" height="2"/><rect x="45" y="19" width="2" height="2"/>
+            <rect x="5" y="23" width="2" height="2"/><rect x="11" y="23" width="2" height="2"/>
+            <rect x="17" y="23" width="2" height="2"/><rect x="33" y="23" width="2" height="2"/>
+            <rect x="39" y="23" width="2" height="2"/><rect x="45" y="23" width="2" height="2"/>
+            <rect x="3" y="27" width="2" height="2"/><rect x="9" y="27" width="2" height="2"/>
+            <rect x="13" y="27" width="2" height="2"/><rect x="35" y="27" width="2" height="2"/>
+            <rect x="41" y="27" width="2" height="2"/><rect x="47" y="27" width="2" height="2"/>
+            <rect x="9" y="31" width="2" height="2"/><rect x="15" y="31" width="2" height="2"/>
+            <rect x="19" y="33" width="2" height="2"/><rect x="23" y="33" width="2" height="2"/>
+            <rect x="29" y="33" width="2" height="2"/><rect x="35" y="33" width="2" height="2"/>
+            <rect x="41" y="33" width="2" height="2"/><rect x="45" y="33" width="2" height="2"/>
+            <rect x="19" y="37" width="2" height="2"/><rect x="27" y="37" width="2" height="2"/>
+            <rect x="37" y="37" width="2" height="2"/><rect x="43" y="37" width="2" height="2"/>
+            <rect x="47" y="37" width="2" height="2"/><rect x="23" y="41" width="2" height="2"/>
+            <rect x="25" y="41" width="2" height="2"/><rect x="33" y="41" width="2" height="2"/>
+            <rect x="39" y="41" width="2" height="2"/><rect x="45" y="41" width="2" height="2"/>
+            <rect x="21" y="45" width="2" height="2"/><rect x="27" y="45" width="2" height="2"/>
+            <rect x="33" y="45" width="2" height="2"/><rect x="37" y="45" width="2" height="2"/>
+            <rect x="43" y="45" width="2" height="2"/>
+          </g>
+          <circle cx="25" cy="25" r="3.5" fill="#ed4836"/>
+        </svg>
+      </div>
+      <p class="qr-hint">or download individually</p>
+      <div class="qr-inline-pills">
+        <div class="qr-pill" onclick="downloadFramed()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Framed</div>
+        <div class="qr-pill" onclick="downloadRaw(0)"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Photo 1</div>
+        <div class="qr-pill" onclick="downloadRaw(1)"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Photo 2</div>
+      </div>
+    </div>
+    <div class="bottom-bar" style="display:flex;justify-content:center">
+      <div class="btn-outline" onclick="restart()">Done</div>
+    </div>
+  </div>
+
+  <!-- STATE 7: Delivery — Design 4 (Carousel) -->
+  <div class="state delivery-bg" id="s7">
+    <div class="delivery-top">
+      <div class="design-switcher">
+        <button onclick="prevDesign(4)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <span class="ds-label">Design 4 / 4</span>
+        <button onclick="nextDesign(4)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+    </div>
+    <div class="delivery-content">
+      <p class="delivery-title">Pick a file</p>
+      <p class="delivery-sub">Swipe to browse, tap download</p>
+      <div class="carousel-wrap">
+        <div class="carousel">
+          <div class="car-card">
+            <div class="mini-frame" id="mini-4">
+              <div class="mini-brand">@LOLPHOTOBOOTH.CO</div>
+              <div class="mini-photo m1"></div>
+              <div class="mini-photo m2"></div>
+              <div class="mini-footer"><span>ARTWORKS</span><div class="mini-qr"></div></div>
+            </div>
+            <div class="car-label">FRAMED · PNG</div>
+          </div>
+          <div class="car-card" id="car-raw1"><div class="car-label">PHOTO 1 · JPG</div></div>
+          <div class="car-card" id="car-raw2"><div class="car-label">PHOTO 2 · JPG</div></div>
+        </div>
+      </div>
+      <button class="action-primary" onclick="downloadFramed()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download All
+      </button>
+    </div>
+    <div class="bottom-bar" style="display:flex;justify-content:center">
+      <div class="btn-outline" onclick="restart()">Done</div>
     </div>
   </div>
 
@@ -1080,6 +1557,71 @@
     };
     reader.readAsDataURL(file);
     e.target.value = '';
+  }
+
+  /* ========== Delivery screens ========== */
+  function goToDelivery() {
+    setupDeliveryPreviews();
+    show(4);
+  }
+
+  function setupDeliveryPreviews() {
+    var p0 = photos[0] || '';
+    var p1 = photos[1] || '';
+    var bg0 = p0 ? 'url(' + p0 + ')' : '';
+    var bg1 = p1 ? 'url(' + p1 + ')' : '';
+
+    document.querySelectorAll('.mini-frame .mini-photo.m1').forEach(function(el) {
+      el.style.backgroundImage = bg0;
+    });
+    document.querySelectorAll('.mini-frame .mini-photo.m2').forEach(function(el) {
+      el.style.backgroundImage = bg1;
+    });
+
+    var t1 = document.getElementById('del-thumb1-1');
+    var t2 = document.getElementById('del-thumb2-1');
+    if (t1) t1.style.backgroundImage = bg0;
+    if (t2) t2.style.backgroundImage = bg1;
+
+    var car1 = document.getElementById('car-raw1');
+    var car2 = document.getElementById('car-raw2');
+    if (car1) car1.style.backgroundImage = bg0;
+    if (car2) car2.style.backgroundImage = bg1;
+  }
+
+  function nextDesign(n) {
+    var next = n === 4 ? 1 : n + 1;
+    show(3 + next);
+  }
+  function prevDesign(n) {
+    var prev = n === 1 ? 4 : n - 1;
+    show(3 + prev);
+  }
+
+  function downloadFramed() {
+    var src = photos[0] || lastCaptured;
+    if (!src) return;
+    triggerDownload(src, 'lolphotobooth-framed.jpg');
+  }
+  function downloadRaw(i) {
+    var src = photos[i];
+    if (!src) return;
+    triggerDownload(src, 'lolphotobooth-photo-' + (i + 1) + '.jpg');
+  }
+  function triggerDownload(dataUrl, filename) {
+    var a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+  function shareLink() {
+    if (navigator.share) {
+      navigator.share({ title: 'My LOL Photobooth photo', text: 'Check out my photos!', url: window.location.href }).catch(function(){});
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href);
+    }
   }
 
   show(0);
