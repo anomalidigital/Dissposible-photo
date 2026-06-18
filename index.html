@@ -414,30 +414,81 @@
     .photo-fill.one { background: linear-gradient(135deg, #f8c9a0, #f0a07a); background-size: cover; background-position: center; }
     .photo-fill.two { background: linear-gradient(135deg, #f0a07a, #e8836a); background-size: cover; background-position: center; }
     .photo-fill svg { width: 32px; height: 32px; stroke: rgba(255,255,255,0.7); fill: none; stroke-width: 1.5; }
-    .proc-inner {
-      position: absolute;
-      top: 5%;
-      left: 5%;
-      right: 5%;
-      bottom: 11%;
-      border: none;
-      border-radius: 6px;
-      overflow: hidden;
-      background: #111;
+    /* ---- Processing polaroid (compact) ---- */
+    .proc-polaroid {
+      width: 72%;
+      max-width: 280px;
+      aspect-ratio: 1 / 1.15;
+      background: #fff;
+      border-radius: 8px;
+      padding: 6% 6% 16% 6%;
+      position: relative;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      transform: scale(0.85);
     }
-    .proc-inner::after {
+    .proc-photo {
+      width: 100%;
+      height: 100%;
+      background: #1a1a1a center/cover no-repeat;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    .proc-photo::after {
       content: '';
       position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(225deg, transparent 40%, rgba(255, 255, 255, 0.03) 48%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.03) 52%, transparent 60%);
-      animation: shimmerDiag 2.5s ease-in-out infinite;
+      inset: 0;
+      background: linear-gradient(110deg,
+        transparent 35%,
+        rgba(255, 255, 255, 0.0) 45%,
+        rgba(255, 255, 255, 0.35) 50%,
+        rgba(255, 255, 255, 0.0) 55%,
+        transparent 65%);
+      background-size: 250% 100%;
+      animation: shimmerFast 1.4s ease-in-out infinite;
+      pointer-events: none;
     }
-    @keyframes shimmerDiag {
-      0% { transform: translate(50%, -50%); }
-      100% { transform: translate(-50%, 50%); }
+    @keyframes shimmerFast {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .proc-polaroid .brand-mark span {
+      color: rgba(0, 0, 0, 0.2);
+    }
+
+    /* ---- Status + progress bar ---- */
+    .proc-status {
+      width: 78%;
+      max-width: 280px;
+    }
+    .proc-step {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      margin-bottom: 14px;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      letter-spacing: 0.2px;
+      min-height: 20px;
+    }
+    .proc-bar {
+      height: 3px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+    .proc-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ed4836, #ff7a5a);
+      border-radius: 2px;
+      transition: width 0.18s linear;
+      position: relative;
+      box-shadow: 0 0 12px rgba(237, 72, 54, 0.6);
     }
     .brand-mark {
       position: absolute;
@@ -590,33 +641,14 @@
 
   <!-- STATE 2: Processing -->
   <div class="state processing-bg" id="s2">
-    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:16px 16px 0">
-      <div class="frame-container">
-        <div class="frame-card" id="tpl-frame" style="opacity:0;transform:scale(0.92);border:1.5px solid #d5d5d5">
-          <div class="proc-inner"></div>
-          <div class="brand-mark"><span>@LOLPHOTOBOOTH.CO</span></div>
-          <div id="proc-icon" style="position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);opacity:0.25;z-index:2">
-            <svg viewBox="0 0 64 64" style="width:48px;height:48px">
-              <rect x="2" y="8" width="44" height="44" rx="7" fill="none" stroke="#ed4836" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle cx="16" cy="24" r="4" fill="none" stroke="#ed4836" stroke-width="2.5"/>
-              <polyline points="2 42 14 30 24 40 32 32 46 46" fill="none" stroke="#ed4836" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M48 4 L50.5 11 L57.5 13.5 L50.5 16 L48 23 L45.5 16 L38.5 13.5 L45.5 11 Z" fill="#ed4836"/>
-              <path d="M57 18 L58.5 22 L62.5 23.5 L58.5 25 L57 29 L55.5 25 L51.5 23.5 L55.5 22 Z" fill="#ed4836"/>
-              <path d="M42 0 L43.2 3.5 L46.5 4.8 L43.2 6 L42 9.5 L40.8 6 L37.5 4.8 L40.8 3.5 Z" fill="#ed4836"/>
-            </svg>
-          </div>
-        </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:40px;padding:24px">
+      <div class="proc-polaroid" id="tpl-frame">
+        <div class="proc-photo" id="proc-photo"></div>
+        <div class="brand-mark"><span>@LOLPHOTOBOOTH.CO</span></div>
       </div>
-      <div style="text-align:center">
-        <p id="status-text" style="font-size:16px;font-weight:700;color:#fff;margin:0 0 6px;opacity:0">Processing Photo...</p>
-        <div id="dot-loader" style="opacity:0" class="dots"><span>.</span><span>.</span><span>.</span></div>
-      </div>
-      <div id="circle-prog" style="position:relative;width:56px;height:56px;opacity:0">
-        <svg width="56" height="56" viewBox="0 0 56 56">
-          <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(237,72,54,0.1)" stroke-width="3"/>
-          <circle id="prog-c" cx="28" cy="28" r="24" fill="none" stroke="#ed4836" stroke-width="3" stroke-linecap="round" stroke-dasharray="150.8" stroke-dashoffset="150.8" transform="rotate(-90 28 28)" style="transition:stroke-dashoffset 0.4s ease"/>
-        </svg>
-        <span id="prog-num" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#ed4836">0%</span>
+      <div class="proc-status">
+        <div class="proc-step" id="status-text">Capturing moment</div>
+        <div class="proc-bar"><div class="proc-bar-fill" id="prog-bar"></div></div>
       </div>
     </div>
   </div>
@@ -800,17 +832,14 @@
   }
 
   function resetProcessing() {
-    var ids = ['tpl-frame','status-text','dot-loader','circle-prog'];
-    ids.forEach(function(id) {
-      var e = document.getElementById(id);
-      if (e) { e.style.transition = ''; e.style.opacity = '0'; }
-    });
-    document.getElementById('tpl-frame').style.transform = 'scale(0.92)';
-    var icon = document.getElementById('proc-icon');
-    if (icon) { icon.style.transition = ''; icon.style.opacity = '0.3'; }
-    document.getElementById('prog-c').style.strokeDashoffset = '150.8';
-    document.getElementById('prog-num').textContent = '0%';
-    document.getElementById('status-text').textContent = 'Processing Photo...';
+    var tf = document.getElementById('tpl-frame');
+    var st = document.getElementById('status-text');
+    var bar = document.getElementById('prog-bar');
+    var photo = document.getElementById('proc-photo');
+    if (tf) { tf.style.transition = ''; tf.style.opacity = '0'; tf.style.transform = 'scale(0.85)'; }
+    if (st) { st.style.transition = ''; st.style.opacity = '0'; st.textContent = 'Capturing moment'; }
+    if (bar) { bar.style.transition = ''; bar.style.width = '0%'; }
+    if (photo) { photo.style.backgroundImage = ''; }
   }
 
   function resetDone() {
@@ -854,50 +883,61 @@
     }
   }
 
+  var procSteps = ['Capturing moment', 'Enhancing colors', 'Adding frame', 'Almost ready'];
+
   function startProcessing() {
     if (procInterval) clearInterval(procInterval);
-
     injectPhotos();
 
-    var st = document.getElementById('status-text');
-    var dl = document.getElementById('dot-loader');
     var tf = document.getElementById('tpl-frame');
-    var cp = document.getElementById('circle-prog');
-    var icon = document.getElementById('proc-icon');
-    var pc = document.getElementById('prog-c');
-    var pn = document.getElementById('prog-num');
+    var st = document.getElementById('status-text');
+    var bar = document.getElementById('prog-bar');
+    var photo = document.getElementById('proc-photo');
+
+    var src = lastCaptured || (photos.length ? photos[photos.length - 1] : null);
+    if (src) photo.style.backgroundImage = 'url(' + src + ')';
 
     setTimeout(function() {
-      st.style.transition = 'opacity 0.5s';
-      st.style.opacity = '1';
-      dl.style.transition = 'opacity 0.4s 0.2s';
-      dl.style.opacity = '1';
-    }, 100);
-
-    setTimeout(function() {
-      tf.style.transition = 'all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      tf.style.transition = 'all 0.45s cubic-bezier(0.2, 1.4, 0.5, 1)';
       tf.style.opacity = '1';
       tf.style.transform = 'scale(1)';
-      cp.style.transition = 'opacity 0.4s';
-      cp.style.opacity = '1';
-    }, 400);
+    }, 40);
 
-    var p = 0;
+    setTimeout(function() {
+      st.style.opacity = '1';
+    }, 220);
+
+    var startTime = Date.now();
+    var duration = 3200;
+    var stepIdx = 0;
+
     procInterval = setInterval(function() {
-      p += 1;
-      if (p > 100) { clearInterval(procInterval); return; }
+      var elapsed = Date.now() - startTime;
+      var t = Math.min(elapsed / duration, 1);
+      var p = Math.round((1 - Math.pow(1 - t, 2.6)) * 100);
 
-      var offset = 150.8 - (150.8 * p / 100);
-      pc.style.strokeDashoffset = offset.toFixed(1);
-      pn.textContent = p + '%';
+      bar.style.width = p + '%';
 
-      if (p === 100) {
-        st.textContent = 'All done!';
-        dl.style.transition = 'opacity 0.3s';
-        dl.style.opacity = '0';
-        setTimeout(function() { goToDone(); }, 800);
+      var newStep = p < 28 ? 0 : p < 58 ? 1 : p < 88 ? 2 : 3;
+      if (newStep !== stepIdx) {
+        stepIdx = newStep;
+        st.style.opacity = '0';
+        setTimeout(function() {
+          st.textContent = procSteps[stepIdx];
+          st.style.opacity = '1';
+        }, 160);
       }
-    }, 55);
+
+      if (t >= 1) {
+        clearInterval(procInterval);
+        st.style.opacity = '0';
+        setTimeout(function() {
+          st.textContent = 'Done!';
+          st.style.opacity = '1';
+        }, 160);
+        setTimeout(goToDone, 500);
+      }
+    }, 40);
   }
 
   function goToDone() {
