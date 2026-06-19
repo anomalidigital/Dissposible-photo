@@ -1364,7 +1364,7 @@
   <div class="cam-anim" id="cam-anim">
     <div class="cam-iris" id="cam-iris"></div>
     <div class="cam-rig" id="cam-rig">
-      <img class="cam-rig-img" src="logo-lens.png" alt="">
+      <img class="cam-rig-img" src="logo-lens.webp" alt="" decoding="async">
       <div class="cam-lens" id="cam-lens"></div>
     </div>
   </div>
@@ -1382,9 +1382,18 @@
   var lastCaptured = null;
   var introTimer = null;
 
-  // Preload the result-screen hand image at startup so it is fetched + decoded
-  // long before the done screen, never popping in mid-animation.
-  (function() { var p = new Image(); p.src = 'hand.webp'; })();
+  // Preload + decode the heavy intro/result images at startup so they are fully
+  // ready before they are shown and never pop in mid-animation. (A small file
+  // can still hitch on first paint because decoding a big bitmap is the cost.)
+  (function() {
+    ['logo-lens.webp', 'hand.webp'].forEach(function(src) { var p = new Image(); p.src = src; });
+    window.addEventListener('load', function() {
+      var logo = document.querySelector('.cam-rig-img');
+      if (logo && logo.decode) logo.decode().catch(function() {});
+      var hand = document.getElementById('done-hand');
+      if (hand && hand.decode) hand.decode().catch(function() {});
+    });
+  })();
 
   function show(n) {
     currentState = n;
