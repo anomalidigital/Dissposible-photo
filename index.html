@@ -900,6 +900,19 @@
       pointer-events: none;
       filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.5));
     }
+    /* Red "closed lens" disc over the punched hole. It fades + shrinks to open
+       the aperture, revealing the dark iris (and then the zoom) behind it. */
+    .cam-lens {
+      position: absolute;
+      left: 50.14%;
+      top: 49.95%;
+      width: 16%;
+      height: 16%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: #e54c3d;
+      animation: lensOpen 2s ease forwards;
+    }
     @keyframes camIntro {
       /* fast drop straight to centre */
       0%   { transform: translate(-50%, -140%) rotate(-18deg) scale(0.4); opacity: 0.35; animation-timing-function: cubic-bezier(0.3, 0.85, 0.45, 1); }
@@ -908,18 +921,27 @@
       18%  { transform: translate(-50%, -50%) rotate(8deg) scale(0.6); opacity: 1; animation-timing-function: ease-in-out; }
       27%  { transform: translate(-50%, -50%) rotate(-4deg) scale(0.61); animation-timing-function: ease-in-out; }
       34%  { transform: translate(-50%, -50%) rotate(1.6deg) scale(0.615); animation-timing-function: ease-in-out; }
-      40%  { transform: translate(-50%, -50%) rotate(0deg) scale(0.62); opacity: 1; animation-timing-function: cubic-bezier(0.5, 0, 0.85, 0.6); }
+      /* hold settled while the red lens opens */
+      40%  { transform: translate(-50%, -50%) rotate(0deg) scale(0.62); opacity: 1; animation-timing-function: linear; }
+      54%  { transform: translate(-50%, -50%) rotate(0deg) scale(0.64); opacity: 1; animation-timing-function: cubic-bezier(0.5, 0, 0.85, 0.6); }
       /* dive in (enlarging) while dissolving — the sharp iris keeps zooming */
-      62%  { transform: translate(-50%, -50%) rotate(0deg) scale(2.4); opacity: 0; animation-timing-function: ease-out; }
-      100% { transform: translate(-50%, -50%) rotate(0deg) scale(4); opacity: 0; }
+      80%  { transform: translate(-50%, -50%) rotate(0deg) scale(3); opacity: 0; animation-timing-function: ease-out; }
+      100% { transform: translate(-50%, -50%) rotate(0deg) scale(5); opacity: 0; }
     }
     @keyframes irisOpen {
       /* invisible during the drop, then the dark fades in (hole still shut),
          then the circular hole keeps zooming bigger to reveal s1 — sharp at
          every size because width/height grow (no transform scaling) */
-      0%, 40%  { width: 0; height: 0; box-shadow: 0 0 0 2000px rgba(17, 17, 17, 0); animation-timing-function: ease-in; }
+      0%, 38%  { width: 0; height: 0; box-shadow: 0 0 0 2000px rgba(17, 17, 17, 0); animation-timing-function: ease-in; }
       50%      { width: 0; height: 0; box-shadow: 0 0 0 2000px rgba(17, 17, 17, 1); animation-timing-function: cubic-bezier(0.5, 0, 0.8, 1); }
       100%     { width: 2000px; height: 2000px; box-shadow: 0 0 0 2000px rgba(17, 17, 17, 1); }
+    }
+    @keyframes lensOpen {
+      /* the red centre stays closed through the drop, then fades + shrinks away
+         so the aperture "opens" into the dark hole behind it */
+      0%, 42%  { opacity: 1; transform: translate(-50%, -50%) scale(1); animation-timing-function: ease; }
+      56%      { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+      100%     { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
     }
   </style>
 </head>
@@ -1321,7 +1343,8 @@
   <div class="cam-anim" id="cam-anim">
     <div class="cam-iris" id="cam-iris"></div>
     <div class="cam-rig" id="cam-rig">
-      <img class="cam-rig-img" src="Lol logo recreated.png" alt="">
+      <img class="cam-rig-img" src="logo-lens.png" alt="">
+      <div class="cam-lens" id="cam-lens"></div>
     </div>
   </div>
 
@@ -1367,15 +1390,16 @@
     var anim = document.getElementById('cam-anim');
     var rig = document.getElementById('cam-rig');
     var iris = document.getElementById('cam-iris');
+    var lens = document.getElementById('cam-lens');
     if (introTimer) { clearTimeout(introTimer); introTimer = null; }
 
     anim.style.display = 'block';
     anim.style.opacity = '1';
     anim.style.transition = '';
     // restart the CSS animations from frame 0
-    [rig, iris].forEach(function(el) { el.style.animation = 'none'; });
+    [rig, iris, lens].forEach(function(el) { el.style.animation = 'none'; });
     void rig.offsetWidth;
-    [rig, iris].forEach(function(el) { el.style.animation = ''; });
+    [rig, iris, lens].forEach(function(el) { el.style.animation = ''; });
 
     // Mid-animation: the dark mask fully covers the screen and the iris hole is
     // still shut, so swap the page behind the overlay from the landing to the
