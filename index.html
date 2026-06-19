@@ -387,17 +387,21 @@
       opacity: 0;
       will-change: transform, opacity;
     }
-    /* hand grips the frame from below, thumb in front of the bottom edge */
+    /* hand grips the frame from below, thumb in front of the bottom edge; the
+       forearm fades out toward the bottom so it never looks chopped ("buntung")
+       and never collides with the buttons */
     .result-hand {
       position: absolute;
-      bottom: -52%;
+      bottom: -82%;
       left: 50%;
-      width: 82%;
+      width: 116%;
       transform: translateX(-50%);
-      z-index: 3;
+      z-index: 2;
       opacity: 0;
       pointer-events: none;
-      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+      filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.55));
+      -webkit-mask-image: linear-gradient(to bottom, #000 52%, rgba(0, 0, 0, 0) 86%);
+              mask-image: linear-gradient(to bottom, #000 52%, rgba(0, 0, 0, 0) 86%);
     }
     .result-brand {
       position: absolute;
@@ -1104,7 +1108,7 @@
       <p id="done-title" style="font-size:22px;font-weight:800;color:#fff;margin:0 0 4px;opacity:0">Photo Ready!</p>
       <p id="done-sub" style="font-size:14px;font-weight:600;color:#999;margin:0;opacity:0">Looking great, confirm to save</p>
     </div>
-    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 16px;overflow:hidden">
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 16px;overflow:visible;position:relative;z-index:1">
       <div class="result-stage" id="done-stage">
       <div class="result-frame" id="done-frame">
         <div class="result-brand">@LOLPHOTOBOOTH.CO</div>
@@ -1185,10 +1189,10 @@
           </svg>
         </div>
       </div>
-      <img class="result-hand" id="done-hand" src="hand.webp" alt="" decoding="async">
+      <img class="result-hand" id="done-hand" src="hand-frame.webp" alt="" decoding="async">
       </div>
     </div>
-    <div class="bottom-bar" style="display:flex;align-items:center;justify-content:space-between" id="done-btns">
+    <div class="bottom-bar" style="display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2" id="done-btns">
       <div class="btn-outline" style="opacity:0" onclick="retakeAll()">
         <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         Start Over
@@ -1386,7 +1390,7 @@
   // ready before they are shown and never pop in mid-animation. (A small file
   // can still hitch on first paint because decoding a big bitmap is the cost.)
   (function() {
-    ['logo-lens.webp', 'hand.webp'].forEach(function(src) { var p = new Image(); p.src = src; });
+    ['logo-lens.webp', 'hand-frame.webp'].forEach(function(src) { var p = new Image(); p.src = src; });
     window.addEventListener('load', function() {
       var logo = document.querySelector('.cam-rig-img');
       if (logo && logo.decode) logo.decode().catch(function() {});
@@ -1592,7 +1596,7 @@
 
   function resetDone() {
     var stage = document.getElementById('done-stage');
-    if (stage) { stage.style.transition = ''; stage.style.transform = 'scale(1.28)'; stage.style.opacity = '0'; }
+    if (stage) { stage.style.transition = ''; stage.style.transform = 'translateY(0%) scale(1.28)'; stage.style.opacity = '0'; }
     var hand = document.getElementById('done-hand');
     if (hand) { hand.style.transition = ''; hand.style.opacity = '0'; }
     document.getElementById('done-title').style.opacity = '0';
@@ -1704,10 +1708,10 @@
       hand.style.opacity = '1';
     }, 550);
 
-    // 3) frame + hand recede together ("mundur")
+    // 3) frame + hand recede AND rise together ("mundur" + naik ke atas)
     setTimeout(function() {
-      stage.style.transition = 'transform 0.7s cubic-bezier(0.25, 1, 0.5, 1)';
-      stage.style.transform = 'scale(0.9)';
+      stage.style.transition = 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
+      stage.style.transform = 'translateY(-9%) scale(0.88)';
     }, 1300);
 
     // 4) Photo Ready! title
