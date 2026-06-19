@@ -1185,7 +1185,7 @@
           </svg>
         </div>
       </div>
-      <img class="result-hand" id="done-hand" src="hand.png" alt="">
+      <img class="result-hand" id="done-hand" src="hand.webp" alt="" decoding="async">
       </div>
     </div>
     <div class="bottom-bar" style="display:flex;align-items:center;justify-content:space-between" id="done-btns">
@@ -1381,6 +1381,10 @@
   var totalPhotos = 2;
   var lastCaptured = null;
   var introTimer = null;
+
+  // Preload the result-screen hand image at startup so it is fetched + decoded
+  // long before the done screen, never popping in mid-animation.
+  (function() { var p = new Image(); p.src = 'hand.webp'; })();
 
   function show(n) {
     currentState = n;
@@ -1623,6 +1627,10 @@
     if (procInterval) clearInterval(procInterval);
 
     injectPhotos();
+
+    // decode the hand now (during the ~2.5s loader) so the done screen is instant
+    var handImg = document.getElementById('done-hand');
+    if (handImg && handImg.decode) handImg.decode().catch(function() {});
 
     var st = document.getElementById('status-text');
     var dl = document.getElementById('dot-loader');
