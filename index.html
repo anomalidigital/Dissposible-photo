@@ -371,27 +371,31 @@
     /* ---- Confirm: polaroid video preview ---- */
     .polaroid-stage {
       position: relative;
-      width: 92%;
+      width: 84%;
       max-width: 360px;
-      aspect-ratio: 2160 / 2696;
+      aspect-ratio: 1122 / 1402;
+      opacity: 0;
+      transform: translateY(8%) scale(0.92);
+      will-change: transform, opacity;
     }
-    .polaroid-stage video {
+    .polaroid-hand {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
-      object-fit: contain;
       display: block;
+      filter: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.5));
     }
-    /* the captured photo, placed exactly over the polaroid's centre box (coords
-       measured from the video's final frame) and revealed when the clip ends */
+    /* captured photo sits BEHIND the polaroid, showing through its transparent
+       centre box from the very start; the green-screened paper+hand has a fully
+       transparent background so it blends straight into the page */
     .polaroid-photo {
       position: absolute;
-      left: 31.53%;
-      top: 27.97%;
-      width: 36.3%;
-      height: 28.78%;
+      left: 36.72%;
+      top: 33.67%;
+      width: 26.02%;
+      height: 20.68%;
       background: #000 center / cover no-repeat;
-      opacity: 0;
-      will-change: opacity;
     }
 
     /* ---- Done state: ARTWORKS result template ---- */
@@ -875,8 +879,8 @@
     }
     .carousel::-webkit-scrollbar { display: none; }
     .car-card {
-      flex: 0 0 78%;
-      max-width: 260px;
+      flex: 0 0 90%;
+      max-width: 330px;
       scroll-snap-align: center;
       aspect-ratio: 2/3;
       border-radius: 12px;
@@ -1080,11 +1084,8 @@
     </div>
     <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px 12px 0">
       <div class="polaroid-stage" id="confirm-stage">
-        <video id="confirm-video" muted playsinline preload="auto">
-          <source src="foto_preview.webm" type="video/webm">
-          <source src="foto_preview.mp4" type="video/mp4">
-        </video>
         <div class="polaroid-photo" id="confirm-photo"></div>
+        <img class="polaroid-hand" src="polaroid-hand.webp" alt="" decoding="async">
       </div>
     </div>
     <div class="bottom-bar" id="confirm-btns" style="display:flex;align-items:center;justify-content:space-between">
@@ -1354,15 +1355,9 @@
     </div>
   </div>
 
-  <!-- STATE 7: Delivery — Design 4 (Carousel) -->
+  <!-- STATE 7: Delivery — Design 4 (Carousel) — FINAL download design -->
   <div class="state delivery-bg" id="s7">
-    <div class="delivery-top">
-      <div class="design-switcher">
-        <button onclick="prevDesign(4)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-        <span class="ds-label">Design 4 / 4</span>
-        <button onclick="nextDesign(4)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-      </div>
-    </div>
+    <div class="delivery-top" style="padding-top:max(20px,env(safe-area-inset-top))"></div>
     <div class="delivery-content">
       <p class="delivery-title">Pick a file</p>
       <p class="delivery-sub">Swipe · tap <svg style="width:12px;height:12px;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="#ed4836" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> to save</p>
@@ -1421,14 +1416,14 @@
   // ready before they are shown and never pop in mid-animation. (A small file
   // can still hitch on first paint because decoding a big bitmap is the cost.)
   (function() {
-    ['logo-lens.webp', 'hand-frame.webp'].forEach(function(src) { var p = new Image(); p.src = src; });
+    ['logo-lens.webp', 'hand-frame.webp', 'polaroid-hand.webp'].forEach(function(src) { var p = new Image(); p.src = src; });
     window.addEventListener('load', function() {
       var logo = document.querySelector('.cam-rig-img');
       if (logo && logo.decode) logo.decode().catch(function() {});
       var hand = document.getElementById('done-hand');
       if (hand && hand.decode) hand.decode().catch(function() {});
-      var cv = document.getElementById('confirm-video');
-      if (cv && cv.load) cv.load(); // start fetching the polaroid clip early
+      var ph = document.querySelector('.polaroid-hand');
+      if (ph && ph.decode) ph.decode().catch(function() {});
     });
   })();
 
@@ -1589,44 +1584,39 @@
   function goToConfirm() {
     document.getElementById('confirm-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
 
-    var video = document.getElementById('confirm-video');
+    var stage = document.getElementById('confirm-stage');
     var photo = document.getElementById('confirm-photo');
     var btns = document.getElementById('confirm-btns');
 
-    // put the captured photo into the polaroid's centre box (hidden until reveal)
+    // the captured photo is already in the box from the very start
     photo.style.backgroundImage = 'url(' + lastCaptured + ')';
-    photo.style.transition = ''; photo.style.opacity = '0';
+
+    stage.style.transition = '';
+    stage.style.opacity = '0';
+    stage.style.transform = 'translateY(8%) scale(0.92)';
     btns.querySelectorAll('button').forEach(function(b) { b.style.transition = ''; b.style.opacity = '0'; });
 
     show('1b');
 
-    var revealed = false;
-    function reveal() {
-      if (revealed) return; revealed = true;
-      photo.style.transition = 'opacity 0.5s ease';
-      photo.style.opacity = '1';
-      setTimeout(function() {
-        btns.querySelectorAll('button').forEach(function(b, i) {
-          b.style.transition = 'opacity 0.4s ease ' + (i * 0.12) + 's';
-          b.style.opacity = '1';
-        });
-      }, 350);
-    }
-    video.onended = reveal;
-    video.onerror = reveal;
-    try {
-      video.currentTime = 0;
-      var p = video.play();
-      if (p && p.catch) p.catch(reveal); // autoplay blocked -> reveal straight away
-    } catch (e) { reveal(); }
-    // safety: reveal even if 'ended' never fires
+    // polaroid (with the photo already inside) eases into view
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        stage.style.transition = 'opacity 0.45s ease, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
+        stage.style.opacity = '1';
+        stage.style.transform = 'translateY(0) scale(1)';
+      });
+    });
+
     if (confirmRevealTimer) clearTimeout(confirmRevealTimer);
-    confirmRevealTimer = setTimeout(reveal, 2700);
+    confirmRevealTimer = setTimeout(function() {
+      btns.querySelectorAll('button').forEach(function(b, i) {
+        b.style.transition = 'opacity 0.4s ease ' + (i * 0.12) + 's';
+        b.style.opacity = '1';
+      });
+    }, 600);
   }
 
   function retakePhoto() {
-    var v = document.getElementById('confirm-video');
-    if (v) { v.pause(); }
     if (confirmRevealTimer) { clearTimeout(confirmRevealTimer); confirmRevealTimer = null; }
     lastCaptured = null;
     document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
@@ -1635,8 +1625,6 @@
   }
 
   function confirmPhoto() {
-    var v = document.getElementById('confirm-video');
-    if (v) { v.pause(); }
     if (confirmRevealTimer) { clearTimeout(confirmRevealTimer); confirmRevealTimer = null; }
     photos.push(lastCaptured);
     photoCount++;
@@ -1866,7 +1854,7 @@
   /* ========== Delivery screens ========== */
   function goToDelivery() {
     setupDeliveryPreviews();
-    show(4);
+    show(7); // final download design = Design 4 (carousel)
   }
 
   function setupDeliveryPreviews() {
