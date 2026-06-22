@@ -395,38 +395,17 @@
 
     /* ---- Done state: ARTWORKS result template ---- */
     .result-frame {
-      width: 100%;
+      width: 66%;
+      max-width: 300px;
       aspect-ratio: 2 / 3;
       background: #1a1a1a;
-      border-radius: 10px;
+      border-radius: 12px;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
-    }
-    /* stage groups the frame + hand so they recede ("mundur") together */
-    .result-stage {
-      position: relative;
-      width: 62vw;
-      max-width: 250px;
-      transform: scale(1.28);
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.62);
       opacity: 0;
+      transform: scale(0.9);
       will-change: transform, opacity;
-    }
-    /* hand grips the frame from below, thumb in front of the bottom edge; the
-       forearm fades out toward the bottom so it never looks chopped ("buntung")
-       and never collides with the buttons */
-    .result-hand {
-      position: absolute;
-      bottom: -82%;
-      left: 50%;
-      width: 116%;
-      transform: translateX(-50%);
-      z-index: 2;
-      opacity: 0;
-      pointer-events: none;
-      filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.55));
-      -webkit-mask-image: linear-gradient(to bottom, #000 52%, rgba(0, 0, 0, 0) 86%);
-              mask-image: linear-gradient(to bottom, #000 52%, rgba(0, 0, 0, 0) 86%);
     }
     .result-brand {
       position: absolute;
@@ -1133,8 +1112,7 @@
       <p id="done-title" style="font-size:22px;font-weight:800;color:#fff;margin:0 0 4px;opacity:0">Photo Ready!</p>
       <p id="done-sub" style="font-size:14px;font-weight:600;color:#999;margin:0;opacity:0">Looking great, confirm to save</p>
     </div>
-    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 16px;overflow:visible;position:relative;z-index:1">
-      <div class="result-stage" id="done-stage">
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:0 24px">
       <div class="result-frame" id="done-frame">
         <div class="result-brand">@LOLPHOTOBOOTH.CO</div>
         <div class="result-photo r1" id="done-pf1"></div>
@@ -1214,10 +1192,8 @@
           </svg>
         </div>
       </div>
-      <img class="result-hand" id="done-hand" src="hand-frame.webp" alt="" decoding="async">
-      </div>
     </div>
-    <div class="bottom-bar" style="display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2" id="done-btns">
+    <div class="bottom-bar" style="display:flex;align-items:center;justify-content:space-between" id="done-btns">
       <div class="btn-outline" style="opacity:0" onclick="retakeAll()">
         <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         Start Over
@@ -1408,14 +1384,15 @@
 
   // Per-frame box rects for the polaroid clip (fractions of the frame W/H);
   // the captured photo is drawn into rects[k] each frame so it rides the moving box.
-  var POLAROID_RECTS = [[0.1903,0.1888,0.6074,0.4818],[0.1894,0.1888,0.6083,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1894,0.1888,0.6083,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1852,0.1888,0.6116,0.4818],[0.1833,0.1903,0.6074,0.4807],[0.1815,0.1888,0.6106,0.4818],[0.1889,0.181,0.6167,0.4896],[0.194,0.1858,0.6069,0.4833],[0.1917,0.1944,0.5954,0.4803],[0.1833,0.1977,0.5977,0.4811],[0.1833,0.2014,0.5931,0.4774],[0.1912,0.2059,0.581,0.4674],[0.2028,0.2085,0.5694,0.4577],[0.2204,0.214,0.5477,0.4403],[0.2287,0.2185,0.5347,0.4284],[0.2366,0.2218,0.525,0.4191],[0.2435,0.2248,0.5148,0.4095],[0.2505,0.2333,0.4954,0.3961],[0.2523,0.24,0.4847,0.3865],[0.2551,0.2448,0.4736,0.3783],[0.263,0.2463,0.4569,0.3705],[0.2671,0.2511,0.4468,0.3605],[0.2741,0.2604,0.4352,0.3446],[0.2819,0.2622,0.4241,0.3383],[0.287,0.2652,0.4153,0.3297],[0.2954,0.2678,0.4009,0.3197],[0.3009,0.2723,0.3907,0.309],[0.3065,0.2737,0.3819,0.303],[0.3111,0.2763,0.3708,0.2949],[0.3153,0.2797,0.363,0.2878]];
+  var POLAROID_RECTS = [[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1894,0.1888,0.6083,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1875,0.1888,0.6097,0.4818],[0.1852,0.1888,0.6106,0.4818],[0.1833,0.1903,0.6074,0.4807],[0.1815,0.1888,0.6106,0.4818],[0.1852,0.184,0.6134,0.4866],[0.1889,0.181,0.6167,0.4896],[0.1921,0.1806,0.6157,0.49],[0.194,0.1858,0.6069,0.4833],[0.1917,0.194,0.5963,0.48],[0.187,0.1958,0.5968,0.4811],[0.1833,0.1977,0.5977,0.4811],[0.1833,0.2014,0.5931,0.4774],[0.1889,0.2051,0.5838,0.4703],[0.1921,0.207,0.5801,0.4662],[0.2028,0.2085,0.5694,0.4577],[0.2148,0.2107,0.5556,0.4488],[0.2204,0.214,0.5477,0.4403],[0.2269,0.2177,0.5384,0.4318],[0.2296,0.2188,0.5338,0.428],[0.2366,0.2218,0.525,0.4191],[0.2426,0.224,0.5157,0.4102],[0.2468,0.2281,0.5065,0.4039],[0.2505,0.2333,0.4954,0.3961],[0.2523,0.24,0.4847,0.3865],[0.2551,0.2441,0.4769,0.3798],[0.2556,0.2455,0.4731,0.3776],[0.2611,0.2496,0.462,0.3694],[0.2634,0.2511,0.4546,0.3646],[0.2671,0.2511,0.4468,0.3605],[0.2722,0.2582,0.438,0.3494],[0.275,0.2608,0.4343,0.3442],[0.2819,0.2622,0.4241,0.3383],[0.2861,0.2645,0.4162,0.3305],[0.2907,0.2667,0.4093,0.3257],[0.2954,0.2678,0.4009,0.3197],[0.3005,0.2708,0.3921,0.3108],[0.3028,0.2734,0.3866,0.3053],[0.3065,0.2737,0.3819,0.303],[0.3097,0.2763,0.375,0.2964],[0.3111,0.2778,0.3699,0.2919],[0.3153,0.2797,0.363,0.2878]];
   var polaroidFrames = [];
   var polaroidRAF = null;
+  var confirmPhotoImg = null;
 
   // Preload + decode the heavy intro/result images at startup so they are fully
   // ready before they are shown and never pop in mid-animation.
   (function() {
-    ['logo-lens.webp', 'hand-frame.webp'].forEach(function(src) { var p = new Image(); p.src = src; });
+    var logoPre = new Image(); logoPre.src = 'logo-lens.webp';
     for (var k = 0; k < POLAROID_RECTS.length; k++) {
       var im = new Image();
       im.src = 'polaroid_seq/f' + (k < 10 ? '0' : '') + k + '.webp';
@@ -1424,8 +1401,6 @@
     window.addEventListener('load', function() {
       var logo = document.querySelector('.cam-rig-img');
       if (logo && logo.decode) logo.decode().catch(function() {});
-      var hand = document.getElementById('done-hand');
-      if (hand && hand.decode) hand.decode().catch(function() {});
     });
   })();
 
@@ -1583,61 +1558,61 @@
     if (v) v.srcObject = null;
   }
 
-  function goToConfirm() {
-    document.getElementById('confirm-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-
+  // Plays the polaroid frame sequence on the canvas (forward or reversed),
+  // drawing the captured photo into the moving box every frame.
+  function playPolaroidClip(reverse, dur, onDone) {
     var canvas = document.getElementById('confirm-canvas');
     var ctx = canvas.getContext('2d');
-    var btns = document.getElementById('confirm-btns');
-    var CW = canvas.width, CH = canvas.height, N = POLAROID_RECTS.length, DUR = 2000;
-
-    btns.querySelectorAll('button').forEach(function(b) { b.style.transition = ''; b.style.opacity = '0'; });
-    canvas.style.transition = ''; canvas.style.opacity = '0';
-    ctx.clearRect(0, 0, CW, CH);
-    show('1b');
-
-    // captured photo as an image, drawn into the moving box every frame
-    var photoImg = new Image();
-
+    var CW = canvas.width, CH = canvas.height, N = POLAROID_RECTS.length;
     function draw(k) {
       ctx.clearRect(0, 0, CW, CH);
       var r = POLAROID_RECTS[k];
-      if (photoImg.complete && photoImg.naturalWidth) {
-        ctx.drawImage(photoImg, r[0] * CW, r[1] * CH, r[2] * CW, r[3] * CH);
+      if (confirmPhotoImg && confirmPhotoImg.complete && confirmPhotoImg.naturalWidth) {
+        ctx.drawImage(confirmPhotoImg, r[0] * CW, r[1] * CH, r[2] * CW, r[3] * CH);
       }
       var f = polaroidFrames[k];
       if (f && f.complete && f.naturalWidth) ctx.drawImage(f, 0, 0, CW, CH);
     }
+    if (polaroidRAF) { cancelAnimationFrame(polaroidRAF); polaroidRAF = null; }
+    var startTs = null;
+    function loop(ts) {
+      if (startTs === null) startTs = ts;
+      var p = Math.min(1, (ts - startTs) / dur);
+      var k = reverse ? Math.round((N - 1) * (1 - p)) : Math.round((N - 1) * p);
+      draw(k);
+      if (p < 1) { polaroidRAF = requestAnimationFrame(loop); }
+      else { polaroidRAF = null; if (onDone) onDone(); }
+    }
+    polaroidRAF = requestAnimationFrame(loop);
+  }
+
+  function goToConfirm() {
+    document.getElementById('confirm-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
+    var canvas = document.getElementById('confirm-canvas');
+    var btns = document.getElementById('confirm-btns');
+
+    btns.querySelectorAll('button').forEach(function(b) { b.style.transition = ''; b.style.opacity = '0'; });
+    canvas.style.transition = ''; canvas.style.opacity = '0';
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    show('1b');
+
     function revealButtons() {
       btns.querySelectorAll('button').forEach(function(b, i) {
         b.style.transition = 'opacity 0.4s ease ' + (i * 0.12) + 's';
         b.style.opacity = '1';
       });
     }
-    var startTs = null;
-    function loop(ts) {
-      if (startTs === null) startTs = ts;
-      var k = Math.floor((ts - startTs) / DUR * N);
-      if (k >= N - 1) { draw(N - 1); polaroidRAF = null; revealButtons(); return; }
-      draw(k);
-      polaroidRAF = requestAnimationFrame(loop);
-    }
-    function startAnim() {
-      canvas.style.transition = 'opacity 0.2s ease'; canvas.style.opacity = '1';
-      if (polaroidRAF) cancelAnimationFrame(polaroidRAF);
-      startTs = null;
-      polaroidRAF = requestAnimationFrame(loop);
-    }
-    photoImg.onload = startAnim;
-    photoImg.onerror = startAnim;
-    photoImg.src = lastCaptured;
 
-    // safety: settle on the final frame + buttons even if rAF is throttled
-    if (confirmRevealTimer) clearTimeout(confirmRevealTimer);
-    confirmRevealTimer = setTimeout(function() {
-      if (polaroidRAF) { cancelAnimationFrame(polaroidRAF); polaroidRAF = null; }
-      draw(N - 1); revealButtons();
-    }, 2700);
+    confirmPhotoImg = new Image();
+    function start() {
+      canvas.style.transition = 'opacity 0.2s ease'; canvas.style.opacity = '1';
+      playPolaroidClip(false, 2000, revealButtons);
+      if (confirmRevealTimer) clearTimeout(confirmRevealTimer);
+      confirmRevealTimer = setTimeout(revealButtons, 2500); // safety
+    }
+    confirmPhotoImg.onload = start;
+    confirmPhotoImg.onerror = start;
+    confirmPhotoImg.src = lastCaptured;
   }
 
   function retakePhoto() {
@@ -1651,18 +1626,23 @@
 
   function confirmPhoto() {
     if (confirmRevealTimer) { clearTimeout(confirmRevealTimer); confirmRevealTimer = null; }
-    if (polaroidRAF) { cancelAnimationFrame(polaroidRAF); polaroidRAF = null; }
-    photos.push(lastCaptured);
-    photoCount++;
-    lastCaptured = null;
+    var btns = document.getElementById('confirm-btns');
+    btns.querySelectorAll('button').forEach(function(b) { b.style.transition = 'opacity 0.2s'; b.style.opacity = '0'; });
 
-    if (photoCount >= totalPhotos) {
-      goToProcessing();
-    } else {
-      document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-      show(1);
-      requestCamera();
+    function proceed() {
+      photos.push(lastCaptured);
+      photoCount++;
+      lastCaptured = null;
+      if (photoCount >= totalPhotos) {
+        goToProcessing();
+      } else {
+        document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
+        show(1);
+        requestCamera();
+      }
     }
+    // reverse the clip — the polaroid zooms back in / the hand comes closer — then continue
+    playPolaroidClip(true, 1100, proceed);
   }
 
   function resetProcessing() {
@@ -1680,10 +1660,8 @@
   }
 
   function resetDone() {
-    var stage = document.getElementById('done-stage');
-    if (stage) { stage.style.transition = ''; stage.style.transform = 'translateY(0%) scale(1.28)'; stage.style.opacity = '0'; }
-    var hand = document.getElementById('done-hand');
-    if (hand) { hand.style.transition = ''; hand.style.opacity = '0'; }
+    var frame = document.getElementById('done-frame');
+    if (frame) { frame.style.transition = ''; frame.style.transform = 'scale(0.9)'; frame.style.opacity = '0'; }
     document.getElementById('done-title').style.opacity = '0';
     document.getElementById('done-title').style.transition = '';
     document.getElementById('done-sub').style.opacity = '0';
@@ -1726,9 +1704,6 @@
 
     injectPhotos();
 
-    // decode the hand now (during the ~2.5s loader) so the done screen is instant
-    var handImg = document.getElementById('done-hand');
-    if (handImg && handImg.decode) handImg.decode().catch(function() {});
 
     var st = document.getElementById('status-text');
     var dl = document.getElementById('dot-loader');
@@ -1775,45 +1750,33 @@
     resetDone();
     show(3);
 
-    var stage = document.getElementById('done-stage');
-    var hand = document.getElementById('done-hand');
+    var frame = document.getElementById('done-frame');
     var dt = document.getElementById('done-title');
     var ds = document.getElementById('done-sub');
     var db = document.getElementById('done-btns');
 
-    // 1) frame appears large
+    // framed photo eases in
     setTimeout(function() {
-      stage.style.transition = 'opacity 0.5s ease';
-      stage.style.opacity = '1';
-    }, 100);
+      frame.style.transition = 'opacity 0.6s ease, transform 0.7s cubic-bezier(0.34, 1.4, 0.5, 1)';
+      frame.style.opacity = '1';
+      frame.style.transform = 'scale(1)';
+    }, 120);
 
-    // 2) the hand fades in, holding the frame from below
-    setTimeout(function() {
-      hand.style.transition = 'opacity 0.55s ease';
-      hand.style.opacity = '1';
-    }, 550);
-
-    // 3) frame + hand recede AND rise together ("mundur" + naik ke atas)
-    setTimeout(function() {
-      stage.style.transition = 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
-      stage.style.transform = 'translateY(-9%) scale(0.88)';
-    }, 1300);
-
-    // 4) Photo Ready! title
+    // title
     setTimeout(function() {
       dt.style.transition = 'opacity 0.4s';
       dt.style.opacity = '1';
       ds.style.transition = 'opacity 0.4s 0.1s';
       ds.style.opacity = '1';
-    }, 1550);
+    }, 650);
 
-    // 5) buttons
+    // buttons
     setTimeout(function() {
       db.querySelectorAll('.btn-outline,.btn-solid').forEach(function(b, i) {
-        b.style.transition = 'opacity 0.4s ease ' + (i * 0.15) + 's';
+        b.style.transition = 'opacity 0.4s ease ' + (i * 0.12) + 's';
         b.style.opacity = '1';
       });
-    }, 1850);
+    }, 950);
   }
 
   function retakeAll() {
