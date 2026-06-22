@@ -368,6 +368,32 @@
       line-height: 1.5;
     }
 
+    /* ---- Confirm: polaroid video preview ---- */
+    .polaroid-stage {
+      position: relative;
+      width: 92%;
+      max-width: 360px;
+      aspect-ratio: 2160 / 2696;
+    }
+    .polaroid-stage video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    /* the captured photo, placed exactly over the polaroid's centre box (coords
+       measured from the video's final frame) and revealed when the clip ends */
+    .polaroid-photo {
+      position: absolute;
+      left: 31.53%;
+      top: 27.97%;
+      width: 36.3%;
+      height: 28.78%;
+      background: #000 center / cover no-repeat;
+      opacity: 0;
+      will-change: opacity;
+    }
+
     /* ---- Done state: ARTWORKS result template ---- */
     .result-frame {
       width: 100%;
@@ -1052,12 +1078,16 @@
       </div>
       <div style="width:36px"></div>
     </div>
-    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px 16px 0">
-      <div style="width:88%;aspect-ratio:1/1;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08)">
-        <img id="confirm-img" src="" alt="Preview" style="width:100%;height:100%;object-fit:cover;display:block">
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px 12px 0">
+      <div class="polaroid-stage" id="confirm-stage">
+        <video id="confirm-video" muted playsinline preload="auto">
+          <source src="foto_preview.webm" type="video/webm">
+          <source src="foto_preview.mp4" type="video/mp4">
+        </video>
+        <div class="polaroid-photo" id="confirm-photo"></div>
       </div>
     </div>
-    <div class="bottom-bar" style="display:flex;align-items:center;justify-content:space-between">
+    <div class="bottom-bar" id="confirm-btns" style="display:flex;align-items:center;justify-content:space-between">
       <button class="btn-outline" onclick="retakePhoto()">
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         Retake
@@ -1385,6 +1415,7 @@
   var totalPhotos = 2;
   var lastCaptured = null;
   var introTimer = null;
+  var confirmRevealTimer = null;
 
   // Preload + decode the heavy intro/result images at startup so they are fully
   // ready before they are shown and never pop in mid-animation. (A small file
@@ -1396,6 +1427,8 @@
       if (logo && logo.decode) logo.decode().catch(function() {});
       var hand = document.getElementById('done-hand');
       if (hand && hand.decode) hand.decode().catch(function() {});
+      var cv = document.getElementById('confirm-video');
+      if (cv && cv.load) cv.load(); // start fetching the polaroid clip early
     });
   })();
 
@@ -1554,12 +1587,47 @@
   }
 
   function goToConfirm() {
-    document.getElementById('confirm-img').src = lastCaptured;
     document.getElementById('confirm-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
+
+    var video = document.getElementById('confirm-video');
+    var photo = document.getElementById('confirm-photo');
+    var btns = document.getElementById('confirm-btns');
+
+    // put the captured photo into the polaroid's centre box (hidden until reveal)
+    photo.style.backgroundImage = 'url(' + lastCaptured + ')';
+    photo.style.transition = ''; photo.style.opacity = '0';
+    btns.querySelectorAll('button').forEach(function(b) { b.style.transition = ''; b.style.opacity = '0'; });
+
     show('1b');
+
+    var revealed = false;
+    function reveal() {
+      if (revealed) return; revealed = true;
+      photo.style.transition = 'opacity 0.5s ease';
+      photo.style.opacity = '1';
+      setTimeout(function() {
+        btns.querySelectorAll('button').forEach(function(b, i) {
+          b.style.transition = 'opacity 0.4s ease ' + (i * 0.12) + 's';
+          b.style.opacity = '1';
+        });
+      }, 350);
+    }
+    video.onended = reveal;
+    video.onerror = reveal;
+    try {
+      video.currentTime = 0;
+      var p = video.play();
+      if (p && p.catch) p.catch(reveal); // autoplay blocked -> reveal straight away
+    } catch (e) { reveal(); }
+    // safety: reveal even if 'ended' never fires
+    if (confirmRevealTimer) clearTimeout(confirmRevealTimer);
+    confirmRevealTimer = setTimeout(reveal, 2700);
   }
 
   function retakePhoto() {
+    var v = document.getElementById('confirm-video');
+    if (v) { v.pause(); }
+    if (confirmRevealTimer) { clearTimeout(confirmRevealTimer); confirmRevealTimer = null; }
     lastCaptured = null;
     document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
     show(1);
@@ -1567,6 +1635,9 @@
   }
 
   function confirmPhoto() {
+    var v = document.getElementById('confirm-video');
+    if (v) { v.pause(); }
+    if (confirmRevealTimer) { clearTimeout(confirmRevealTimer); confirmRevealTimer = null; }
     photos.push(lastCaptured);
     photoCount++;
     lastCaptured = null;
