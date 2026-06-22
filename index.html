@@ -371,17 +371,21 @@
     /* ---- Confirm: polaroid video preview ---- */
     .polaroid-stage {
       position: relative;
-      width: 92%;
-      max-width: 380px;
+      width: 100%;
+      max-width: 440px;
       aspect-ratio: 2160 / 2696;
     }
     /* the photo-paper clip plays here: each frame is the paper+hand on a
        transparent background (black keyed out), and the captured photo is drawn
-       into the moving centre box per frame so it rides inside the polaroid */
+       into the moving centre box per frame so it rides inside the polaroid.
+       The bottom fades out so the forearm dissolves into the page instead of
+       being chopped off at the source frame's edge. */
     .polaroid-stage canvas {
       width: 100%;
       height: 100%;
       display: block;
+      -webkit-mask-image: linear-gradient(to bottom, #000 87%, rgba(0, 0, 0, 0) 100%);
+              mask-image: linear-gradient(to bottom, #000 87%, rgba(0, 0, 0, 0) 100%);
     }
 
     /* ---- Done state: ARTWORKS result template ---- */
