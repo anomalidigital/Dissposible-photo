@@ -374,16 +374,21 @@
       width: 100%;
       max-width: 440px;
       aspect-ratio: 2160 / 2696;
+      overflow: visible;
     }
     /* the photo-paper clip plays here: each frame is the paper+hand on a
        transparent background (black keyed out), and the captured photo is drawn
        into the moving centre box per frame so it rides inside the polaroid.
-       The bottom fades out so the forearm dissolves into the page instead of
-       being chopped off at the source frame's edge. */
+       Scaled up + nudged down so the photo box on the FIRST frame lands on the
+       live-view viewfinder (same size + place) — the polaroid then shrinks into
+       the hand from there, so the photo never jumps smaller at the hand-off.
+       The bottom fades so the forearm dissolves instead of being chopped off. */
     .polaroid-stage canvas {
       width: 100%;
       height: 100%;
       display: block;
+      transform: translateY(6.2%) scale(1.42);
+      transform-origin: 49.4% 43%;
       -webkit-mask-image: linear-gradient(to bottom, #000 87%, rgba(0, 0, 0, 0) 100%);
               mask-image: linear-gradient(to bottom, #000 87%, rgba(0, 0, 0, 0) 100%);
     }
