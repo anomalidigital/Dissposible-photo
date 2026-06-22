@@ -371,31 +371,17 @@
     /* ---- Confirm: polaroid video preview ---- */
     .polaroid-stage {
       position: relative;
-      width: 84%;
-      max-width: 360px;
-      aspect-ratio: 1122 / 1402;
-      opacity: 0;
-      transform: translateY(8%) scale(0.92);
-      will-change: transform, opacity;
+      width: 92%;
+      max-width: 380px;
+      aspect-ratio: 2160 / 2696;
     }
-    .polaroid-hand {
-      position: absolute;
-      inset: 0;
+    /* the photo-paper clip plays here: each frame is the paper+hand on a
+       transparent background (black keyed out), and the captured photo is drawn
+       into the moving centre box per frame so it rides inside the polaroid */
+    .polaroid-stage canvas {
       width: 100%;
       height: 100%;
       display: block;
-      filter: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.5));
-    }
-    /* captured photo sits BEHIND the polaroid, showing through its transparent
-       centre box from the very start; the green-screened paper+hand has a fully
-       transparent background so it blends straight into the page */
-    .polaroid-photo {
-      position: absolute;
-      left: 36.72%;
-      top: 33.67%;
-      width: 26.02%;
-      height: 20.68%;
-      background: #000 center / cover no-repeat;
     }
 
     /* ---- Done state: ARTWORKS result template ---- */
@@ -1084,8 +1070,7 @@
     </div>
     <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px 12px 0">
       <div class="polaroid-stage" id="confirm-stage">
-        <div class="polaroid-photo" id="confirm-photo"></div>
-        <img class="polaroid-hand" src="polaroid-hand.webp" alt="" decoding="async">
+        <canvas id="confirm-canvas" width="640" height="798"></canvas>
       </div>
     </div>
     <div class="bottom-bar" id="confirm-btns" style="display:flex;align-items:center;justify-content:space-between">
@@ -1412,18 +1397,26 @@
   var introTimer = null;
   var confirmRevealTimer = null;
 
+  // Per-frame box rects for the polaroid clip (fractions of the frame W/H);
+  // the captured photo is drawn into rects[k] each frame so it rides the moving box.
+  var POLAROID_RECTS = [[0.1903,0.1888,0.6074,0.4818],[0.1894,0.1888,0.6083,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1894,0.1888,0.6083,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1852,0.1888,0.6116,0.4818],[0.1833,0.1903,0.6074,0.4807],[0.1815,0.1888,0.6106,0.4818],[0.1889,0.181,0.6167,0.4896],[0.194,0.1858,0.6069,0.4833],[0.1917,0.1944,0.5954,0.4803],[0.1833,0.1977,0.5977,0.4811],[0.1833,0.2014,0.5931,0.4774],[0.1912,0.2059,0.581,0.4674],[0.2028,0.2085,0.5694,0.4577],[0.2204,0.214,0.5477,0.4403],[0.2287,0.2185,0.5347,0.4284],[0.2366,0.2218,0.525,0.4191],[0.2435,0.2248,0.5148,0.4095],[0.2505,0.2333,0.4954,0.3961],[0.2523,0.24,0.4847,0.3865],[0.2551,0.2448,0.4736,0.3783],[0.263,0.2463,0.4569,0.3705],[0.2671,0.2511,0.4468,0.3605],[0.2741,0.2604,0.4352,0.3446],[0.2819,0.2622,0.4241,0.3383],[0.287,0.2652,0.4153,0.3297],[0.2954,0.2678,0.4009,0.3197],[0.3009,0.2723,0.3907,0.309],[0.3065,0.2737,0.3819,0.303],[0.3111,0.2763,0.3708,0.2949],[0.3153,0.2797,0.363,0.2878]];
+  var polaroidFrames = [];
+  var polaroidRAF = null;
+
   // Preload + decode the heavy intro/result images at startup so they are fully
-  // ready before they are shown and never pop in mid-animation. (A small file
-  // can still hitch on first paint because decoding a big bitmap is the cost.)
+  // ready before they are shown and never pop in mid-animation.
   (function() {
-    ['logo-lens.webp', 'hand-frame.webp', 'polaroid-hand.webp'].forEach(function(src) { var p = new Image(); p.src = src; });
+    ['logo-lens.webp', 'hand-frame.webp'].forEach(function(src) { var p = new Image(); p.src = src; });
+    for (var k = 0; k < POLAROID_RECTS.length; k++) {
+      var im = new Image();
+      im.src = 'polaroid_seq/f' + (k < 10 ? '0' : '') + k + '.webp';
+      polaroidFrames.push(im);
+    }
     window.addEventListener('load', function() {
       var logo = document.querySelector('.cam-rig-img');
       if (logo && logo.decode) logo.decode().catch(function() {});
       var hand = document.getElementById('done-hand');
       if (hand && hand.decode) hand.decode().catch(function() {});
-      var ph = document.querySelector('.polaroid-hand');
-      if (ph && ph.decode) ph.decode().catch(function() {});
     });
   })();
 
@@ -1584,40 +1577,63 @@
   function goToConfirm() {
     document.getElementById('confirm-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
 
-    var stage = document.getElementById('confirm-stage');
-    var photo = document.getElementById('confirm-photo');
+    var canvas = document.getElementById('confirm-canvas');
+    var ctx = canvas.getContext('2d');
     var btns = document.getElementById('confirm-btns');
+    var CW = canvas.width, CH = canvas.height, N = POLAROID_RECTS.length, DUR = 2000;
 
-    // the captured photo is already in the box from the very start
-    photo.style.backgroundImage = 'url(' + lastCaptured + ')';
-
-    stage.style.transition = '';
-    stage.style.opacity = '0';
-    stage.style.transform = 'translateY(8%) scale(0.92)';
     btns.querySelectorAll('button').forEach(function(b) { b.style.transition = ''; b.style.opacity = '0'; });
-
+    canvas.style.transition = ''; canvas.style.opacity = '0';
+    ctx.clearRect(0, 0, CW, CH);
     show('1b');
 
-    // polaroid (with the photo already inside) eases into view
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        stage.style.transition = 'opacity 0.45s ease, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
-        stage.style.opacity = '1';
-        stage.style.transform = 'translateY(0) scale(1)';
-      });
-    });
+    // captured photo as an image, drawn into the moving box every frame
+    var photoImg = new Image();
 
-    if (confirmRevealTimer) clearTimeout(confirmRevealTimer);
-    confirmRevealTimer = setTimeout(function() {
+    function draw(k) {
+      ctx.clearRect(0, 0, CW, CH);
+      var r = POLAROID_RECTS[k];
+      if (photoImg.complete && photoImg.naturalWidth) {
+        ctx.drawImage(photoImg, r[0] * CW, r[1] * CH, r[2] * CW, r[3] * CH);
+      }
+      var f = polaroidFrames[k];
+      if (f && f.complete && f.naturalWidth) ctx.drawImage(f, 0, 0, CW, CH);
+    }
+    function revealButtons() {
       btns.querySelectorAll('button').forEach(function(b, i) {
         b.style.transition = 'opacity 0.4s ease ' + (i * 0.12) + 's';
         b.style.opacity = '1';
       });
-    }, 600);
+    }
+    var startTs = null;
+    function loop(ts) {
+      if (startTs === null) startTs = ts;
+      var k = Math.floor((ts - startTs) / DUR * N);
+      if (k >= N - 1) { draw(N - 1); polaroidRAF = null; revealButtons(); return; }
+      draw(k);
+      polaroidRAF = requestAnimationFrame(loop);
+    }
+    function startAnim() {
+      canvas.style.transition = 'opacity 0.2s ease'; canvas.style.opacity = '1';
+      if (polaroidRAF) cancelAnimationFrame(polaroidRAF);
+      startTs = null;
+      polaroidRAF = requestAnimationFrame(loop);
+    }
+    photoImg.onload = startAnim;
+    photoImg.onerror = startAnim;
+    photoImg.src = lastCaptured;
+
+    // safety: settle on the final frame + buttons even if rAF is throttled
+    if (confirmRevealTimer) clearTimeout(confirmRevealTimer);
+    confirmRevealTimer = setTimeout(function() {
+      if (polaroidRAF) { cancelAnimationFrame(polaroidRAF); polaroidRAF = null; }
+      draw(N - 1); revealButtons();
+    }, 2700);
   }
 
   function retakePhoto() {
     if (confirmRevealTimer) { clearTimeout(confirmRevealTimer); confirmRevealTimer = null; }
+    if (polaroidRAF) { cancelAnimationFrame(polaroidRAF); polaroidRAF = null; }
     lastCaptured = null;
     document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
     show(1);
@@ -1626,6 +1642,7 @@
 
   function confirmPhoto() {
     if (confirmRevealTimer) { clearTimeout(confirmRevealTimer); confirmRevealTimer = null; }
+    if (polaroidRAF) { cancelAnimationFrame(polaroidRAF); polaroidRAF = null; }
     photos.push(lastCaptured);
     photoCount++;
     lastCaptured = null;
