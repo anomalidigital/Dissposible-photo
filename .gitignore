@@ -1,0 +1,16 @@
+# This repo holds ONLY the app (HTML/CSS/JS) + the assets it actually uses.
+# Design sources, the logo archive, exports and OS junk stay local — not in the repo.
+
+# ignore everything in the project root by default...
+/*
+
+# ...then keep just the app and its asset folder
+!/.gitignore
+!/index.html
+!/styles.css
+!/app.js
+!/assets
+
+# OS / editor junk (also inside assets/)
+Thumbs.db
+.DS_Store
