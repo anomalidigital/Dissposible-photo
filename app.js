@@ -69,8 +69,8 @@
     iris.style.animation = '';
     overlay.classList.add('run');
 
-    // swap to the live camera while the dark covers everything
-    setTimeout(function() { if (currentState !== 1) show(1); }, 180);
+    // swap to the live camera while the light field fully covers the screen
+    setTimeout(function() { if (currentState !== 1) show(1); }, 245);
 
     var finished = false;
     function done(e) {
@@ -84,7 +84,7 @@
       if (currentState !== 1) show(1);
     }
     iris.addEventListener('animationend', done);
-    introTimer = setTimeout(done, 1500); // fallback if animationend never fires
+    introTimer = setTimeout(done, 2000); // fallback if animationend never fires
   }
 
   function hideIntroOverlay() {
@@ -190,16 +190,17 @@
   // held in a hand (3 layers). Frame N starts matched to where the live view
   // sat, then the whole card zooms out into the hand (GPU transform). ----
 
-  // Fill the template holes: frame `previewIdx` shows previewSrc; earlier frames
-  // show their confirmed photos; later (not-yet-shot) frames show a spinner.
-  function setHoles(previewIdx, previewSrc) {
+  // Paint the template holes around the current preview frame: already-confirmed
+  // frames show their photo; not-yet-shot frames show a spinner. `skipIdx` is the
+  // frame the caller fades in itself (pass -1 to paint every frame).
+  function paintHoles(skipIdx) {
     for (var i = 0; i < totalPhotos; i++) {
+      if (i === skipIdx) continue;
       var img = document.getElementById('hole-photo-' + (i + 1));
       var load = document.getElementById('hole-load-' + (i + 1));
       if (!img) continue;
-      var src = (i === previewIdx) ? previewSrc : (i < photoCount ? photos[i] : null);
-      if (src) {
-        img.src = src; img.classList.add('show');
+      if (i < photoCount) {
+        img.src = photos[i]; img.classList.add('show');
         if (load) load.classList.remove('show');
       } else {
         img.classList.remove('show'); img.removeAttribute('src');
@@ -208,35 +209,47 @@
     }
   }
 
-  // Transform that maps frame `idx` exactly onto the stored live-view rect.
-  function frameToViewTransform(idx) {
+  // Transform (origin 0 0) mapping element `el` onto a target screen rect,
+  // measured with the stage un-transformed. Uniform scale keeps the aspect.
+  function rectTransform(el, target) {
     var stage = document.getElementById('hand-stage');
-    var hole = document.querySelector('.frame-hole.hole-' + (idx + 1));
-    if (!stage || !hole || !lastViewRect) return 'none';
+    if (!stage || !el || !target) return { t: 'none', tx: 0, ty: 0, s: 1 };
     stage.style.transition = 'none';
     var keep = stage.style.transform;
     stage.style.transform = 'none';
     var sr = stage.getBoundingClientRect();
-    var hr = hole.getBoundingClientRect();
+    var er = el.getBoundingClientRect();
     stage.style.transform = keep;
-    var S = lastViewRect.width / hr.width;
-    var tx = lastViewRect.left - sr.left - S * (hr.left - sr.left);
-    var ty = lastViewRect.top - sr.top - S * (hr.top - sr.top);
-    return 'translate(' + tx + 'px,' + ty + 'px) scale(' + S + ')';
+    var s = target.width / er.width;
+    var tx = target.left - sr.left - s * (er.left - sr.left);
+    var ty = target.top - sr.top - s * (er.top - sr.top);
+    return { t: 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')', tx: tx, ty: ty, s: s };
   }
 
-  // toRest=true  -> start zoomed on frame idx, settle to the card-in-hand.
-  // toRest=false -> start at rest, zoom into frame idx.
-  function zoomFrame(idx, toRest, dur, onDone) {
+  // A frame matched to where the live view sat (the zoomed-in start of a preview).
+  function viewTransform(idx) {
+    if (!lastViewRect) return { t: 'none', tx: 0, ty: 0, s: 1 };
+    return rectTransform(document.querySelector('.frame-hole.hole-' + (idx + 1)), lastViewRect);
+  }
+
+  // The settled "card in hand" view: zoom in on the template so the photos read
+  // clearly and the hand isn't dominant (forearm runs off-screen, fingers stay).
+  function restTransform() {
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var cardW = Math.min(vw * 0.66, 320);
+    return rectTransform(document.querySelector('.tpl-slot'), { left: (vw - cardW) / 2, top: vh * 0.085, width: cardW });
+  }
+
+  // Animate the hand-stage from one transform string to another (GPU transform).
+  function animateStage(fromT, toT, dur, onDone) {
     var stage = document.getElementById('hand-stage');
-    var t = frameToViewTransform(idx);
     stage.style.transformOrigin = '0 0';
     stage.style.transition = 'none';
     stage.style.opacity = '1';
-    stage.style.transform = toRest ? t : 'none';
+    stage.style.transform = fromT;
     void stage.offsetWidth;
-    stage.style.transition = 'transform ' + dur + 's cubic-bezier(0.22, 1, 0.36, 1)';
-    stage.style.transform = toRest ? 'none' : t;
+    stage.style.transition = 'transform ' + dur + 's cubic-bezier(0.33, 1, 0.38, 1)';
+    stage.style.transform = toT;
     var done = false;
     function fin(e) {
       if (e && e.propertyName && e.propertyName !== 'transform') return;
@@ -245,7 +258,21 @@
       if (onDone) onDone();
     }
     stage.addEventListener('transitionend', fin);
-    setTimeout(fin, dur * 1000 + 280);
+    setTimeout(fin, dur * 1000 + 300);
+  }
+
+  // Slide the settled card off to the right (keeping its scale) + fade out.
+  function animateSlideOut(onDone) {
+    var stage = document.getElementById('hand-stage');
+    var r = restTransform();
+    stage.style.transformOrigin = '0 0';
+    stage.style.transition = 'none';
+    stage.style.transform = r.t;
+    void stage.offsetWidth;
+    stage.style.transition = 'transform 0.55s cubic-bezier(0.5, 0, 0.7, 0.2), opacity 0.55s ease';
+    stage.style.transform = 'translate(' + (r.tx + window.innerWidth * 1.15) + 'px,' + r.ty + 'px) scale(' + r.s + ')';
+    stage.style.opacity = '0';
+    setTimeout(onDone, 580);
   }
 
   function resetHandStage() {
@@ -270,29 +297,43 @@
     document.getElementById('confirm-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
     document.getElementById('confirm-next-label').textContent = isLast ? 'Confirm' : 'Continue';
 
-    setHoles(idx, lastCaptured);
+    paintHoles(idx);
     hideConfirmButtons();
     var stage = document.getElementById('hand-stage');
+    var img = document.getElementById('hole-photo-' + (idx + 1));
+    if (img) { img.classList.remove('show'); img.src = lastCaptured; } // rendered at opacity 0 -> fades in
+
     stage.style.transition = 'none'; stage.style.transform = 'none'; stage.style.opacity = '0';
     show('1b');
 
-    var img = document.getElementById('hole-photo-' + (idx + 1));
     var started = false;
     function start() {
       if (started) return; started = true;
       requestAnimationFrame(function() { requestAnimationFrame(function() {
-        zoomFrame(idx, true, 0.85, revealConfirmButtons);
+        // 1) place the frame exactly where the live view was, reveal the stage
+        var vt = viewTransform(idx).t;
+        stage.style.transformOrigin = '0 0';
+        stage.style.transition = 'none';
+        stage.style.transform = vt;
+        stage.style.opacity = '1';
+        void stage.offsetWidth;
+        // 2) fade the captured photo into the frame (no sudden pop)
+        if (img) img.classList.add('show');
+        // 3) then ease the whole card back to the settled "in hand" view
+        setTimeout(function() {
+          animateStage(vt, restTransform().t, 0.95, revealConfirmButtons);
+        }, 440);
       }); });
     }
     if (img && img.complete && img.naturalWidth) start();
-    else if (img) { img.onload = start; img.onerror = start; setTimeout(start, 450); }
+    else if (img) { img.onload = start; img.onerror = start; setTimeout(start, 500); }
     else start();
   }
 
   function retakePhoto() {
     hideConfirmButtons();
     var idx = photoCount; // redo the current frame
-    zoomFrame(idx, false, 0.7, function() {
+    animateStage(restTransform().t, viewTransform(idx).t, 0.8, function() {
       lastCaptured = null;
       document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
       show(1);
@@ -305,22 +346,17 @@
     hideConfirmButtons();
     var isLast = (photoCount + 1 >= totalPhotos);
     if (isLast) {
-      // last shot confirmed: slide the card out to the right, then process.
-      var stage = document.getElementById('hand-stage');
-      stage.style.transition = 'transform 0.5s cubic-bezier(0.5, 0, 0.7, 0.2), opacity 0.5s ease';
-      stage.style.transform = 'translateX(130%)';
-      stage.style.opacity = '0';
-      setTimeout(function() {
+      animateSlideOut(function() {
         photos.push(lastCaptured); photoCount++; lastCaptured = null;
         resetHandStage();
         goToProcessing();
-      }, 520);
+      });
     } else {
       // commit this shot, then zoom into the NEXT (empty) frame and reopen camera.
       photos.push(lastCaptured); photoCount++; lastCaptured = null;
-      setHoles(-1, null);
+      paintHoles(-1);
       document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-      zoomFrame(photoCount, false, 0.75, function() {
+      animateStage(restTransform().t, viewTransform(photoCount).t, 0.8, function() {
         show(1);
         requestCamera();
         resetHandStage();

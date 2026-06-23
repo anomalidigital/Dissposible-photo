@@ -373,12 +373,15 @@
     .hand-stage { position: relative; max-width: 100%; max-height: 100%; will-change: transform; }
     .hand-back { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; user-select: none; -webkit-user-drag: none; }
     .hand-front { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; user-select: none; -webkit-user-drag: none; }
-    .tpl-slot { position: absolute; left: 33.0%; top: 14.85%; width: 35.0%; height: 39.36%; z-index: 2; }
+    /* Template enlarged within the grip (anchored at the bottom-right corner the
+       fingers hold) so the photos+template read clearly and the hand is not
+       dominant. Right edge 68% / bottom 54.21% match the original grip point. */
+    .tpl-slot { position: absolute; left: 24.0%; top: 4.71%; width: 44.0%; height: 49.5%; z-index: 2; }
     .frame-hole { position: absolute; left: 6.92%; width: 87.92%; overflow: hidden; background: #0c0c0c; }
     .frame-hole.hole-1 { top: 6.72%; height: 38.89%; }
     .frame-hole.hole-2 { top: 48.11%; height: 38.94%; }
-    .hole-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
-    .hole-photo.show { display: block; }
+    .hole-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.45s ease; }
+    .hole-photo.show { opacity: 1; }
     .tpl-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; pointer-events: none; user-select: none; -webkit-user-drag: none; }
     .hole-load { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: #18181a; }
     .hole-load.show { display: flex; }
@@ -880,11 +883,13 @@
     .wipe-iris {
       position: absolute; left: 50%; top: 50%; width: 0; height: 0;
       transform: translate(-50%, -50%); border-radius: 50%; background: transparent;
-      box-shadow: 0 0 0 1700px rgba(17, 17, 17, 0); will-change: width, height;
+      box-shadow: 0 0 0 1300px rgba(232, 232, 232, 0); will-change: width, height;
     }
-    .wipe-overlay.run .wipe-iris { animation: irisWipe 1.15s linear forwards; }
+    /* The hole grows over a LIGHT field (not dark) so the dark camera circle is
+       clearly seen sweeping across the whole screen, not just the video box. */
+    .wipe-overlay.run .wipe-iris { animation: irisWipe 1.7s linear forwards; }
     @keyframes irisWipe {
-      0%   { width: 0; height: 0; box-shadow: 0 0 0 1700px rgba(17, 17, 17, 0); animation-timing-function: ease-in; }
-      15%  { width: 0; height: 0; box-shadow: 0 0 0 1700px rgba(17, 17, 17, 1); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
-      100% { width: 1500px; height: 1500px; box-shadow: 0 0 0 1700px rgba(17, 17, 17, 1); }
+      0%   { width: 0; height: 0; box-shadow: 0 0 0 1300px rgba(232, 232, 232, 0); animation-timing-function: ease-in; }
+      14%  { width: 0; height: 0; box-shadow: 0 0 0 1300px rgba(232, 232, 232, 1); animation-timing-function: cubic-bezier(0.45, 0.02, 0.35, 1); }
+      100% { width: 1100px; height: 1100px; box-shadow: 0 0 0 1300px rgba(232, 232, 232, 1); }
     }
