@@ -3,10 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-  <!-- always fetch the freshest HTML so phone browsers stop showing a stale cached build -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
   <title>Disposable Photo - LOL Photobooth</title>
   <link rel="icon" type="image/png" href="assets/logo-ico.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -883,22 +879,95 @@
       text-align: center;
     }
 
-    /* Camera intro = circle wipe. A dark overlay irises OPEN from the centre to
-       reveal the live camera (s1) behind it. The hole grows via width/height
-       (NOT transform / clip-path) so its edge stays razor-sharp at any size and
-       the motion is smooth on phones — the same proven mechanism as the old logo
-       intro. (Scaling a box-shadow blurs it; clip-path can judder.) */
-    .wipe-overlay { position: fixed; inset: 0; z-index: 9999; display: none; overflow: hidden; pointer-events: none; }
-    .wipe-iris {
-      position: absolute; left: 50%; top: 50%; width: 0; height: 0;
-      transform: translate(-50%, -50%); border-radius: 50%; background: transparent;
-      box-shadow: 0 0 0 1700px rgba(17, 17, 17, 0); will-change: width, height;
+    /* ==================== CAMERA INTRO ANIMATION ==================== */
+    .cam-anim {
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      overflow: hidden;
+      display: none;
+      background: transparent;
+      pointer-events: auto;
     }
-    .wipe-overlay.run .wipe-iris { animation: irisWipe 1.15s linear forwards; }
-    @keyframes irisWipe {
-      0%   { width: 0; height: 0; box-shadow: 0 0 0 1700px rgba(17, 17, 17, 0); animation-timing-function: ease-in; }
-      15%  { width: 0; height: 0; box-shadow: 0 0 0 1700px rgba(17, 17, 17, 1); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
-      100% { width: 1500px; height: 1500px; box-shadow: 0 0 0 1700px rgba(17, 17, 17, 1); }
+    .cam-rig {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 92%;
+      aspect-ratio: 1 / 1;
+      transform-origin: 50% 50%;
+      transform: translate(-50%, -140%) rotate(-18deg) scale(0.4);
+      animation: camIntro 2s linear forwards;
+      will-change: transform, opacity;
+    }
+    /* Dark mask with a circular hole that irises open to reveal the real photo
+       session (s1) behind the overlay. It is NOT transform-scaled — the circle
+       grows via width/height so the huge box-shadow is repainted each frame and
+       its edge stays razor sharp at any size (scaling a box-shadow blurs it). */
+    .cam-iris {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0;
+      height: 0;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: transparent;
+      box-shadow: 0 0 0 1600px rgba(17, 17, 17, 0);
+      animation: irisOpen 2s linear forwards;
+      will-change: width, height;
+    }
+    .cam-rig-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      pointer-events: none;
+      filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.5));
+    }
+    /* Red "closed lens" disc over the punched hole. It fades + shrinks to open
+       the aperture, revealing the dark iris (and then the zoom) behind it. */
+    .cam-lens {
+      position: absolute;
+      left: 50.14%;
+      top: 49.95%;
+      width: 16%;
+      height: 16%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: #e54c3d;
+      animation: lensOpen 2s ease forwards;
+    }
+    @keyframes camIntro {
+      /* fast drop straight to centre */
+      0%   { transform: translate(-50%, -140%) rotate(-18deg) scale(0.4); opacity: 0.35; animation-timing-function: cubic-bezier(0.3, 0.85, 0.45, 1); }
+      /* arrived, swung past — then a damped pendulum settle (ease-in-out = slow
+         at the extremes, like a real swing) */
+      18%  { transform: translate(-50%, -50%) rotate(8deg) scale(0.6); opacity: 1; animation-timing-function: ease-in-out; }
+      27%  { transform: translate(-50%, -50%) rotate(-4deg) scale(0.61); animation-timing-function: ease-in-out; }
+      34%  { transform: translate(-50%, -50%) rotate(1.6deg) scale(0.615); animation-timing-function: ease-in-out; }
+      /* hold settled while the red lens opens */
+      40%  { transform: translate(-50%, -50%) rotate(0deg) scale(0.62); opacity: 1; animation-timing-function: linear; }
+      52%  { transform: translate(-50%, -50%) rotate(0deg) scale(0.66); opacity: 1; animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+      /* keep ENLARGING right through the lens hole until the logo body has flown
+         off-screen (no early fade) — the centre hole grows to fill the screen */
+      100% { transform: translate(-50%, -50%) rotate(0deg) scale(18); opacity: 1; }
+    }
+    @keyframes irisOpen {
+      /* invisible during the drop, then the dark fades in (hole still shut),
+         then the circular hole keeps zooming bigger to reveal s1 — sharp at
+         every size because width/height grow (no transform scaling) */
+      0%, 38%  { width: 0; height: 0; box-shadow: 0 0 0 2000px rgba(17, 17, 17, 0); animation-timing-function: ease-in; }
+      50%      { width: 0; height: 0; box-shadow: 0 0 0 2000px rgba(17, 17, 17, 1); animation-timing-function: cubic-bezier(0.5, 0, 0.8, 1); }
+      100%     { width: 2000px; height: 2000px; box-shadow: 0 0 0 2000px rgba(17, 17, 17, 1); }
+    }
+    @keyframes lensOpen {
+      /* the red centre stays closed through the drop, then fades + shrinks away
+         so the aperture "opens" into the dark hole behind it */
+      0%, 42%  { opacity: 1; transform: translate(-50%, -50%) scale(1); animation-timing-function: ease; }
+      56%      { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+      100%     { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
     }
   </style>
 </head>
@@ -906,9 +975,6 @@
 
 <div class="app">
   <input type="file" id="gallery-input" accept="image/*" style="display:none" onchange="handleGalleryPick(event)">
-
-  <!-- Circle-wipe intro: a dark iris opens from the centre to reveal the live camera -->
-  <div class="wipe-overlay" id="wipe-overlay"><div class="wipe-iris" id="wipe-iris"></div></div>
 
   <!-- STATE 0: Landing Page -->
   <div class="state landing active" id="s0">
@@ -1293,6 +1359,14 @@
     </div>
   </div>
 
+  <!-- Camera intro animation overlay -->
+  <div class="cam-anim" id="cam-anim">
+    <div class="cam-iris" id="cam-iris"></div>
+    <div class="cam-rig" id="cam-rig">
+      <img class="cam-rig-img" src="logo-lens.webp" alt="" decoding="async">
+      <div class="cam-lens" id="cam-lens"></div>
+    </div>
+  </div>
 
 </div>
 
@@ -1318,11 +1392,16 @@
   // Preload + decode the heavy intro/result images at startup so they are fully
   // ready before they are shown and never pop in mid-animation.
   (function() {
+    var logoPre = new Image(); logoPre.src = 'logo-lens.webp';
     for (var k = 0; k < POLAROID_RECTS.length; k++) {
       var im = new Image();
       im.src = 'polaroid_seq/f' + (k < 10 ? '0' : '') + k + '.webp';
       polaroidFrames.push(im);
     }
+    window.addEventListener('load', function() {
+      var logo = document.querySelector('.cam-rig-img');
+      if (logo && logo.decode) logo.decode().catch(function() {});
+    });
   })();
 
   function show(n) {
@@ -1346,50 +1425,51 @@
     document.getElementById('cam-perm').classList.add('hidden');
     document.getElementById('cam-denied').classList.remove('show');
     document.getElementById('cam-ph').style.display = 'flex';
-    // Ask for the camera FIRST. The circle wipe only plays once the stream is
-    // live, so: a first-time permission prompt happens BEFORE the animation (not
-    // during it), the camera is already showing when the circle opens, and a
-    // returning (already-granted) user goes straight into the wipe.
-    startCamera(playCircleWipe);
+    playCameraIntro();
+    startCamera();
   }
 
-  // Circle wipe: a dark overlay irises OPEN from the centre to reveal the live
-  // camera (s1) behind it. The hole grows via width/height (sharp + smooth on
-  // phones). The landing -> camera page swap happens while the dark fully covers
-  // the screen (~180ms), so the switch is invisible.
-  function playCircleWipe() {
-    var overlay = document.getElementById('wipe-overlay');
-    var iris = document.getElementById('wipe-iris');
+  function playCameraIntro() {
+    var anim = document.getElementById('cam-anim');
+    var rig = document.getElementById('cam-rig');
+    var iris = document.getElementById('cam-iris');
+    var lens = document.getElementById('cam-lens');
     if (introTimer) { clearTimeout(introTimer); introTimer = null; }
-    overlay.style.display = 'block';
-    overlay.classList.remove('run');
-    iris.style.animation = 'none';
-    void iris.offsetWidth; // restart the keyframe animation if replayed
-    iris.style.animation = '';
-    overlay.classList.add('run');
 
-    // swap to the live camera while the dark covers everything
-    setTimeout(function() { if (currentState !== 1) show(1); }, 180);
+    anim.style.display = 'block';
+    anim.style.opacity = '1';
+    anim.style.transition = '';
+    // restart the CSS animations from frame 0
+    [rig, iris, lens].forEach(function(el) { el.style.animation = 'none'; });
+    void rig.offsetWidth;
+    [rig, iris, lens].forEach(function(el) { el.style.animation = ''; });
 
-    var finished = false;
-    function done(e) {
-      if (e && e.animationName !== 'irisWipe') return;
-      if (finished) return;
-      finished = true;
-      if (introTimer) { clearTimeout(introTimer); introTimer = null; }
-      iris.removeEventListener('animationend', done);
-      overlay.classList.remove('run');
-      overlay.style.display = 'none';
-      if (currentState !== 1) show(1);
-    }
-    iris.addEventListener('animationend', done);
-    introTimer = setTimeout(done, 1500); // fallback if animationend never fires
+    // Mid-animation: the dark mask fully covers the screen and the iris hole is
+    // still shut, so swap the page behind the overlay from the landing to the
+    // live photo session completely hidden — no visible flash.
+    introTimer = setTimeout(function() { show(1); }, 1000);
+
+    var done = function(e) {
+      if (e.animationName !== 'camIntro') return;
+      rig.removeEventListener('animationend', done);
+      anim.style.transition = 'opacity 0.25s ease';
+      anim.style.opacity = '0';
+      setTimeout(function() {
+        anim.style.display = 'none';
+        anim.style.transition = '';
+      }, 280);
+    };
+    rig.addEventListener('animationend', done);
   }
 
   function hideIntroOverlay() {
     if (introTimer) { clearTimeout(introTimer); introTimer = null; }
-    var overlay = document.getElementById('wipe-overlay');
-    if (overlay) { overlay.classList.remove('run'); overlay.style.display = 'none'; }
+    var anim = document.getElementById('cam-anim');
+    if (anim) {
+      anim.style.display = 'none';
+      anim.style.opacity = '1';
+      anim.style.transition = '';
+    }
   }
 
   function requestCamera() {
@@ -1407,13 +1487,13 @@
     v.classList.toggle('mirror', facingMode === 'user');
   }
 
-  function startCamera(onReady) {
+  function startCamera() {
     if (cameraStream) {
       cameraStream.getTracks().forEach(function(t) { t.stop(); });
       cameraStream = null;
     }
     navigator.mediaDevices.getUserMedia({
-      video: { facingMode: facingMode, width: { ideal: 1280 }, height: { ideal: 960 } },
+      video: { facingMode: facingMode, width: { ideal: 1080 }, height: { ideal: 1080 } },
       audio: false
     }).then(function(stream) {
       cameraStream = stream;
@@ -1421,10 +1501,7 @@
       document.getElementById('cam-ph').style.display = 'none';
       document.getElementById('cam-perm').classList.add('hidden');
       document.getElementById('cam-denied').classList.remove('show');
-      if (typeof onReady === 'function') onReady();
     }).catch(function(err) {
-      // make sure the camera screen is visible to show the message (we may still be on the landing)
-      if (currentState !== 1) show(1);
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         document.getElementById('cam-ph').style.display = 'none';
         document.getElementById('cam-perm').classList.add('hidden');
