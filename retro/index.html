@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Retro FX explorer — LOL Photobooth</title>
+<style>
+  :root{ --bg:#0e0e11; --panel:#17171d; --line:#2a2a32; --txt:#ededf0; --muted:#9696a0; --accent:#ed4836; }
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body{ background:var(--bg); color:var(--txt); font-family:'Nunito',system-ui,-apple-system,sans-serif; padding:16px 14px 70px; max-width:560px; margin:0 auto; }
+  h1{ font-size:20px; font-weight:800; letter-spacing:.2px; }
+  .sub{ color:var(--muted); font-size:12.5px; line-height:1.55; margin:4px 0 14px; }
+  .label{ font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin:18px 2px 8px; font-weight:700; }
+
+  /* ============ camera stage ============ */
+  .stage{ position:relative; width:100%; aspect-ratio:3/2; border-radius:14px; overflow:hidden; background:#000; box-shadow:0 12px 40px rgba(0,0,0,.55); }
+  .scene{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:filter .35s ease; }
+  .scene.warm{ filter:sepia(.46) saturate(1.35) contrast(1.06) brightness(1.03) hue-rotate(-8deg); }
+  .scene.bw{ filter:grayscale(1) contrast(1.18) brightness(1.03); }
+  .scene.faded{ filter:sepia(.28) saturate(.82) contrast(.9) brightness(1.1); }
+  .layer{ position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .35s ease; }
+  .stage.on-grain .grain, .stage.on-vig .vignette, .stage.on-leak .leak,
+  .stage.on-scan .scan, .stage.on-dust .dust, .stage.on-camui .cam-ui,
+  .stage.on-date .datestamp, .stage.on-cd .cd, .stage.on-flick .flickv{ opacity:1; }
+
+  /* film grain (animated noise) */
+  .grain{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-size:170px 170px; mix-blend-mode:overlay; }
+  .stage.on-grain .grain{ opacity:.6; animation:grain .55s steps(3) infinite; }
+  @keyframes grain{ 0%{background-position:0 0} 33%{background-position:-85px 50px} 66%{background-position:70px -60px} 100%{background-position:-40px 25px} }
+
+  /* vignette */
+  .vignette{ background:radial-gradient(ellipse 78% 75% at 50% 48%, transparent 52%, rgba(0,0,0,.78) 100%); }
+
+  /* warm light leak (drifts + flickers) */
+  .leak{ background:
+      radial-gradient(120% 90% at 92% 8%, rgba(255,120,40,.62), rgba(255,60,30,.22) 30%, transparent 52%),
+      radial-gradient(80% 70% at 4% 96%, rgba(255,180,70,.4), transparent 46%);
+      mix-blend-mode:screen; }
+  .stage.on-leak .leak{ animation:leak 5.5s ease-in-out infinite; }
+  @keyframes leak{ 0%,100%{opacity:.95; transform:translateX(0)} 40%{opacity:.6} 55%{opacity:1; transform:translateX(-3%)} 75%{opacity:.72} }
+
+  /* VHS scanlines + tracking band */
+  .scan{ background:repeating-linear-gradient(to bottom, rgba(0,0,0,.16) 0 1px, rgba(255,255,255,.015) 1px 2px, transparent 2px 4px); }
+  .scan::after{ content:""; position:absolute; left:0; right:0; height:14%; background:linear-gradient(to bottom, transparent, rgba(255,255,255,.06), transparent); animation:track 7s linear infinite; }
+  @keyframes track{ from{top:-15%} to{top:115%} }
+
+  /* dust & scratches */
+  .dust{ background-image:
+      linear-gradient(90deg, transparent 0 12%, rgba(255,255,255,.5) 12% 12.2%, transparent 12.4% 100%),
+      linear-gradient(90deg, transparent 0 63%, rgba(255,255,255,.32) 63% 63.15%, transparent 63.3% 100%),
+      radial-gradient(circle at 30% 72%, rgba(255,255,255,.5) 0 1px, transparent 2px),
+      radial-gradient(circle at 80% 22%, rgba(0,0,0,.4) 0 1px, transparent 2px),
+      radial-gradient(circle at 55% 50%, rgba(255,255,255,.4) 0 1px, transparent 2px); }
+  .stage.on-dust .dust{ animation:dust .4s steps(2) infinite; }
+  @keyframes dust{ 0%{transform:translateY(0)} 50%{transform:translateY(-2%) translateX(1%)} 100%{transform:translateY(1%)} }
+
+  /* flicker (whole image) */
+  .stage.on-flick .scene{ animation:flick .11s steps(2) infinite; }
+  @keyframes flick{ 0%{filter:brightness(1)} 50%{filter:brightness(1.05)} 100%{filter:brightness(.98)} }
+  .flickv{ background:#000; }
+  .stage.on-flick .flickv{ animation:flickv .12s steps(2) infinite; }
+  @keyframes flickv{ 0%,100%{opacity:.03} 50%{opacity:.08} }
+
+  /* orange camcorder date stamp */
+  .datestamp{ display:flex; align-items:flex-end; justify-content:flex-end; padding:14px 16px; }
+  .datestamp span{ font-family:'Courier New',monospace; font-weight:700; font-size:clamp(13px,3.6vw,18px); letter-spacing:1px; color:#ff8a1e; text-shadow:0 0 6px rgba(255,120,0,.85), 0 1px 1px rgba(0,0,0,.6); }
+
+  /* camcorder viewfinder UI */
+  .cam-ui{ font-family:'Courier New',monospace; font-weight:700; }
+  .cam-ui .rec{ position:absolute; top:12px; left:14px; display:flex; align-items:center; gap:7px; font-size:13px; letter-spacing:1px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.6); }
+  .cam-ui .rec b{ width:11px; height:11px; border-radius:50%; background:#ff3b30; box-shadow:0 0 8px #ff3b30; animation:blink 1s steps(1) infinite; }
+  @keyframes blink{ 50%{opacity:.15} }
+  .cam-ui .tc{ position:absolute; top:12px; right:14px; font-size:13px; letter-spacing:1px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.6); }
+  .cam-ui .batt{ position:absolute; bottom:12px; left:14px; font-size:12px; color:#fff; letter-spacing:1px; text-shadow:0 1px 2px rgba(0,0,0,.6); display:flex; align-items:center; gap:6px; }
+  .cam-ui .batt i{ display:inline-block; width:20px; height:11px; border:1.5px solid #fff; border-radius:2px; position:relative; }
+  .cam-ui .batt i::before{ content:""; position:absolute; left:2px; top:2px; bottom:2px; right:7px; background:#fff; }
+  .cam-ui .batt i::after{ content:""; position:absolute; right:-3px; top:3px; width:2px; height:5px; background:#fff; }
+  .br{ position:absolute; width:24px; height:24px; border:2px solid rgba(255,255,255,.85); }
+  .br.tl{ top:40px; left:14px; border-right:0; border-bottom:0; }
+  .br.tr{ top:40px; right:14px; border-left:0; border-bottom:0; }
+  .br.bl{ bottom:34px; left:14px; border-right:0; border-top:0; }
+  .br.b2{ bottom:34px; right:14px; border-left:0; border-top:0; }
+
+  /* countdown */
+  .cd{ display:flex; align-items:center; justify-content:center; }
+  .cd b{ font-family:'Courier New',monospace; font-weight:700; font-size:clamp(80px,30vw,150px); color:#fff; text-shadow:0 0 24px rgba(0,0,0,.55); }
+  .cd .ring{ position:absolute; width:38%; aspect-ratio:1; border-radius:50%; border:4px solid rgba(255,255,255,.7); }
+  .stage.on-cd .cd b{ animation:cdpop 1s ease-out infinite; }
+  @keyframes cdpop{ 0%{transform:scale(1.5);opacity:0} 18%{transform:scale(1);opacity:1} 80%{opacity:1} 100%{transform:scale(.9);opacity:0} }
+
+  /* ============ controls ============ */
+  .row{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{ border:1px solid var(--line); background:var(--panel); color:var(--txt); font:inherit; font-size:13px; font-weight:600; padding:9px 13px; border-radius:999px; cursor:pointer; transition:all .15s; }
+  .chip:active{ transform:scale(.96); }
+  .chip.on{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .preset{ border:1px solid var(--line); background:linear-gradient(180deg,#1d1d24,#15151b); color:var(--txt); font:inherit; font-size:13.5px; font-weight:700; padding:11px 14px; border-radius:12px; cursor:pointer; transition:all .15s; flex:1 1 30%; min-width:96px; text-align:left; }
+  .preset:active{ transform:scale(.97); }
+  .preset small{ display:block; color:var(--muted); font-weight:600; font-size:10.5px; letter-spacing:.3px; margin-top:3px; }
+  .reset{ flex:1 1 100%; background:none; border-color:var(--line); color:var(--muted); text-align:center; }
+  .note{ color:var(--muted); font-size:12px; line-height:1.6; margin-top:18px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:var(--panel); }
+  .note b{ color:var(--txt); }
+</style>
+</head>
+<body>
+  <h1>Retro FX explorer</h1>
+  <p class="sub">Coba-coba efek retro buat sesi foto. Pencet sebuah <b>preset</b> buat lihat satu "look" jadi, atau campur sendiri lewat <b>toggle</b> di bawah. Pilih yang kamu suka, nanti aku pasang ke app aslinya.</p>
+
+  <div class="stage" id="stage">
+    <img class="scene" id="scene" src="sample.jpg" alt="sample">
+    <div class="layer leak"></div>
+    <div class="layer scan"></div>
+    <div class="layer grain"></div>
+    <div class="layer dust"></div>
+    <div class="layer flickv"></div>
+    <div class="layer vignette"></div>
+    <div class="layer datestamp"><span id="dstamp">JUN 23 2026</span></div>
+    <div class="layer cam-ui">
+      <div class="rec"><b></b>REC</div>
+      <div class="tc" id="tc">0:00:14</div>
+      <div class="batt"><i></i>SP</div>
+      <div class="br tl"></div><div class="br tr"></div><div class="br bl"></div><div class="br b2"></div>
+    </div>
+    <div class="layer cd"><div class="ring"></div><b id="cdn">3</b></div>
+  </div>
+
+  <div class="label">Preset looks</div>
+  <div class="row">
+    <button class="preset" onclick="preset('super8')">Super 8<small>grain · warm · leak</small></button>
+    <button class="preset" onclick="preset('vhs')">VHS cam<small>scanline · REC UI</small></button>
+    <button class="preset" onclick="preset('polaroid')">Faded Polaroid<small>washed · vignette</small></button>
+    <button class="preset" onclick="preset('y2k')">Y2K digicam<small>date · grain · UI</small></button>
+    <button class="preset" onclick="preset('noir')">Film noir<small>B&amp;W · grain</small></button>
+    <button class="preset reset" onclick="preset('none')">Reset — tanpa efek</button>
+  </div>
+
+  <div class="label">Campur sendiri</div>
+  <div class="row" id="toggles">
+    <button class="chip" data-fx="grain">Film grain</button>
+    <button class="chip" data-fx="vig">Vignette</button>
+    <button class="chip" data-fx="leak">Light leak</button>
+    <button class="chip" data-fx="scan">Scanlines / VHS</button>
+    <button class="chip" data-grade="warm">Warm tone</button>
+    <button class="chip" data-grade="bw">Black &amp; white</button>
+    <button class="chip" data-grade="faded">Faded</button>
+    <button class="chip" data-fx="dust">Dust &amp; scratches</button>
+    <button class="chip" data-fx="flick">Flicker</button>
+    <button class="chip" data-fx="date">Date stamp</button>
+    <button class="chip" data-fx="camui">Camcorder UI</button>
+    <button class="chip" data-fx="cd">Countdown 3·2·1</button>
+  </div>
+
+  <div class="note"><b>Catatan:</b> efek dibuat ringan &amp; ditaruh di pinggir biar nggak ganggu komposisi foto. Grade warna (warm / B&amp;W / faded) bisa ikut ke hasil foto; overlay (grain, scanline, UI, date) cuma buat tampilan live view. Bilang aja look mana yang kamu mau — atau kombinasi sendiri.</div>
+
+<script>
+  var stage = document.getElementById('stage');
+  var scene = document.getElementById('scene');
+
+  function setGrade(g){ scene.classList.remove('warm','bw','faded'); if(g) scene.classList.add(g); syncChips(); }
+
+  document.querySelectorAll('#toggles .chip').forEach(function(c){
+    c.addEventListener('click', function(){
+      if(c.dataset.fx){ stage.classList.toggle('on-' + c.dataset.fx); syncChips(); }
+      else if(c.dataset.grade){ setGrade(scene.classList.contains(c.dataset.grade) ? '' : c.dataset.grade); }
+    });
+  });
+
+  function syncChips(){
+    document.querySelectorAll('#toggles .chip').forEach(function(c){
+      if(c.dataset.fx) c.classList.toggle('on', stage.classList.contains('on-' + c.dataset.fx));
+      else if(c.dataset.grade) c.classList.toggle('on', scene.classList.contains(c.dataset.grade));
+    });
+  }
+
+  var ALL = ['grain','vig','leak','scan','dust','flick','date','camui','cd'];
+  function clearAll(){ ALL.forEach(function(f){ stage.classList.remove('on-' + f); }); setGrade(''); }
+
+  function preset(name){
+    clearAll();
+    function on(f){ stage.classList.add('on-' + f); }
+    if(name==='super8'){ setGrade('warm'); ['grain','vig','leak','flick','date'].forEach(on); }
+    else if(name==='vhs'){ setGrade('faded'); ['scan','grain','camui','dust'].forEach(on); }
+    else if(name==='polaroid'){ setGrade('faded'); ['vig','grain','leak'].forEach(on); }
+    else if(name==='y2k'){ ['grain','date','camui'].forEach(on); }
+    else if(name==='noir'){ setGrade('bw'); ['grain','vig','flick'].forEach(on); }
+    syncChips();
+  }
+
+  // running timecode + looping countdown number
+  var t = 14;
+  setInterval(function(){ t++; var m=Math.floor(t/60), s=t%60; document.getElementById('tc').textContent='0:'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s; }, 1000);
+  var n = 3;
+  setInterval(function(){ document.getElementById('cdn').textContent = n; n = n>1 ? n-1 : 3; }, 1000);
+
+  preset('super8'); // start with a look applied
+</script>
+</body>
+</html>
