@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <!-- always fetch the freshest HTML so phone browsers stop showing a stale cached build -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Disposable Photo - LOL Photobooth</title>
   <link rel="icon" type="image/png" href="assets/logo-ico.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -887,7 +891,7 @@
       from { -webkit-clip-path: circle(0px at 50% 50%); clip-path: circle(0px at 50% 50%); }
       to   { -webkit-clip-path: circle(1500px at 50% 50%); clip-path: circle(1500px at 50% 50%); }
     }
-    #s1.cam-wipe { animation: circleWipe 0.85s cubic-bezier(0.45, 0, 0.2, 1) forwards; }
+    #s1.cam-wipe { animation: circleWipe 1.3s cubic-bezier(0.22, 1, 0.36, 1) forwards; will-change: clip-path; }
   </style>
 </head>
 <body>
@@ -1331,8 +1335,11 @@
     document.getElementById('cam-perm').classList.add('hidden');
     document.getElementById('cam-denied').classList.remove('show');
     document.getElementById('cam-ph').style.display = 'flex';
-    playCircleWipe();
-    startCamera();
+    // Ask for the camera FIRST. The circle wipe only plays once the stream is
+    // live, so: a first-time permission prompt happens BEFORE the animation (not
+    // during it), the camera is already showing when the circle opens, and a
+    // returning (already-granted) user goes straight into the wipe.
+    startCamera(playCircleWipe);
   }
 
   // Circle wipe: the camera screen (s1) is revealed through a circle that grows
@@ -1358,7 +1365,7 @@
     void s1.offsetWidth; // restart the keyframe animation if replayed
     s1.addEventListener('animationend', done);
     s1.classList.add('cam-wipe');
-    introTimer = setTimeout(done, 1500); // fallback if animationend never fires
+    introTimer = setTimeout(done, 1700); // fallback if animationend never fires
   }
 
   function hideIntroOverlay() {
@@ -1382,13 +1389,13 @@
     v.classList.toggle('mirror', facingMode === 'user');
   }
 
-  function startCamera() {
+  function startCamera(onReady) {
     if (cameraStream) {
       cameraStream.getTracks().forEach(function(t) { t.stop(); });
       cameraStream = null;
     }
     navigator.mediaDevices.getUserMedia({
-      video: { facingMode: facingMode, width: { ideal: 1080 }, height: { ideal: 1080 } },
+      video: { facingMode: facingMode, width: { ideal: 1280 }, height: { ideal: 960 } },
       audio: false
     }).then(function(stream) {
       cameraStream = stream;
@@ -1396,7 +1403,10 @@
       document.getElementById('cam-ph').style.display = 'none';
       document.getElementById('cam-perm').classList.add('hidden');
       document.getElementById('cam-denied').classList.remove('show');
+      if (typeof onReady === 'function') onReady();
     }).catch(function(err) {
+      // make sure the camera screen is visible to show the message (we may still be on the landing)
+      if (currentState !== 1) show(1);
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         document.getElementById('cam-ph').style.display = 'none';
         document.getElementById('cam-perm').classList.add('hidden');
