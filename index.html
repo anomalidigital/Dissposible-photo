@@ -240,9 +240,9 @@
 
     /* Camera viewfinder */
     .viewfinder-wrap {
-      width: 88%;
-      aspect-ratio: 1 / 1;
-      background: #222;
+      width: 94%;
+      aspect-ratio: 1055 / 700; /* landscape 3:2 — curtains make the visible centre read 1:1 */
+      background: #000;
       border-radius: 12px;
       overflow: hidden;
       position: relative;
@@ -259,6 +259,11 @@
     .viewfinder-wrap canvas {
       display: none;
     }
+    /* black "curtains": the captured photo is the full 3:2 landscape, but the
+       live view hides the left & right ~16.67% so it reads as a 1:1 square. */
+    .vf-curtain { position: absolute; top: 0; bottom: 0; width: 16.67%; background: #000; z-index: 2; pointer-events: none; }
+    .vf-curtain.left { left: 0; }
+    .vf-curtain.right { right: 0; }
     .flash-overlay {
       position: absolute;
       inset: 0;
@@ -372,30 +377,28 @@
       line-height: 1.5;
     }
 
-    /* ---- Confirm: polaroid video preview ---- */
-    .polaroid-stage {
-      position: relative;
-      width: 100%;
-      max-width: 440px;
-      aspect-ratio: 2160 / 2696;
-      overflow: visible;
-    }
-    /* the photo-paper clip plays here: each frame is the paper+hand on a
-       transparent background (black keyed out), and the captured photo is drawn
-       into the moving centre box per frame so it rides inside the polaroid.
-       Scaled up + nudged down so the photo box on the FIRST frame lands on the
-       live-view viewfinder (same size + place) — the polaroid then shrinks into
-       the hand from there, so the photo never jumps smaller at the hand-off.
-       The bottom fades so the forearm dissolves instead of being chopped off. */
-    .polaroid-stage canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-      transform: translateY(6.2%) scale(1.42);
-      transform-origin: 49.4% 43%;
-      -webkit-mask-image: linear-gradient(to bottom, #000 87%, rgba(0, 0, 0, 0) 100%);
-              mask-image: linear-gradient(to bottom, #000 87%, rgba(0, 0, 0, 0) 100%);
-    }
+    /* ---- Confirm: the captured photo(s) sit inside the real PNG template,
+       held in a real hand. Three layers: hand-back, template+photos, hand-front.
+       The template's position on the hand comes from the source PSD's frame slot
+       (L33% T14.85% W35% H39.36% of the 1086x1448 hand canvas). ---- */
+    .hand-area { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4px 10px 0; min-height: 0; }
+    /* hand-back is the in-flow sizer: it scales to "contain" within the area
+       (by width OR height, whichever is smaller) and the stage takes its size;
+       the other two layers are absolutely overlaid on top. */
+    .hand-stage { position: relative; max-width: 100%; max-height: 100%; will-change: transform; }
+    .hand-back { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; user-select: none; -webkit-user-drag: none; }
+    .hand-front { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+    .tpl-slot { position: absolute; left: 33.0%; top: 14.85%; width: 35.0%; height: 39.36%; z-index: 2; }
+    .frame-hole { position: absolute; left: 6.92%; width: 87.92%; overflow: hidden; background: #0c0c0c; }
+    .frame-hole.hole-1 { top: 6.72%; height: 38.89%; }
+    .frame-hole.hole-2 { top: 48.11%; height: 38.94%; }
+    .hole-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+    .hole-photo.show { display: block; }
+    .tpl-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+    .hole-load { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: #18181a; }
+    .hole-load.show { display: flex; }
+    .hole-load span { width: 30px; height: 30px; border: 3px solid rgba(255,255,255,0.16); border-top-color: rgba(255,255,255,0.7); border-radius: 50%; animation: holeSpin 0.85s linear infinite; }
+    @keyframes holeSpin { to { transform: rotate(360deg); } }
 
     /* ---- Done state: ARTWORKS result template ---- */
     .result-frame {
@@ -940,6 +943,8 @@
       <div class="viewfinder-wrap" id="viewfinder">
         <video id="cam-video" autoplay playsinline muted></video>
         <canvas id="cam-canvas"></canvas>
+        <div class="vf-curtain left"></div>
+        <div class="vf-curtain right"></div>
         <div class="flash-overlay" id="flash"></div>
         <div class="cam-permission" id="cam-perm">
           <svg viewBox="0 0 24 24">
@@ -990,9 +995,21 @@
       </div>
       <div style="width:36px"></div>
     </div>
-    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px 12px 0">
-      <div class="polaroid-stage" id="confirm-stage">
-        <canvas id="confirm-canvas" width="1000" height="1248"></canvas>
+    <div class="hand-area" id="hand-area">
+      <div class="hand-stage" id="hand-stage">
+        <img class="hand-layer hand-back" src="assets/hand-back.webp" alt="" draggable="false">
+        <div class="tpl-slot">
+          <div class="frame-hole hole-1">
+            <img class="hole-photo" id="hole-photo-1" alt="">
+            <div class="hole-load show" id="hole-load-1"><span></span></div>
+          </div>
+          <div class="frame-hole hole-2">
+            <img class="hole-photo" id="hole-photo-2" alt="">
+            <div class="hole-load show" id="hole-load-2"><span></span></div>
+          </div>
+          <img class="tpl-img" src="assets/template-artworks.webp" alt="" draggable="false">
+        </div>
+        <img class="hand-layer hand-front" src="assets/hand-front.webp" alt="" draggable="false">
       </div>
     </div>
     <div class="bottom-bar" id="confirm-btns" style="display:flex;align-items:center;justify-content:space-between">
@@ -1000,8 +1017,8 @@
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         Retake
       </button>
-      <button class="btn-solid" onclick="confirmPhoto()">
-        Continue
+      <button class="btn-solid" id="confirm-next-btn" onclick="confirmPhoto()">
+        <span id="confirm-next-label">Continue</span>
         <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
     </div>
@@ -1263,8 +1280,8 @@
   <div class="state delivery-bg" id="s7">
     <div class="delivery-top" style="padding-top:max(20px,env(safe-area-inset-top))"></div>
     <div class="delivery-content">
-      <p class="delivery-title">Pick a file</p>
-      <p class="delivery-sub">Swipe · tap <svg style="width:12px;height:12px;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="#ed4836" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> to save</p>
+      <p class="delivery-title">Thank you!</p>
+      <p class="delivery-sub">Your photos are ready · tap <svg style="width:12px;height:12px;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="#ed4836" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> to save</p>
       <div class="carousel-wrap">
         <div class="carousel">
           <div class="car-card">
@@ -1288,8 +1305,15 @@
         </div>
       </div>
     </div>
-    <div class="bottom-bar" style="display:flex;justify-content:center">
-      <div class="btn-outline" onclick="restart()">Done</div>
+    <div class="bottom-bar" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <button class="btn-outline" onclick="startOver()">
+        <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        Start Over
+      </button>
+      <button class="btn-solid" onclick="restart()">
+        Done
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </button>
     </div>
   </div>
 
@@ -1307,6 +1331,7 @@
   var lastCaptured = null;
   var introTimer = null;
   var confirmRevealTimer = null;
+  var lastViewRect = null; // where the live view sat on screen, so a frame can start matched to it
 
   // Per-frame box rects for the polaroid clip (fractions of the frame W/H);
   // the captured photo is drawn into rects[k] each frame so it rides the moving box.
@@ -1315,14 +1340,13 @@
   var polaroidRAF = null;
   var confirmPhotoImg = null;
 
-  // Preload + decode the heavy intro/result images at startup so they are fully
-  // ready before they are shown and never pop in mid-animation.
+  // Preload + decode the hand + template art so the confirm preview never pops in.
   (function() {
-    for (var k = 0; k < POLAROID_RECTS.length; k++) {
+    ['assets/hand-back.webp', 'assets/hand-front.webp', 'assets/template-artworks.webp'].forEach(function(src) {
       var im = new Image();
-      im.src = 'polaroid_seq/f' + (k < 10 ? '0' : '') + k + '.webp';
-      polaroidFrames.push(im);
-    }
+      im.src = src;
+      if (im.decode) im.decode().catch(function() {});
+    });
   })();
 
   function show(n) {
@@ -1444,22 +1468,26 @@
     var video = document.getElementById('cam-video');
     if (!video.srcObject) return;
 
+    // capture a centred 3:2 landscape crop (wider than the visible 1:1 — the
+    // curtains hid the sides). The template holes are 3:2.
+    var ASPECT = 1055 / 700;
+    var vw = video.videoWidth, vh = video.videoHeight;
+    var cw = vw, ch = vw / ASPECT;
+    if (ch > vh) { ch = vh; cw = vh * ASPECT; }
+    var sx = (vw - cw) / 2, sy = (vh - ch) / 2;
+
     var canvas = document.getElementById('cam-canvas');
-    var size = Math.min(video.videoWidth, video.videoHeight);
-    canvas.width = size;
-    canvas.height = size;
+    canvas.width = Math.round(cw);
+    canvas.height = Math.round(ch);
     var ctx = canvas.getContext('2d');
-    var sx = (video.videoWidth - size) / 2;
-    var sy = (video.videoHeight - size) / 2;
-
-    if (facingMode === 'user') {
-      ctx.translate(size, 0);
-      ctx.scale(-1, 1);
-    }
-    ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
+    if (facingMode === 'user') { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
+    ctx.drawImage(video, sx, sy, cw, ch, 0, 0, canvas.width, canvas.height);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-
     lastCaptured = canvas.toDataURL('image/jpeg', 0.9);
+
+    // remember the live-view rectangle so the frame can start matched to it
+    var vf = document.getElementById('viewfinder');
+    if (vf) { var r = vf.getBoundingClientRect(); lastViewRect = { left: r.left, top: r.top, width: r.width, height: r.height }; }
 
     var flash = document.getElementById('flash');
     flash.classList.remove('flash');
@@ -1481,100 +1509,144 @@
     if (v) v.srcObject = null;
   }
 
-  // Plays the polaroid frame sequence on the canvas (forward or reversed),
-  // drawing the captured photo into the moving box every frame.
-  function playPolaroidClip(reverse, dur, onDone) {
-    var canvas = document.getElementById('confirm-canvas');
-    var ctx = canvas.getContext('2d');
-    var CW = canvas.width, CH = canvas.height, N = POLAROID_RECTS.length;
-    function draw(k) {
-      ctx.clearRect(0, 0, CW, CH);
-      var r = POLAROID_RECTS[k];
-      if (confirmPhotoImg && confirmPhotoImg.complete && confirmPhotoImg.naturalWidth) {
-        ctx.drawImage(confirmPhotoImg, r[0] * CW, r[1] * CH, r[2] * CW, r[3] * CH);
+  // ---- Confirm preview: the captured photo lands inside the real template,
+  // held in a hand (3 layers). Frame N starts matched to where the live view
+  // sat, then the whole card zooms out into the hand (GPU transform). ----
+
+  // Fill the template holes: frame `previewIdx` shows previewSrc; earlier frames
+  // show their confirmed photos; later (not-yet-shot) frames show a spinner.
+  function setHoles(previewIdx, previewSrc) {
+    for (var i = 0; i < totalPhotos; i++) {
+      var img = document.getElementById('hole-photo-' + (i + 1));
+      var load = document.getElementById('hole-load-' + (i + 1));
+      if (!img) continue;
+      var src = (i === previewIdx) ? previewSrc : (i < photoCount ? photos[i] : null);
+      if (src) {
+        img.src = src; img.classList.add('show');
+        if (load) load.classList.remove('show');
+      } else {
+        img.classList.remove('show'); img.removeAttribute('src');
+        if (load) load.classList.add('show');
       }
-      var f = polaroidFrames[k];
-      if (f && f.complete && f.naturalWidth) ctx.drawImage(f, 0, 0, CW, CH);
     }
-    if (polaroidRAF) { cancelAnimationFrame(polaroidRAF); polaroidRAF = null; }
-    var startTs = null;
-    function loop(ts) {
-      if (startTs === null) startTs = ts;
-      var p = Math.min(1, (ts - startTs) / dur);
-      var k = reverse ? Math.round((N - 1) * (1 - p)) : Math.round((N - 1) * p);
-      draw(k);
-      if (p < 1) { polaroidRAF = requestAnimationFrame(loop); }
-      else { polaroidRAF = null; if (onDone) onDone(); }
+  }
+
+  // Transform that maps frame `idx` exactly onto the stored live-view rect.
+  function frameToViewTransform(idx) {
+    var stage = document.getElementById('hand-stage');
+    var hole = document.querySelector('.frame-hole.hole-' + (idx + 1));
+    if (!stage || !hole || !lastViewRect) return 'none';
+    stage.style.transition = 'none';
+    var keep = stage.style.transform;
+    stage.style.transform = 'none';
+    var sr = stage.getBoundingClientRect();
+    var hr = hole.getBoundingClientRect();
+    stage.style.transform = keep;
+    var S = lastViewRect.width / hr.width;
+    var tx = lastViewRect.left - sr.left - S * (hr.left - sr.left);
+    var ty = lastViewRect.top - sr.top - S * (hr.top - sr.top);
+    return 'translate(' + tx + 'px,' + ty + 'px) scale(' + S + ')';
+  }
+
+  // toRest=true  -> start zoomed on frame idx, settle to the card-in-hand.
+  // toRest=false -> start at rest, zoom into frame idx.
+  function zoomFrame(idx, toRest, dur, onDone) {
+    var stage = document.getElementById('hand-stage');
+    var t = frameToViewTransform(idx);
+    stage.style.transformOrigin = '0 0';
+    stage.style.transition = 'none';
+    stage.style.opacity = '1';
+    stage.style.transform = toRest ? t : 'none';
+    void stage.offsetWidth;
+    stage.style.transition = 'transform ' + dur + 's cubic-bezier(0.22, 1, 0.36, 1)';
+    stage.style.transform = toRest ? 'none' : t;
+    var done = false;
+    function fin(e) {
+      if (e && e.propertyName && e.propertyName !== 'transform') return;
+      if (done) return; done = true;
+      stage.removeEventListener('transitionend', fin);
+      if (onDone) onDone();
     }
-    polaroidRAF = requestAnimationFrame(loop);
+    stage.addEventListener('transitionend', fin);
+    setTimeout(fin, dur * 1000 + 280);
+  }
+
+  function resetHandStage() {
+    var stage = document.getElementById('hand-stage');
+    if (stage) { stage.style.transition = 'none'; stage.style.transform = 'none'; stage.style.opacity = '1'; }
+  }
+
+  function revealConfirmButtons() {
+    document.getElementById('confirm-btns').querySelectorAll('button').forEach(function(b, i) {
+      b.style.transition = 'opacity 0.4s ease ' + (i * 0.1) + 's'; b.style.opacity = '1';
+    });
+  }
+  function hideConfirmButtons() {
+    document.getElementById('confirm-btns').querySelectorAll('button').forEach(function(b) {
+      b.style.transition = 'opacity 0.2s'; b.style.opacity = '0';
+    });
   }
 
   function goToConfirm() {
+    var idx = photoCount;
+    var isLast = (photoCount + 1 >= totalPhotos);
     document.getElementById('confirm-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-    var canvas = document.getElementById('confirm-canvas');
-    var btns = document.getElementById('confirm-btns');
+    document.getElementById('confirm-next-label').textContent = isLast ? 'Confirm' : 'Continue';
 
-    btns.querySelectorAll('button').forEach(function(b) { b.style.transition = ''; b.style.opacity = '0'; });
-    canvas.style.transition = ''; canvas.style.opacity = '0';
-    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    setHoles(idx, lastCaptured);
+    hideConfirmButtons();
+    var stage = document.getElementById('hand-stage');
+    stage.style.transition = 'none'; stage.style.transform = 'none'; stage.style.opacity = '0';
     show('1b');
 
-    function revealButtons() {
-      btns.querySelectorAll('button').forEach(function(b, i) {
-        b.style.transition = 'opacity 0.4s ease ' + (i * 0.12) + 's';
-        b.style.opacity = '1';
-      });
-    }
-
-    confirmPhotoImg = new Image();
+    var img = document.getElementById('hole-photo-' + (idx + 1));
+    var started = false;
     function start() {
-      canvas.style.transition = 'opacity 0.2s ease'; canvas.style.opacity = '1';
-      playPolaroidClip(false, 2000, revealButtons);
-      if (confirmRevealTimer) clearTimeout(confirmRevealTimer);
-      confirmRevealTimer = setTimeout(revealButtons, 2500); // safety
+      if (started) return; started = true;
+      requestAnimationFrame(function() { requestAnimationFrame(function() {
+        zoomFrame(idx, true, 0.85, revealConfirmButtons);
+      }); });
     }
-    confirmPhotoImg.onload = start;
-    confirmPhotoImg.onerror = start;
-    confirmPhotoImg.src = lastCaptured;
+    if (img && img.complete && img.naturalWidth) start();
+    else if (img) { img.onload = start; img.onerror = start; setTimeout(start, 450); }
+    else start();
   }
 
   function retakePhoto() {
-    if (confirmRevealTimer) { clearTimeout(confirmRevealTimer); confirmRevealTimer = null; }
-    var btns = document.getElementById('confirm-btns');
-    btns.querySelectorAll('button').forEach(function(b) { b.style.transition = 'opacity 0.2s'; b.style.opacity = '0'; });
-    // reverse the clip first (polaroid zooms back in), then re-open the camera
-    playPolaroidClip(true, 1100, function() {
+    hideConfirmButtons();
+    var idx = photoCount; // redo the current frame
+    zoomFrame(idx, false, 0.7, function() {
       lastCaptured = null;
       document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
       show(1);
       requestCamera();
+      resetHandStage();
     });
   }
 
   function confirmPhoto() {
-    if (confirmRevealTimer) { clearTimeout(confirmRevealTimer); confirmRevealTimer = null; }
-    var btns = document.getElementById('confirm-btns');
-    btns.querySelectorAll('button').forEach(function(b) { b.style.transition = 'opacity 0.2s'; b.style.opacity = '0'; });
-
-    if (photoCount + 1 >= totalPhotos) {
-      // last shot: the photo now goes into the template — slide the polaroid out
-      // to the right, then let the processing screen grow in from the centre
-      if (polaroidRAF) { cancelAnimationFrame(polaroidRAF); polaroidRAF = null; }
-      var stage = document.getElementById('confirm-stage');
+    hideConfirmButtons();
+    var isLast = (photoCount + 1 >= totalPhotos);
+    if (isLast) {
+      // last shot confirmed: slide the card out to the right, then process.
+      var stage = document.getElementById('hand-stage');
       stage.style.transition = 'transform 0.5s cubic-bezier(0.5, 0, 0.7, 0.2), opacity 0.5s ease';
-      stage.style.transform = 'translateX(125%)';
+      stage.style.transform = 'translateX(130%)';
       stage.style.opacity = '0';
       setTimeout(function() {
-        stage.style.transition = ''; stage.style.transform = ''; stage.style.opacity = '1';
         photos.push(lastCaptured); photoCount++; lastCaptured = null;
+        resetHandStage();
         goToProcessing();
       }, 520);
     } else {
-      // more shots to go: reverse the clip (polaroid zooms back in), then next photo
-      playPolaroidClip(true, 1100, function() {
-        photos.push(lastCaptured); photoCount++; lastCaptured = null;
-        document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-        show(1); requestCamera();
+      // commit this shot, then zoom into the NEXT (empty) frame and reopen camera.
+      photos.push(lastCaptured); photoCount++; lastCaptured = null;
+      setHoles(-1, null);
+      document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
+      zoomFrame(photoCount, false, 0.75, function() {
+        show(1);
+        requestCamera();
+        resetHandStage();
       });
     }
   }
@@ -1676,7 +1748,7 @@
         st.textContent = 'All done!';
         dl.style.transition = 'opacity 0.3s';
         dl.style.opacity = '0';
-        setTimeout(function() { goToDone(); }, 500);
+        setTimeout(function() { goToDelivery(); }, 500); // Photo Ready page removed: straight to download
       }
     }, 20);
   }
@@ -1756,6 +1828,14 @@
     document.getElementById('cam-ph').style.display = 'none';
 
     show(0);
+  }
+
+  // Start Over (download page): restart from session 1 with the circle wipe.
+  function startOver() {
+    if (procInterval) clearInterval(procInterval);
+    resetHandStage();
+    hideIntroOverlay();
+    goToCamera(); // resets counters, requests camera, plays the circle wipe into session 1
   }
 
   function pickFromGallery() {
