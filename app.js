@@ -56,6 +56,69 @@
     else stopRetro();
   }
 
+  // ===== Retro doodle layer: hand-drawn photobooth marks scattered round the
+  // edges of the preview / processing / download screens. All motion is steps()
+  // based (see CSS) so it boils frame-by-frame like stop-motion, never smooth. =====
+  function dsvg(k) {
+    var m = {
+      spark: '<svg viewBox="0 0 24 24"><path d="M12 0 L14.5 9.5 L24 12 L14.5 14.5 L12 24 L9.5 14.5 L0 12 L9.5 9.5 Z" fill="#fff"/></svg>',
+      star:  '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M12 2 l2.9 6.3 6.9 .6 -5.2 4.5 1.6 6.8 L12 17 l-6.2 3.7 1.6 -6.8 -5.2 -4.5 6.9 -.6 z"/></svg>',
+      cam:   '<svg viewBox="0 0 48 40" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h7l3-5h12l3 5h6a3 3 0 0 1 3 3v18a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3V14a3 3 0 0 1 3-3z"/><circle cx="22" cy="23" r="7"/></svg>',
+      film:  '<svg viewBox="0 0 44 26" fill="none" stroke="#fff" stroke-width="1.6"><rect x="1" y="4" width="42" height="18" rx="2"/><g fill="#fff" stroke="none"><rect x="4" y="1.5" width="3" height="2.5"/><rect x="11" y="1.5" width="3" height="2.5"/><rect x="18" y="1.5" width="3" height="2.5"/><rect x="25" y="1.5" width="3" height="2.5"/><rect x="32" y="1.5" width="3" height="2.5"/><rect x="4" y="22" width="3" height="2.5"/><rect x="11" y="22" width="3" height="2.5"/><rect x="18" y="22" width="3" height="2.5"/><rect x="25" y="22" width="3" height="2.5"/><rect x="32" y="22" width="3" height="2.5"/></g></svg>',
+      lens:  '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 3 L12 12 L20 8 M21 13 L12 12 L15 21 M3 11 L12 12 L8 3"/></svg>',
+      heart: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7"><path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/></svg>',
+      bolt:  '<svg viewBox="0 0 24 24"><path d="M13 1 L4 14 h6 l-1 9 9-13 h-6 z" fill="#fff"/></svg>',
+      squig: '<svg viewBox="0 0 44 12" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"><path d="M2 7 q5 -7 10 0 t10 0 t10 0 t8 0"/></svg>',
+      diamond: '<svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.5"><path d="M8 1 L15 8 L8 15 L1 8 Z"/></svg>',
+      cross: '<svg viewBox="0 0 12 12" stroke="#fff" stroke-width="1.7" stroke-linecap="round"><path d="M2 2 L10 10 M10 2 L2 10"/></svg>',
+      spiral: '<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20 17 a3 3 0 1 1 -3 3 a6 6 0 1 1 6 -6 a9 9 0 1 1 -9 9 a12 12 0 1 1 12 -12 a15 15 0 1 1 -15 15"/></svg>'
+    };
+    return m[k] || '';
+  }
+  var DOODLES = [
+    { pos: 'top:8%;left:6%', word: 'SMILE' },
+    { pos: 'top:16%;left:30%', size: 16, k: 'spark', anim: 'twinkle1' },
+    { pos: 'top:7%;left:47%', word: 'CLICK' },
+    { pos: 'top:9%;right:7%', size: 40, k: 'cam' },
+    { pos: 'top:5%;right:31%', size: 18, k: 'bolt' },
+    { pos: 'top:23%;left:6%', size: 24, k: 'lens' },
+    { pos: 'top:33%;left:9%', size: 30, k: 'squig' },
+    { pos: 'top:47%;left:5%', word: 'FLASH' },
+    { pos: 'top:30%;right:6%', word: 'SNAP' },
+    { pos: 'top:42%;right:8%', size: 22, k: 'heart' },
+    { pos: 'top:55%;right:5%', size: 40, k: 'film' },
+    { pos: 'top:67%;right:7%', word: 'POSE' },
+    { pos: 'top:20%;right:23%', size: 14, k: 'spark', anim: 'twinkle2' },
+    { pos: 'bottom:24%;left:6%', word: 'FOCUS' },
+    { pos: 'bottom:15%;left:7%', word: 'SAY CHEESE' },
+    { pos: 'bottom:7%;left:5%', size: 38, k: 'film' },
+    { pos: 'bottom:6%;left:25%', size: 30, k: 'spiral' },
+    { pos: 'bottom:7%;left:47%', word: 'PHOTO' },
+    { pos: 'bottom:16%;right:6%', word: 'MEMORIES' },
+    { pos: 'bottom:8%;right:19%', size: 18, k: 'star', anim: 'twinkle3' },
+    { pos: 'top:40%;left:27%', size: 12, k: 'cross', anim: 'twinkle2' },
+    { pos: 'bottom:30%;right:24%', size: 14, k: 'diamond' },
+    { pos: 'top:58%;left:7%', size: 14, k: 'spark', anim: 'twinkle1' }
+  ];
+  function buildDoodles() {
+    return DOODLES.map(function(d, i) {
+      var anim = d.anim || ('boil' + (1 + (i % 3)));
+      if (d.word) return '<div class="dood word ' + anim + '" style="' + d.pos + '">' + d.word + '</div>';
+      return '<div class="dood ' + anim + '" style="' + d.pos + ';width:' + (d.size || 24) + 'px;height:' + (d.size || 24) + 'px">' + dsvg(d.k) + '</div>';
+    }).join('');
+  }
+  function injectDoodles() {
+    ['s1b', 's2', 's7'].forEach(function(id) {
+      var s = document.getElementById(id);
+      if (s && !s.querySelector('.retro-doodles')) {
+        var ov = document.createElement('div');
+        ov.className = 'retro-doodles';
+        ov.innerHTML = buildDoodles();
+        s.insertBefore(ov, s.firstChild);
+      }
+    });
+  }
+
   function show(n) {
     currentState = n;
     document.querySelectorAll('.state').forEach(function(s) {
@@ -78,11 +141,10 @@
     document.getElementById('cam-perm').classList.add('hidden');
     document.getElementById('cam-denied').classList.remove('show');
     document.getElementById('cam-ph').style.display = 'flex';
-    // Ask for the camera FIRST. The circle wipe only plays once the stream is
-    // live, so: a first-time permission prompt happens BEFORE the animation (not
-    // during it), the camera is already showing when the circle opens, and a
-    // returning (already-granted) user goes straight into the wipe.
-    startCamera(playCircleWipe);
+    // Play the wipe IMMEDIATELY on tap (no waiting for the camera) and warm the
+    // camera up in parallel, so there's zero pause between click and transition.
+    playCircleWipe();
+    startCamera();
   }
 
   // Circle wipe: a dark overlay irises OPEN from the centre to reveal the live
@@ -267,20 +329,24 @@
   // clearly and the hand isn't dominant (forearm runs off-screen, fingers stay).
   function restTransform() {
     var vw = window.innerWidth, vh = window.innerHeight;
-    var cardW = Math.min(vw * 0.66, 320);
-    return rectTransform(document.querySelector('.tpl-slot'), { left: (vw - cardW) / 2, top: vh * 0.085, width: cardW });
+    var cardW = Math.min(vw * 0.58, 290);
+    return rectTransform(document.querySelector('.tpl-slot'), { left: (vw - cardW) / 2, top: vh * 0.10, width: cardW });
   }
 
   // Animate the hand-stage from one transform string to another (GPU transform).
-  function animateStage(fromT, toT, dur, onDone) {
+  // fadeOut=true also fades it away during the move (for the zoom-in to camera).
+  function animateStage(fromT, toT, dur, onDone, fadeOut) {
     var stage = document.getElementById('hand-stage');
     stage.style.transformOrigin = '0 0';
     stage.style.transition = 'none';
     stage.style.opacity = '1';
     stage.style.transform = fromT;
     void stage.offsetWidth;
-    stage.style.transition = 'transform ' + dur + 's cubic-bezier(0.33, 1, 0.38, 1)';
+    var tr = 'transform ' + dur + 's cubic-bezier(0.22, 1, 0.36, 1)';
+    if (fadeOut) tr += ', opacity ' + (dur * 0.7).toFixed(2) + 's ease ' + (dur * 0.25).toFixed(2) + 's';
+    stage.style.transition = tr;
     stage.style.transform = toT;
+    if (fadeOut) stage.style.opacity = '0';
     var done = false;
     function fin(e) {
       if (e && e.propertyName && e.propertyName !== 'transform') return;
@@ -341,19 +407,26 @@
     function start() {
       if (started) return; started = true;
       requestAnimationFrame(function() { requestAnimationFrame(function() {
-        // 1) place the frame exactly where the live view was, reveal the stage
+        // start with the frame on the live-view spot, fully transparent...
         var vt = viewTransform(idx).t;
         stage.style.transformOrigin = '0 0';
         stage.style.transition = 'none';
         stage.style.transform = vt;
-        stage.style.opacity = '1';
+        stage.style.opacity = '0';
+        if (img) img.classList.add('show'); // photo fades in too
         void stage.offsetWidth;
-        // 2) fade the captured photo into the frame (no sudden pop)
-        if (img) img.classList.add('show');
-        // 3) then ease the whole card back to the settled "in hand" view
-        setTimeout(function() {
-          animateStage(vt, restTransform().t, 0.95, revealConfirmButtons);
-        }, 440);
+        // ...then fade the whole card in WHILE it eases back to the settled view
+        stage.style.transition = 'transform 1.05s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s ease';
+        stage.style.transform = restTransform().t;
+        stage.style.opacity = '1';
+        var done = false;
+        function fin(e) {
+          if (e && e.propertyName && e.propertyName !== 'transform') return;
+          if (done) return; done = true;
+          stage.removeEventListener('transitionend', fin); revealConfirmButtons();
+        }
+        stage.addEventListener('transitionend', fin);
+        setTimeout(fin, 1180);
       }); });
     }
     if (img && img.complete && img.naturalWidth) start();
@@ -364,13 +437,13 @@
   function retakePhoto() {
     hideConfirmButtons();
     var idx = photoCount; // redo the current frame
-    animateStage(restTransform().t, viewTransform(idx).t, 0.8, function() {
+    animateStage(restTransform().t, viewTransform(idx).t, 0.62, function() {
       lastCaptured = null;
       document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
       show(1);
       requestCamera();
       resetHandStage();
-    });
+    }, true);
   }
 
   function confirmPhoto() {
@@ -387,11 +460,11 @@
       photos.push(lastCaptured); photoCount++; lastCaptured = null;
       paintHoles(-1);
       document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-      animateStage(restTransform().t, viewTransform(photoCount).t, 0.8, function() {
+      animateStage(restTransform().t, viewTransform(photoCount).t, 0.62, function() {
         show(1);
         requestCamera();
         resetHandStage();
-      });
+      }, true);
     }
   }
 
@@ -674,3 +747,4 @@
   }
 
   show(0);
+  injectDoodles();

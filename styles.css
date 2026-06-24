@@ -366,7 +366,9 @@
        held in a real hand. Three layers: hand-back, template+photos, hand-front.
        The template's position on the hand comes from the source PSD's frame slot
        (L33% T14.85% W35% H39.36% of the 1086x1448 hand canvas). ---- */
-    .hand-area { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4px 10px 0; min-height: 0; }
+    .hand-area { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4px 10px 0; min-height: 0; position: relative; }
+    /* fade the bottom of the held card / forearm into black so the hand never looks abruptly cut off */
+    .hand-area::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 26%; background: linear-gradient(to bottom, transparent, #111 92%); pointer-events: none; z-index: 4; }
     /* hand-back is the in-flow sizer: it scales to "contain" within the area
        (by width OR height, whichever is smaller) and the stage takes its size;
        the other two layers are absolutely overlaid on top. */
@@ -383,9 +385,11 @@
     .hole-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.45s ease; }
     .hole-photo.show { opacity: 1; }
     .tpl-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; pointer-events: none; user-select: none; -webkit-user-drag: none; }
-    .hole-load { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: #18181a; }
+    .hole-load { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 7px; background: #16161b; }
     .hole-load.show { display: flex; }
-    .hole-load span { width: 30px; height: 30px; border: 3px solid rgba(255,255,255,0.16); border-top-color: rgba(255,255,255,0.7); border-radius: 50%; animation: holeSpin 0.85s linear infinite; }
+    .hole-load svg { width: 26%; max-width: 48px; opacity: 0.5; animation: holePulse 1.9s ease-in-out infinite; }
+    .hole-load .hl-next { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 11px; letter-spacing: 2px; color: rgba(255,255,255,0.4); }
+    @keyframes holePulse { 0%, 100% { opacity: 0.32; transform: scale(0.95); } 50% { opacity: 0.62; transform: scale(1.03); } }
     @keyframes holeSpin { to { transform: rotate(360deg); } }
 
     /* Retro microcopy that rotates through the flow (camera / preview / processing
@@ -393,8 +397,35 @@
        to the dedicated retro typeface (Bungee). */
     .retro-line { font-family: 'Nunito', sans-serif; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: #fff; text-align: center; font-size: 18px; line-height: 1.1; min-height: 22px; padding: 0 16px; }
     .retro-line.alt-font { font-family: 'Bungee', cursive; font-weight: 400; text-transform: none; letter-spacing: 0.5px; }
-    .retro-line.swap, .swap { animation: retroSwap 0.42s cubic-bezier(0.22, 1, 0.36, 1); }
-    @keyframes retroSwap { 0% { opacity: 0; transform: translateY(9px); } 100% { opacity: 1; transform: none; } }
+    /* choppy "stamp in" for the rotating retro copy (stop-motion feel) */
+    .retro-line.swap, .swap { animation: retroSwap 0.34s steps(3) both; }
+    @keyframes retroSwap { 0% { opacity: 0; transform: translateY(10px) scale(0.92); } 100% { opacity: 1; transform: none; } }
+
+    /* ===== Retro doodle layer: hand-drawn photobooth marks scattered round the
+       edges. Everything animates with steps() so it BOILS / jitters frame-by-
+       frame like stop-motion, never smooth. Sits behind the screen content. ===== */
+    .retro-doodles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+    .state > *:not(.retro-doodles) { position: relative; z-index: 1; }
+    .dood { position: absolute; color: #fff; transform-origin: center; will-change: transform; }
+    .dood svg { display: block; width: 100%; height: 100%; overflow: visible; }
+    .dood.word { font-family: 'Bungee', cursive; font-size: 12px; letter-spacing: 1px; color: #fff; white-space: nowrap; opacity: 0.9; }
+    .boil1 { animation: boil 0.5s steps(1) infinite; }
+    .boil2 { animation: boil 0.66s steps(1) infinite; animation-delay: -0.22s; }
+    .boil3 { animation: boil 0.42s steps(1) infinite; animation-delay: -0.3s; }
+    @keyframes boil {
+      0%   { transform: translate(0, 0) rotate(0deg); }
+      25%  { transform: translate(0.6px, -0.6px) rotate(-1.4deg); }
+      50%  { transform: translate(-0.5px, 0.5px) rotate(1deg); }
+      75%  { transform: translate(0.4px, 0.3px) rotate(-0.6deg); }
+    }
+    .twinkle1 { animation: twinkle 1.0s steps(1) infinite; }
+    .twinkle2 { animation: twinkle 1.4s steps(1) infinite; animation-delay: -0.5s; }
+    .twinkle3 { animation: twinkle 0.8s steps(1) infinite; animation-delay: -0.3s; }
+    @keyframes twinkle {
+      0%   { opacity: 1; transform: scale(1) rotate(0deg); }
+      33%  { opacity: 0.12; transform: scale(0.45) rotate(18deg); }
+      66%  { opacity: 0.85; transform: scale(1.2) rotate(-12deg); }
+    }
 
     /* ---- Done state: ARTWORKS result template ---- */
     .result-frame {
