@@ -308,10 +308,8 @@
     flash.classList.remove('flash');
     void flash.offsetWidth;
     flash.classList.add('flash');
-    if (vf) vf.classList.add('shutter'); // curtains snap shut like a camera shutter
 
     setTimeout(function() {
-      if (vf) vf.classList.remove('shutter');
       stopCamera();
       goToConfirm();
     }, 400);

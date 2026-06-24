@@ -249,9 +249,6 @@
     .vf-curtain { position: absolute; top: 0; bottom: 0; width: 16.67%; background: #000; z-index: 2; pointer-events: none; }
     .vf-curtain.left { left: 0; }
     .vf-curtain.right { right: 0; }
-    /* shutter: on capture the curtains snap shut to the centre (camera shutter) */
-    .vf-curtain { transition: width 0.24s cubic-bezier(0.5, 0, 0.7, 0.3); }
-    .viewfinder-wrap.shutter .vf-curtain { width: 50%; }
     /* animated focus corner-brackets on the visible square (camera "focusing" feel) */
     .vf-focus { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
     .vf-focus i { position: absolute; width: 17px; height: 17px; border: 2px solid rgba(255,255,255,0.7); animation: vfFocus 2.8s ease-in-out infinite; }
