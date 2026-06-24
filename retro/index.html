@@ -7,7 +7,7 @@
 <title>Retro text — LOL Photobooth</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Pacifico&family=Righteous&family=Anton&family=Monoton&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Pacifico&family=Righteous&family=Anton&family=Monoton&family=Nunito:wght@800&display=swap" rel="stylesheet">
 <style>
   *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
   body{ background:#0d0d10; color:#ededf0; font-family:system-ui,-apple-system,'Segoe UI',sans-serif; padding:18px 14px 70px; max-width:520px; margin:0 auto; }
@@ -21,6 +21,7 @@
   .stagelbl{ position:absolute; top:18px; left:0; right:0; text-align:center; font-size:11px; letter-spacing:3px; font-weight:700; color:rgba(255,255,255,.6); }
   .badge{ position:absolute; top:38px; left:50%; transform:translateX(-50%); font-size:11px; font-weight:700; color:#fff; background:rgba(255,255,255,.14); padding:3px 11px; border-radius:999px; }
   .phrase{ position:relative; z-index:2; padding:0 18px; text-align:center; line-height:1.05; color:#fff; font-size:clamp(30px,9vw,46px); text-shadow:0 3px 14px rgba(0,0,0,.55); }
+  .phrase.lol{ font-family:'Nunito',system-ui,sans-serif; font-weight:800; text-transform:uppercase; letter-spacing:2px; }
   .phrase.bungee{ font-family:'Bungee',cursive; font-size:clamp(24px,7vw,38px); }
   .phrase.pacifico{ font-family:'Pacifico',cursive; }
   .phrase.righteous{ font-family:'Righteous',cursive; }
@@ -74,7 +75,8 @@
 
   <div class="label">Font retro</div>
   <div class="row" id="fonts">
-    <button class="on" data-font="bungee">Bungee</button>
+    <button class="on" data-font="lol">LOL (Nunito)</button>
+    <button data-font="bungee">Bungee</button>
     <button data-font="pacifico">Pacifico</button>
     <button data-font="righteous">Righteous</button>
     <button data-font="anton">Anton</button>
@@ -91,7 +93,7 @@
     proses:     { label:'PROCESSING', badge:false, show:'spin',    lines:["DEVELOPING...","COOKING UP MAGIC...","SHAKE IT, POLAROID!","PRINTING MEMORIES...","HANG TIGHT, SUGAR..."] },
     thankyou:   { label:'ALL DONE',   badge:false, show:'check',   lines:["THANKS FOR THE MEMORIES!","STAY GROOVY!","SEE YA, GORGEOUS!","SNAP YA LATER!","DON'T BE A STRANGER!"] }
   };
-  var stage='foto', font='bungee', idx=0, timer=null;
+  var stage='foto', font='lol', idx=0, timer=null;
   var phraseEl=document.getElementById('phrase'), bg=document.getElementById('bg');
 
   function render(){

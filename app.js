@@ -26,6 +26,36 @@
     });
   })();
 
+  // ===== Retro microcopy: playful vintage-photobooth lines that rotate through
+  // the flow. Default font is the LOL app font (Nunito); set RETRO_ALT_FONT to
+  // true to use the dedicated retro typeface (Bungee) on the .retro-line spots.
+  var RETRO_ALT_FONT = false;
+  var RETRO = {
+    camera:  ["SAY CHEESE!", "STRIKE A POSE!", "LOOK ALIVE!", "WORK IT, BABY!", "BIG SMILES!", "GIVE US A WINK!"],
+    preview: ["LOOKIN' GOOD!", "HOT STUFF!", "ONE MORE TIME!", "YOU NAILED IT!", "TOO CUTE!"],
+    process: ["DEVELOPING...", "COOKING UP MAGIC...", "SHAKE IT, POLAROID!", "PRINTING MEMORIES...", "HANG TIGHT, SUGAR..."],
+    thanks:  ["THANKS FOR THE MEMORIES!", "STAY GROOVY!", "SEE YA, GORGEOUS!", "SNAP YA LATER!", "DON'T BE A STRANGER!"]
+  };
+  var retroTimer = null;
+  function stopRetro() { if (retroTimer) { clearInterval(retroTimer); retroTimer = null; } }
+  function startRetro(elId, key, interval) {
+    stopRetro();
+    var el = document.getElementById(elId), lines = RETRO[key];
+    if (!el || !lines) return;
+    if (el.classList.contains('retro-line')) el.classList.toggle('alt-font', RETRO_ALT_FONT);
+    var i = Math.floor(Math.random() * lines.length);
+    function flip() { el.textContent = lines[i % lines.length]; el.classList.remove('swap'); void el.offsetWidth; el.classList.add('swap'); i++; }
+    flip();
+    retroTimer = setInterval(flip, interval || 2200);
+  }
+  function updateRetro(n) {
+    if (n === 1) startRetro('cam-retro', 'camera', 2200);
+    else if (n === '1b') startRetro('confirm-retro', 'preview', 2300);
+    else if (n === 2) startRetro('status-text', 'process', 1500);
+    else if (n === 7) startRetro('thanks-retro', 'thanks', 2600);
+    else stopRetro();
+  }
+
   function show(n) {
     currentState = n;
     document.querySelectorAll('.state').forEach(function(s) {
@@ -37,6 +67,7 @@
       el.style.display = 'flex';
       el.classList.add('active');
     }
+    updateRetro(n);
   }
 
   function goToCamera() {
@@ -458,6 +489,7 @@
       pn.textContent = p + '%';
 
       if (p === 100) {
+        stopRetro(); // stop the rotating retro copy before the final status
         st.textContent = 'All done!';
         dl.style.transition = 'opacity 0.3s';
         dl.style.opacity = '0';
