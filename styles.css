@@ -368,7 +368,7 @@
        (L33% T14.85% W35% H39.36% of the 1086x1448 hand canvas). ---- */
     .hand-area { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4px 10px 0; min-height: 0; position: relative; }
     /* fade the bottom of the held card / forearm into black so the hand never looks abruptly cut off */
-    .hand-area::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 26%; background: linear-gradient(to bottom, transparent, #111 92%); pointer-events: none; z-index: 4; }
+    .hand-area::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 32%; background: linear-gradient(to bottom, transparent, #111 88%); pointer-events: none; z-index: 4; }
     /* hand-back is the in-flow sizer: it scales to "contain" within the area
        (by width OR height, whichever is smaller) and the stage takes its size;
        the other two layers are absolutely overlaid on top. */

@@ -330,7 +330,7 @@
   function restTransform() {
     var vw = window.innerWidth, vh = window.innerHeight;
     var cardW = Math.min(vw * 0.58, 290);
-    return rectTransform(document.querySelector('.tpl-slot'), { left: (vw - cardW) / 2, top: vh * 0.10, width: cardW });
+    return rectTransform(document.querySelector('.tpl-slot'), { left: (vw - cardW) / 2, top: vh * 0.24, width: cardW });
   }
 
   // Animate the hand-stage from one transform string to another (GPU transform).
@@ -398,7 +398,9 @@
     hideConfirmButtons();
     var stage = document.getElementById('hand-stage');
     var img = document.getElementById('hole-photo-' + (idx + 1));
+    var load = document.getElementById('hole-load-' + (idx + 1));
     if (img) { img.classList.remove('show'); img.src = lastCaptured; } // rendered at opacity 0 -> fades in
+    if (load) load.classList.remove('show'); // hide THIS frame's "UP NEXT" so the captured photo shows
 
     stage.style.transition = 'none'; stage.style.transform = 'none'; stage.style.opacity = '0';
     show('1b');
@@ -407,17 +409,21 @@
     function start() {
       if (started) return; started = true;
       requestAnimationFrame(function() { requestAnimationFrame(function() {
-        // start with the frame on the live-view spot, fully transparent...
+        // Measure BOTH transforms FIRST. rectTransform() temporarily sets the
+        // stage transition to 'none' to take its measurement, so calling it after
+        // we set the animation transition would wipe that transition and make the
+        // card jump instantly. Precomputing avoids that.
         var vt = viewTransform(idx).t;
+        var rt = restTransform().t;
         stage.style.transformOrigin = '0 0';
         stage.style.transition = 'none';
-        stage.style.transform = vt;
+        stage.style.transform = vt;       // start on the live-view spot, transparent
         stage.style.opacity = '0';
         if (img) img.classList.add('show'); // photo fades in too
         void stage.offsetWidth;
         // ...then fade the whole card in WHILE it eases back to the settled view
         stage.style.transition = 'transform 1.05s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s ease';
-        stage.style.transform = restTransform().t;
+        stage.style.transform = rt;
         stage.style.opacity = '1';
         var done = false;
         function fin(e) {
