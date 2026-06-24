@@ -50,9 +50,9 @@
   }
   function updateRetro(n) {
     if (n === 1) startRetro('cam-retro', 'camera', 2200);
-    else if (n === '1b') startRetro('confirm-retro', 'preview', 2300);
-    else if (n === 2) startRetro('status-text', 'process', 1500);
-    else if (n === 7) startRetro('thanks-retro', 'thanks', 2600);
+    else if (n === '1b') startRetro('confirm-retro', 'preview', 2300); // doodles entrance handled in goToConfirm (synced with the template)
+    else if (n === 2) { startRetro('status-text', 'process', 1500); playDoodles('s2', false); }
+    else if (n === 7) { startRetro('thanks-retro', 'thanks', 2600); playDoodles('s7', false); }
     else stopRetro();
   }
 
@@ -75,47 +75,92 @@
     };
     return m[k] || '';
   }
-  var DOODLES = [
+  var PREVIEW_DOODLES = [
     { pos: 'top:8%;left:6%', word: 'SMILE' },
-    { pos: 'top:16%;left:30%', size: 16, k: 'spark', anim: 'twinkle1' },
     { pos: 'top:7%;left:47%', word: 'CLICK' },
-    { pos: 'top:9%;right:7%', size: 40, k: 'cam' },
-    { pos: 'top:5%;right:31%', size: 18, k: 'bolt' },
-    { pos: 'top:23%;left:6%', size: 24, k: 'lens' },
-    { pos: 'top:33%;left:9%', size: 30, k: 'squig' },
+    { pos: 'top:9%;right:7%', size: 38, k: 'cam' },
+    { pos: 'top:16%;left:30%', size: 16, k: 'spark', anim: 'twinkle1' },
+    { pos: 'top:5%;right:30%', size: 18, k: 'bolt' },
+    { pos: 'top:24%;left:6%', size: 24, k: 'lens' },
+    { pos: 'top:34%;left:9%', size: 30, k: 'squig' },
     { pos: 'top:47%;left:5%', word: 'FLASH' },
     { pos: 'top:30%;right:6%', word: 'SNAP' },
-    { pos: 'top:42%;right:8%', size: 22, k: 'heart' },
-    { pos: 'top:55%;right:5%', size: 40, k: 'film' },
+    { pos: 'top:43%;right:8%', size: 22, k: 'heart' },
+    { pos: 'top:56%;right:5%', size: 38, k: 'film' },
     { pos: 'top:67%;right:7%', word: 'POSE' },
-    { pos: 'top:20%;right:23%', size: 14, k: 'spark', anim: 'twinkle2' },
-    { pos: 'bottom:24%;left:6%', word: 'FOCUS' },
-    { pos: 'bottom:15%;left:7%', word: 'SAY CHEESE' },
-    { pos: 'bottom:7%;left:5%', size: 38, k: 'film' },
-    { pos: 'bottom:6%;left:25%', size: 30, k: 'spiral' },
+    { pos: 'bottom:16%;left:7%', word: 'SAY CHEESE' },
+    { pos: 'bottom:8%;left:6%', size: 36, k: 'film' },
     { pos: 'bottom:7%;left:47%', word: 'PHOTO' },
     { pos: 'bottom:16%;right:6%', word: 'MEMORIES' },
-    { pos: 'bottom:8%;right:19%', size: 18, k: 'star', anim: 'twinkle3' },
-    { pos: 'top:40%;left:27%', size: 12, k: 'cross', anim: 'twinkle2' },
-    { pos: 'bottom:30%;right:24%', size: 14, k: 'diamond' },
-    { pos: 'top:58%;left:7%', size: 14, k: 'spark', anim: 'twinkle1' }
+    { pos: 'bottom:9%;right:18%', size: 18, k: 'star', anim: 'twinkle3' },
+    { pos: 'top:58%;left:7%', size: 14, k: 'spark', anim: 'twinkle1' },
+    { pos: 'bottom:30%;right:24%', size: 14, k: 'diamond' }
   ];
-  function buildDoodles() {
-    return DOODLES.map(function(d, i) {
+  var PROCESS_DOODLES = [
+    { pos: 'top:9%;left:7%', word: 'DEVELOPING' },
+    { pos: 'top:8%;right:8%', size: 30, k: 'spiral' },
+    { pos: 'top:18%;left:34%', size: 16, k: 'spark', anim: 'twinkle2' },
+    { pos: 'top:22%;left:6%', size: 34, k: 'film' },
+    { pos: 'top:40%;left:6%', word: 'MAGIC' },
+    { pos: 'top:30%;right:6%', size: 24, k: 'lens' },
+    { pos: 'top:46%;right:7%', word: 'HANG ON' },
+    { pos: 'top:58%;left:8%', size: 30, k: 'squig' },
+    { pos: 'top:60%;right:6%', size: 18, k: 'star', anim: 'twinkle1' },
+    { pos: 'bottom:18%;left:7%', word: 'ALMOST' },
+    { pos: 'bottom:9%;left:30%', size: 28, k: 'spiral' },
+    { pos: 'bottom:10%;right:8%', word: 'COOKING' },
+    { pos: 'bottom:26%;right:24%', size: 14, k: 'diamond' },
+    { pos: 'top:14%;right:30%', size: 14, k: 'cross', anim: 'twinkle3' },
+    { pos: 'bottom:30%;left:24%', size: 16, k: 'spark', anim: 'twinkle2' }
+  ];
+  var DOWNLOAD_DOODLES = [
+    { pos: 'top:9%;left:6%', word: 'THANK YOU' },
+    { pos: 'top:8%;right:8%', size: 22, k: 'heart' },
+    { pos: 'top:18%;left:34%', size: 16, k: 'spark', anim: 'twinkle1' },
+    { pos: 'top:24%;left:6%', size: 18, k: 'star', anim: 'twinkle2' },
+    { pos: 'top:30%;right:6%', word: 'MEMORIES' },
+    { pos: 'top:44%;left:6%', word: 'KEEP IT' },
+    { pos: 'top:45%;right:7%', size: 24, k: 'cam' },
+    { pos: 'top:58%;right:6%', size: 22, k: 'heart' },
+    { pos: 'bottom:20%;left:7%', word: 'SHARE' },
+    { pos: 'bottom:9%;left:30%', size: 16, k: 'spark', anim: 'twinkle3' },
+    { pos: 'bottom:10%;right:8%', word: 'LOVE' },
+    { pos: 'bottom:28%;right:22%', size: 18, k: 'star', anim: 'twinkle1' },
+    { pos: 'top:14%;right:30%', size: 18, k: 'bolt' },
+    { pos: 'bottom:30%;left:22%', size: 14, k: 'diamond' },
+    { pos: 'top:62%;left:8%', size: 30, k: 'squig' }
+  ];
+  function buildDoodles(set) {
+    return set.map(function(d, i) {
       var anim = d.anim || ('boil' + (1 + (i % 3)));
-      if (d.word) return '<div class="dood word ' + anim + '" style="' + d.pos + '">' + d.word + '</div>';
-      return '<div class="dood ' + anim + '" style="' + d.pos + ';width:' + (d.size || 24) + 'px;height:' + (d.size || 24) + 'px">' + dsvg(d.k) + '</div>';
+      if (d.word) return '<div class="dood word" style="' + d.pos + '"><span class="dood-in ' + anim + '">' + d.word + '</span></div>';
+      return '<div class="dood" style="' + d.pos + '"><span class="dood-in ' + anim + '" style="width:' + (d.size || 24) + 'px;height:' + (d.size || 24) + 'px">' + dsvg(d.k) + '</span></div>';
     }).join('');
   }
   function injectDoodles() {
-    ['s1b', 's2', 's7'].forEach(function(id) {
+    var map = { s1b: PREVIEW_DOODLES, s2: PROCESS_DOODLES, s7: DOWNLOAD_DOODLES };
+    Object.keys(map).forEach(function(id) {
       var s = document.getElementById(id);
       if (s && !s.querySelector('.retro-doodles')) {
         var ov = document.createElement('div');
         ov.className = 'retro-doodles';
-        ov.innerHTML = buildDoodles();
+        ov.innerHTML = buildDoodles(map[id]);
         s.insertBefore(ov, s.firstChild);
       }
+    });
+  }
+  // stop-motion entrance (reverse=false) or exit (reverse=true) for a screen's
+  // doodles, staggered so they pop in one after another, frame-by-frame.
+  function playDoodles(screenId, reverse) {
+    var s = document.getElementById(screenId);
+    if (!s) return;
+    var ov = s.querySelector('.retro-doodles');
+    if (!ov) return;
+    ov.querySelectorAll('.dood').forEach(function(d, i) {
+      var delay = (reverse ? i * 0.012 : i * 0.03).toFixed(3);
+      d.style.animation = 'none';
+      void d.offsetWidth;
+      d.style.animation = (reverse ? 'doodOut 0.3s steps(2)' : 'doodIn 0.5s steps(4)') + ' ' + delay + 's both';
     });
   }
 
@@ -263,8 +308,10 @@
     flash.classList.remove('flash');
     void flash.offsetWidth;
     flash.classList.add('flash');
+    if (vf) vf.classList.add('shutter'); // curtains snap shut like a camera shutter
 
     setTimeout(function() {
+      if (vf) vf.classList.remove('shutter');
       stopCamera();
       goToConfirm();
     }, 400);
@@ -409,30 +456,33 @@
     function start() {
       if (started) return; started = true;
       requestAnimationFrame(function() { requestAnimationFrame(function() {
-        // Measure BOTH transforms FIRST. rectTransform() temporarily sets the
-        // stage transition to 'none' to take its measurement, so calling it after
-        // we set the animation transition would wipe that transition and make the
-        // card jump instantly. Precomputing avoids that.
+        // Precompute both transforms (rectTransform clears the transition while
+        // measuring, so doing it mid-setup would kill the recede animation).
         var vt = viewTransform(idx).t;
         var rt = restTransform().t;
         stage.style.transformOrigin = '0 0';
         stage.style.transition = 'none';
-        stage.style.transform = vt;       // start on the live-view spot, transparent
+        stage.style.transform = vt;       // sit on the live-view spot, transparent
         stage.style.opacity = '0';
-        if (img) img.classList.add('show'); // photo fades in too
         void stage.offsetWidth;
-        // ...then fade the whole card in WHILE it eases back to the settled view
-        stage.style.transition = 'transform 1.05s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s ease';
-        stage.style.transform = rt;
+        // 1) APPEAR: fade the card (+ photo) in and pop the doodles in — together
+        stage.style.transition = 'opacity 0.45s ease';
         stage.style.opacity = '1';
-        var done = false;
-        function fin(e) {
-          if (e && e.propertyName && e.propertyName !== 'transform') return;
-          if (done) return; done = true;
-          stage.removeEventListener('transitionend', fin); revealConfirmButtons();
-        }
-        stage.addEventListener('transitionend', fin);
-        setTimeout(fin, 1180);
+        if (img) img.classList.add('show');
+        playDoodles('s1b', false);
+        // 2) PAUSE, then 3) RECEDE: ease the card back to the settled view
+        setTimeout(function() {
+          stage.style.transition = 'transform 1.0s cubic-bezier(0.22, 1, 0.36, 1)';
+          stage.style.transform = rt;
+          var done = false;
+          function fin(e) {
+            if (e && e.propertyName && e.propertyName !== 'transform') return;
+            if (done) return; done = true;
+            stage.removeEventListener('transitionend', fin); revealConfirmButtons();
+          }
+          stage.addEventListener('transitionend', fin);
+          setTimeout(fin, 1080);
+        }, 820); // 0.45s fade-in + ~0.37s pause, THEN recede
       }); });
     }
     if (img && img.complete && img.naturalWidth) start();
@@ -442,6 +492,7 @@
 
   function retakePhoto() {
     hideConfirmButtons();
+    playDoodles('s1b', true); // doodles reverse out as the card leaves
     var idx = photoCount; // redo the current frame
     animateStage(restTransform().t, viewTransform(idx).t, 0.62, function() {
       lastCaptured = null;
@@ -454,6 +505,7 @@
 
   function confirmPhoto() {
     hideConfirmButtons();
+    playDoodles('s1b', true); // doodles reverse out as the card leaves
     var isLast = (photoCount + 1 >= totalPhotos);
     if (isLast) {
       animateSlideOut(function() {

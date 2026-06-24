@@ -249,6 +249,21 @@
     .vf-curtain { position: absolute; top: 0; bottom: 0; width: 16.67%; background: #000; z-index: 2; pointer-events: none; }
     .vf-curtain.left { left: 0; }
     .vf-curtain.right { right: 0; }
+    /* shutter: on capture the curtains snap shut to the centre (camera shutter) */
+    .vf-curtain { transition: width 0.24s cubic-bezier(0.5, 0, 0.7, 0.3); }
+    .viewfinder-wrap.shutter .vf-curtain { width: 50%; }
+    /* animated focus corner-brackets on the visible square (camera "focusing" feel) */
+    .vf-focus { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+    .vf-focus i { position: absolute; width: 17px; height: 17px; border: 2px solid rgba(255,255,255,0.7); animation: vfFocus 2.8s ease-in-out infinite; }
+    .vf-focus i:nth-child(1) { top: 7%; left: 19%; border-right: 0; border-bottom: 0; }
+    .vf-focus i:nth-child(2) { top: 7%; right: 19%; border-left: 0; border-bottom: 0; }
+    .vf-focus i:nth-child(3) { bottom: 7%; left: 19%; border-right: 0; border-top: 0; }
+    .vf-focus i:nth-child(4) { bottom: 7%; right: 19%; border-left: 0; border-top: 0; }
+    @keyframes vfFocus { 0%, 100% { transform: scale(1); opacity: 0.65; } 50% { transform: scale(0.84); opacity: 1; } }
+    /* pulsing "ready" ring around the snap button */
+    .btn-snap { position: relative; }
+    .btn-snap::after { content: ""; position: absolute; inset: -7px; border: 2px solid rgba(237,72,54,0.55); border-radius: 50%; animation: snapRing 2.1s ease-out infinite; pointer-events: none; }
+    @keyframes snapRing { 0% { transform: scale(0.92); opacity: 0.7; } 100% { transform: scale(1.5); opacity: 0; } }
     .flash-overlay {
       position: absolute;
       inset: 0;
@@ -406,9 +421,12 @@
        frame like stop-motion, never smooth. Sits behind the screen content. ===== */
     .retro-doodles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
     .state > *:not(.retro-doodles) { position: relative; z-index: 1; }
-    .dood { position: absolute; color: #fff; transform-origin: center; will-change: transform; }
-    .dood svg { display: block; width: 100%; height: 100%; overflow: visible; }
-    .dood.word { font-family: 'Bungee', cursive; font-size: 12px; letter-spacing: 1px; color: #fff; white-space: nowrap; opacity: 0.9; }
+    /* outer wrapper = stop-motion entrance / exit (set from JS, staggered); hidden until then */
+    .dood { position: absolute; opacity: 0; transform: scale(0.4); transform-origin: center; will-change: transform, opacity; }
+    /* inner = the idle "boil"/"twinkle" that keeps running underneath the entrance */
+    .dood-in { display: inline-block; color: #fff; transform-origin: center; will-change: transform; }
+    .dood.word .dood-in { font-family: 'Bungee', cursive; font-size: 12px; letter-spacing: 1px; white-space: nowrap; }
+    .dood-in svg { display: block; width: 100%; height: 100%; overflow: visible; }
     .boil1 { animation: boil 0.5s steps(1) infinite; }
     .boil2 { animation: boil 0.66s steps(1) infinite; animation-delay: -0.22s; }
     .boil3 { animation: boil 0.42s steps(1) infinite; animation-delay: -0.3s; }
@@ -426,6 +444,9 @@
       33%  { opacity: 0.12; transform: scale(0.45) rotate(18deg); }
       66%  { opacity: 0.85; transform: scale(1.2) rotate(-12deg); }
     }
+    /* choppy stop-motion entrance + exit (JS sets these on .dood with a stagger) */
+    @keyframes doodIn { 0% { opacity: 0; transform: scale(0.2) rotate(-12deg); } 65% { opacity: 1; transform: scale(1.18) rotate(6deg); } 100% { opacity: 1; transform: scale(1) rotate(0deg); } }
+    @keyframes doodOut { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.2) rotate(10deg); } }
 
     /* ---- Done state: ARTWORKS result template ---- */
     .result-frame {
