@@ -454,33 +454,29 @@
     function start() {
       if (started) return; started = true;
       requestAnimationFrame(function() { requestAnimationFrame(function() {
-        // Precompute both transforms (rectTransform clears the transition while
-        // measuring, so doing it mid-setup would kill the recede animation).
-        var vt = viewTransform(idx).t;
-        var rt = restTransform().t;
+        // FILM PULL in: the card slides in smoothly from the right to its settled
+        // spot. (restTransform measures with the transition cleared, so compute it
+        // BEFORE setting the slide transition or the slide would jump.)
+        var r = restTransform();
+        var fromT = 'translate(' + (r.tx + window.innerWidth * 1.35) + 'px,' + r.ty + 'px) scale(' + r.s + ')';
         stage.style.transformOrigin = '0 0';
         stage.style.transition = 'none';
-        stage.style.transform = vt;       // sit on the live-view spot, transparent
+        stage.style.transform = fromT;   // off-screen to the right, at rest scale
         stage.style.opacity = '0';
-        void stage.offsetWidth;
-        // 1) APPEAR: fade the card (+ photo) in and pop the doodles in — together
-        stage.style.transition = 'opacity 0.45s ease';
-        stage.style.opacity = '1';
         if (img) img.classList.add('show');
+        void stage.offsetWidth;
+        stage.style.transition = 'transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
+        stage.style.transform = r.t;
+        stage.style.opacity = '1';
         playDoodles('s1b', false);
-        // 2) PAUSE, then 3) RECEDE: ease the card back to the settled view
-        setTimeout(function() {
-          stage.style.transition = 'transform 1.0s cubic-bezier(0.22, 1, 0.36, 1)';
-          stage.style.transform = rt;
-          var done = false;
-          function fin(e) {
-            if (e && e.propertyName && e.propertyName !== 'transform') return;
-            if (done) return; done = true;
-            stage.removeEventListener('transitionend', fin); revealConfirmButtons();
-          }
-          stage.addEventListener('transitionend', fin);
-          setTimeout(fin, 1080);
-        }, 820); // 0.45s fade-in + ~0.37s pause, THEN recede
+        var done = false;
+        function fin(e) {
+          if (e && e.propertyName && e.propertyName !== 'transform') return;
+          if (done) return; done = true;
+          stage.removeEventListener('transitionend', fin); revealConfirmButtons();
+        }
+        stage.addEventListener('transitionend', fin);
+        setTimeout(fin, 1000);
       }); });
     }
     if (img && img.complete && img.naturalWidth) start();
@@ -491,8 +487,9 @@
   function retakePhoto() {
     hideConfirmButtons();
     playDoodles('s1b', true); // doodles reverse out as the card leaves
-    var idx = photoCount; // redo the current frame
-    animateStage(restTransform().t, viewTransform(idx).t, 0.62, function() {
+    var r = restTransform();
+    var outT = 'translate(' + (r.tx - window.innerWidth * 1.35) + 'px,' + r.ty + 'px) scale(' + r.s + ')';
+    animateStage(r.t, outT, 0.7, function() { // film pull out to the left
       lastCaptured = null;
       document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
       show(1);
@@ -512,11 +509,13 @@
         goToProcessing();
       });
     } else {
-      // commit this shot, then zoom into the NEXT (empty) frame and reopen camera.
+      // commit this shot, then FILM PULL the card out to the left + reopen camera.
       photos.push(lastCaptured); photoCount++; lastCaptured = null;
       paintHoles(-1);
       document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-      animateStage(restTransform().t, viewTransform(photoCount).t, 0.62, function() {
+      var r = restTransform();
+      var outT = 'translate(' + (r.tx - window.innerWidth * 1.35) + 'px,' + r.ty + 'px) scale(' + r.s + ')';
+      animateStage(r.t, outT, 0.7, function() {
         show(1);
         requestCamera();
         resetHandStage();

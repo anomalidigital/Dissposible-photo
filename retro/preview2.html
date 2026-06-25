@@ -45,9 +45,9 @@
   .play-F .hole img{ animation: develop 1.5s ease both; }
   @keyframes develop { 0%{ filter:sepia(1) brightness(0.4) contrast(0.8); } 60%{ filter:sepia(0.4) brightness(0.9); } 100%{ filter:none; } }
 
-  /* ===== G · FILM-STRIP PULL (jerky film advance) ===== */
-  .play-G{ animation: optFilm 0.85s steps(5) both; }
-  @keyframes optFilm { 0%{ opacity:0; transform:translate(70%,-50%); } 20%{ opacity:1; } 100%{ opacity:1; transform:translate(-50%,-50%); } }
+  /* ===== G · FILM-STRIP PULL (smooth horizontal pull) ===== */
+  .play-G{ animation: optFilm 0.9s cubic-bezier(0.22,1,0.36,1) both; }
+  @keyframes optFilm { 0%{ opacity:0; transform:translate(75%,-50%); } 25%{ opacity:1; } 100%{ opacity:1; transform:translate(-50%,-50%); } }
 
   /* ===== H · SPIN-TOSS ===== */
   .play-H{ animation: optSpin 0.9s cubic-bezier(0.3,1.4,0.5,1) both; }
