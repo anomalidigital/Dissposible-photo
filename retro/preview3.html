@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Preview animation — 6 ide bagus</title>
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body{ background:#0d0d10; color:#ededf0; font-family:system-ui,-apple-system,'Segoe UI',sans-serif; padding:16px 14px 70px; max-width:480px; margin:0 auto; }
+  h1{ font-size:19px; font-weight:800; }
+  .sub{ color:#9696a0; font-size:12.5px; line-height:1.55; margin:5px 0 14px; }
+  .sub a{ color:#ed8a7a; }
+
+  .stage{ position:relative; width:100%; aspect-ratio:10/16; background:#111; border-radius:16px; overflow:hidden; perspective:1100px; }
+  .stage::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:30%; background:linear-gradient(to bottom, transparent, #111 88%); pointer-events:none; z-index:3; }
+  .card{ position:absolute; left:50%; top:52%; width:62%; transform:translate(-50%,-50%); transform-origin:center; backface-visibility:hidden; }
+  .wrap{ position:relative; width:100%; aspect-ratio:1086/1448; }
+  .hb,.hf{ position:absolute; inset:0; width:100%; height:100%; } .hf{ z-index:3; }
+  .slot{ position:absolute; left:24%; top:4.71%; width:44%; height:49.5%; z-index:2; }
+  .hole{ position:absolute; left:6.92%; width:87.92%; overflow:hidden; background:#0c0c0c; }
+  .hole.h1{ top:6.72%; height:38.89%; } .hole.h2{ top:48.11%; height:38.94%; }
+  .hole img{ width:100%; height:100%; object-fit:cover; }
+  .tpl{ position:absolute; inset:0; width:100%; height:100%; }
+
+  /* ===== I · DROP & BOUNCE ===== */
+  .play-I{ animation: optDrop 1.15s both; }
+  @keyframes optDrop {
+    0%{ opacity:0; transform:translate(-50%,-175%); animation-timing-function:cubic-bezier(0.6,0,0.9,0.4); }
+    45%{ opacity:1; transform:translate(-50%,-50%); animation-timing-function:cubic-bezier(0.2,0.6,0.4,1); }
+    60%{ transform:translate(-50%,-60%); animation-timing-function:ease-in; }
+    75%{ transform:translate(-50%,-50%); animation-timing-function:cubic-bezier(0.2,0.6,0.4,1); }
+    87%{ transform:translate(-50%,-54%); animation-timing-function:ease-in; }
+    100%{ transform:translate(-50%,-50%); }
+  }
+  /* ===== J · IRIS REVEAL ===== */
+  .play-J{ animation: optIris 0.95s cubic-bezier(0.4,0,0.2,1) both; }
+  @keyframes optIris { 0%{ opacity:0.4; transform:translate(-50%,-50%) scale(1.08); } 100%{ opacity:1; transform:translate(-50%,-50%) scale(1); } }
+  .play-J .wrap{ animation: irisClip 0.95s cubic-bezier(0.4,0,0.2,1) both; }
+  @keyframes irisClip { 0%{ clip-path: circle(0px at 50% 42%); } 100%{ clip-path: circle(640px at 50% 42%); } }
+  /* ===== K · SWING IN (pendulum) ===== */
+  .play-K{ animation: optSwing 1.15s cubic-bezier(0.3,0.6,0.3,1) both; transform-origin:50% 0%; }
+  @keyframes optSwing {
+    0%{ opacity:0; transform:translate(-50%,-50%) rotate(34deg); }
+    35%{ opacity:1; }
+    55%{ transform:translate(-50%,-50%) rotate(-14deg); }
+    73%{ transform:translate(-50%,-50%) rotate(7deg); }
+    88%{ transform:translate(-50%,-50%) rotate(-3deg); }
+    100%{ transform:translate(-50%,-50%) rotate(0deg); }
+  }
+  /* ===== L · 3D TILT-IN ===== */
+  .play-L{ animation: optTilt 0.9s cubic-bezier(0.25,1,0.4,1) both; }
+  @keyframes optTilt { 0%{ opacity:0; transform:translate(-50%,-50%) perspective(900px) rotateX(34deg) rotateY(-22deg) scale(0.86); } 55%{ opacity:1; } 100%{ opacity:1; transform:translate(-50%,-50%) perspective(900px) rotateX(0) rotateY(0) scale(1); } }
+  /* ===== M · DEAL (card toss in) ===== */
+  .play-M{ animation: optDeal 0.85s cubic-bezier(0.3,1,0.4,1) both; }
+  @keyframes optDeal { 0%{ opacity:0; transform:translate(55%,40%) rotate(30deg) scale(0.92); } 45%{ opacity:1; } 100%{ opacity:1; transform:translate(-50%,-50%) rotate(0deg) scale(1); } }
+  /* ===== N · ZOOM-BLUR (dolly) ===== */
+  .play-N{ animation: optBlur 0.9s cubic-bezier(0.2,0.8,0.3,1) both; }
+  @keyframes optBlur { 0%{ opacity:0; transform:translate(-50%,-50%) scale(1.7); filter:blur(12px); } 45%{ opacity:1; } 100%{ opacity:1; transform:translate(-50%,-50%) scale(1); filter:blur(0); } }
+
+  .flash{ position:absolute; inset:0; background:#fff; opacity:0; z-index:4; pointer-events:none; }
+  .flash.go{ animation: fl 0.4s ease-out; }
+  @keyframes fl{ 0%{opacity:0.8} 100%{opacity:0} }
+
+  .opts{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; }
+  .opt{ text-align:left; border:1px solid #2a2a32; background:#17171d; color:#ededf0; font:inherit; padding:12px 13px; border-radius:12px; cursor:pointer; transition:transform .12s,border-color .15s; }
+  .opt:active{ transform:scale(.97); } .opt.on{ border-color:#ed4836; background:#221316; }
+  .opt b{ font-size:14px; font-weight:800; display:block; } .opt small{ color:#9696a0; font-size:11px; line-height:1.35; display:block; margin-top:3px; }
+  .replay{ width:100%; margin-top:12px; border:1px solid #ed4836; background:#ed4836; color:#fff; font:inherit; font-size:15px; font-weight:800; padding:13px; border-radius:12px; cursor:pointer; }
+  .replay:active{ transform:scale(.98); }
+  .note{ color:#9696a0; font-size:12px; line-height:1.6; margin-top:16px; }
+</style>
+</head>
+<body>
+  <h1>Animasi snap → preview · 6 ide bagus</h1>
+  <p class="sub">Batch ke-3. Pencet buat lihat, atau Replay. (Lihat juga <a href="preview.html">A–D</a> &amp; <a href="preview2.html">E–H</a>.)</p>
+
+  <div class="stage">
+    <div class="card" id="card">
+      <div class="wrap">
+        <img class="hb" src="../assets/hand-back.webp" alt="">
+        <div class="slot">
+          <div class="hole h1"><img src="sample.jpg" alt=""></div>
+          <div class="hole h2"><img src="sample.jpg" alt=""></div>
+          <img class="tpl" src="../assets/template-artworks.webp" alt="">
+        </div>
+        <img class="hf" src="../assets/hand-front.webp" alt="">
+      </div>
+    </div>
+    <div class="flash" id="flash"></div>
+  </div>
+
+  <div class="opts" id="opts">
+    <button class="opt on" data-opt="I"><b>I · Drop &amp; bounce</b><small>jatuh dari atas lalu mantul mendarat</small></button>
+    <button class="opt" data-opt="J"><b>J · Iris reveal</b><small>kebuka dari lingkaran tengah (kayak rana)</small></button>
+    <button class="opt" data-opt="K"><b>K · Swing in</b><small>mengayun masuk kayak digantung</small></button>
+    <button class="opt" data-opt="L"><b>L · 3D tilt</b><small>miring 3D lalu rata, berdimensi</small></button>
+    <button class="opt" data-opt="M"><b>M · Deal</b><small>masuk dari sudut sambil muter kayak kartu dibagi</small></button>
+    <button class="opt" data-opt="N"><b>N · Zoom-blur</b><small>zoom + blur yang menajam, sinematik</small></button>
+  </div>
+  <button class="replay" id="replay">▶ Replay animasi I</button>
+
+  <p class="note">Pilih yang kamu suka (atau gabungan), nanti kupasang ke app. Favoritku: <b>I (drop &amp; bounce)</b> playful, <b>J (iris)</b> nyambung sama circle-wipe, <b>L (3D tilt)</b> paling "wah".</p>
+
+<script>
+  var card=document.getElementById('card'), flash=document.getElementById('flash'), replay=document.getElementById('replay');
+  var cur='I';
+  function play(opt){
+    cur=opt; card.className='card'; flash.className='flash';
+    void card.offsetWidth;
+    flash.classList.add('go'); card.classList.add('play-'+opt);
+    replay.textContent='▶ Replay animasi '+opt;
+    document.querySelectorAll('.opt').forEach(function(b){ b.classList.toggle('on', b.dataset.opt===opt); });
+  }
+  document.getElementById('opts').addEventListener('click', function(e){ var b=e.target.closest('.opt'); if(b) play(b.dataset.opt); });
+  replay.addEventListener('click', function(){ play(cur); });
+  window.addEventListener('load', function(){ setTimeout(function(){ play('I'); }, 350); });
+</script>
+</body>
+</html>
