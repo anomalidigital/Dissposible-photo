@@ -933,22 +933,6 @@
       text-align: center;
     }
 
-    /* Camera intro = circle wipe. A dark overlay irises OPEN from the centre to
-       reveal the live camera (s1) behind it. The hole grows via width/height
-       (NOT transform / clip-path) so its edge stays razor-sharp at any size and
-       the motion is smooth on phones — the same proven mechanism as the old logo
-       intro. (Scaling a box-shadow blurs it; clip-path can judder.) */
-    .wipe-overlay { position: fixed; inset: 0; z-index: 9999; display: none; overflow: hidden; pointer-events: none; }
-    .wipe-iris {
-      position: absolute; left: 50%; top: 50%; width: 0; height: 0;
-      transform: translate(-50%, -50%); border-radius: 50%; background: transparent;
-      box-shadow: 0 0 0 1300px rgba(17, 17, 17, 0); will-change: width, height;
-    }
-    /* The hole grows over a DARK field (#111, matching the app) so the camera
-       circle sweeps cleanly across the whole screen, not just the video box. */
-    .wipe-overlay.run .wipe-iris { animation: irisWipe 1.7s linear forwards; }
-    @keyframes irisWipe {
-      0%   { width: 0; height: 0; box-shadow: 0 0 0 1300px rgba(17, 17, 17, 0); animation-timing-function: ease-in; }
-      14%  { width: 0; height: 0; box-shadow: 0 0 0 1300px rgba(17, 17, 17, 1); animation-timing-function: cubic-bezier(0.45, 0.02, 0.35, 1); }
-      100% { width: 1100px; height: 1100px; box-shadow: 0 0 0 1300px rgba(17, 17, 17, 1); }
-    }
+    /* Camera intro / "Snap again" = circle REVEAL: the camera (s1) grows from a
+       centre circle on top of the current page (clip-path on s1, set in JS), so
+       the page stays visible until the camera covers it. */

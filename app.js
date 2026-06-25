@@ -201,43 +201,55 @@
     startCamera();
   }
 
-  // Circle wipe: a dark overlay irises OPEN from the centre to reveal the live
-  // camera (s1) behind it. The hole grows via width/height (sharp + smooth on
-  // phones). The landing -> camera page swap happens while the dark fully covers
-  // the screen (~180ms), so the switch is invisible.
+  // Circle reveal: the camera (s1) grows from a centre circle ON TOP of the
+  // current page, which stays fully visible until the circle covers it — no dark
+  // field, no blank. clip-path on s1 keeps the page behind in view through the
+  // wipe, then show(1) hides it once the camera fills the screen.
   function playCircleWipe() {
-    var overlay = document.getElementById('wipe-overlay');
-    var iris = document.getElementById('wipe-iris');
+    var s1 = document.getElementById('s1');
+    if (!s1) return;
     if (introTimer) { clearTimeout(introTimer); introTimer = null; }
-    overlay.style.display = 'block';
-    overlay.classList.remove('run');
-    iris.style.animation = 'none';
-    void iris.offsetWidth; // restart the keyframe animation if replayed
-    iris.style.animation = '';
-    overlay.classList.add('run');
-
-    // swap to the live camera while the light field fully covers the screen
-    setTimeout(function() { if (currentState !== 1) show(1); }, 245);
+    currentState = 1; // heading to the camera (keeps the startCamera error path happy)
+    s1.style.display = 'flex';
+    s1.style.opacity = '1';
+    s1.style.zIndex = '50';            // on top of the page we came from
+    s1.style.pointerEvents = 'none';   // taps fall through to nothing mid-wipe
+    s1.style.willChange = 'clip-path';
+    s1.style.transition = 'none';
+    var c0 = 'circle(0px at 50% 50%)';
+    s1.style.webkitClipPath = c0; s1.style.clipPath = c0;
+    void s1.offsetWidth;
+    var maxR = Math.ceil(Math.hypot(window.innerWidth, window.innerHeight)) + 40;
+    var cMax = 'circle(' + maxR + 'px at 50% 50%)';
+    var ease = 'cubic-bezier(0.5, 0, 0.25, 1)';
+    s1.style.transition = '-webkit-clip-path 1.05s ' + ease + ', clip-path 1.05s ' + ease;
+    s1.style.webkitClipPath = cMax; s1.style.clipPath = cMax;
 
     var finished = false;
     function done(e) {
-      if (e && e.animationName !== 'irisWipe') return;
+      if (e && e.propertyName && e.propertyName.indexOf('clip') < 0) return;
       if (finished) return;
       finished = true;
       if (introTimer) { clearTimeout(introTimer); introTimer = null; }
-      iris.removeEventListener('animationend', done);
-      overlay.classList.remove('run');
-      overlay.style.display = 'none';
-      if (currentState !== 1) show(1);
+      s1.removeEventListener('transitionend', done);
+      s1.style.transition = 'none';
+      s1.style.clipPath = 'none'; s1.style.webkitClipPath = 'none';
+      s1.style.zIndex = ''; s1.style.pointerEvents = ''; s1.style.willChange = '';
+      show(1); // now hide the page behind + run the camera retro/doodles
     }
-    iris.addEventListener('animationend', done);
-    introTimer = setTimeout(done, 2000); // fallback if animationend never fires
+    s1.addEventListener('transitionend', done);
+    introTimer = setTimeout(done, 1500); // fallback if transitionend never fires
   }
 
+  // Cancel a circle reveal in flight + clear the temp clip styles off s1.
   function hideIntroOverlay() {
     if (introTimer) { clearTimeout(introTimer); introTimer = null; }
-    var overlay = document.getElementById('wipe-overlay');
-    if (overlay) { overlay.classList.remove('run'); overlay.style.display = 'none'; }
+    var s1 = document.getElementById('s1');
+    if (s1) {
+      s1.style.transition = 'none';
+      s1.style.clipPath = 'none'; s1.style.webkitClipPath = 'none';
+      s1.style.zIndex = ''; s1.style.pointerEvents = ''; s1.style.willChange = '';
+    }
   }
 
   function requestCamera() {
