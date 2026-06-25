@@ -8,7 +8,6 @@
   var lastCaptured = null;
   var introTimer = null;
   var confirmRevealTimer = null;
-  var lastViewRect = null; // where the live view sat on screen, so a frame can start matched to it
 
   // Per-frame box rects for the polaroid clip (fractions of the frame W/H);
   // the captured photo is drawn into rects[k] each frame so it rides the moving box.
@@ -188,6 +187,7 @@
     document.getElementById('cam-ph').style.display = 'flex';
     // Play the wipe IMMEDIATELY on tap (no waiting for the camera) and warm the
     // camera up in parallel, so there's zero pause between click and transition.
+    var s1r = document.getElementById('s1'); if (s1r) { s1r.style.transition = 'none'; s1r.style.opacity = '1'; }
     playCircleWipe();
     startCamera();
   }
@@ -300,10 +300,6 @@
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     lastCaptured = canvas.toDataURL('image/jpeg', 0.9);
 
-    // remember the live-view rectangle so the frame can start matched to it
-    var vf = document.getElementById('viewfinder');
-    if (vf) { var r = vf.getBoundingClientRect(); lastViewRect = { left: r.left, top: r.top, width: r.width, height: r.height }; }
-
     var flash = document.getElementById('flash');
     flash.classList.remove('flash');
     void flash.offsetWidth;
@@ -364,50 +360,12 @@
     return { t: 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')', tx: tx, ty: ty, s: s };
   }
 
-  // A frame matched to where the live view sat (the zoomed-in start of a preview).
-  function viewTransform(idx) {
-    if (!lastViewRect) return { t: 'none', tx: 0, ty: 0, s: 1 };
-    return rectTransform(document.querySelector('.frame-hole.hole-' + (idx + 1)), lastViewRect);
-  }
-
   // The settled "card in hand" view: zoom in on the template so the photos read
   // clearly and the hand isn't dominant (forearm runs off-screen, fingers stay).
   function restTransform() {
     var vw = window.innerWidth, vh = window.innerHeight;
     var cardW = Math.min(vw * 0.58, 290);
     return rectTransform(document.querySelector('.tpl-slot'), { left: (vw - cardW) / 2, top: vh * 0.24, width: cardW });
-  }
-  // Zoomed-in start of a preview: the template nearly fills the view, then the
-  // card + hand recede (zoom out) to the settled spot.
-  function zoomStartTransform() {
-    var vw = window.innerWidth, vh = window.innerHeight;
-    var cardW = vw * 0.95;
-    return rectTransform(document.querySelector('.tpl-slot'), { left: (vw - cardW) / 2, top: vh * 0.07, width: cardW });
-  }
-
-  // Animate the hand-stage from one transform string to another (GPU transform).
-  // fadeOut=true also fades it away during the move (for the zoom-in to camera).
-  function animateStage(fromT, toT, dur, onDone, fadeOut) {
-    var stage = document.getElementById('hand-stage');
-    stage.style.transformOrigin = '0 0';
-    stage.style.transition = 'none';
-    stage.style.opacity = '1';
-    stage.style.transform = fromT;
-    void stage.offsetWidth;
-    var tr = 'transform ' + dur + 's cubic-bezier(0.22, 1, 0.36, 1)';
-    if (fadeOut) tr += ', opacity ' + (dur * 0.7).toFixed(2) + 's ease ' + (dur * 0.25).toFixed(2) + 's';
-    stage.style.transition = tr;
-    stage.style.transform = toT;
-    if (fadeOut) stage.style.opacity = '0';
-    var done = false;
-    function fin(e) {
-      if (e && e.propertyName && e.propertyName !== 'transform') return;
-      if (done) return; done = true;
-      stage.removeEventListener('transitionend', fin);
-      if (onDone) onDone();
-    }
-    stage.addEventListener('transitionend', fin);
-    setTimeout(fin, dur * 1000 + 300);
   }
 
   // Slide the settled card off to the right (keeping its scale) + fade out.
@@ -422,6 +380,62 @@
     stage.style.transform = 'translate(' + (r.tx + window.innerWidth * 1.15) + 'px,' + r.ty + 'px) scale(' + r.s + ')';
     stage.style.opacity = '0';
     setTimeout(onDone, 580);
+  }
+
+  // Slot (template) centre in the hand-stage's own un-transformed pixels — the
+  // pivot so a "slight rotate" tilts the card in place instead of swinging it.
+  function slotCenterLocal() {
+    var stage = document.getElementById('hand-stage');
+    stage.style.transition = 'none';
+    var keep = stage.style.transform;
+    stage.style.transform = 'none';
+    var sr = stage.getBoundingClientRect();
+    var sl = document.querySelector('.tpl-slot').getBoundingClientRect();
+    stage.style.transform = keep;
+    return { x: (sl.left - sr.left) + sl.width / 2, y: (sl.top - sr.top) + sl.height / 2 };
+  }
+
+  // Choppy stop-motion move of the hand-stage between two {tx,ty,s} states (same
+  // scale), with a slight decaying rotate around the card centre. ease-out by
+  // default; easeIn for exits. fade=true fades it away as it leaves.
+  function stopMotion(from, to, opts, onDone) {
+    opts = opts || {};
+    var stage = document.getElementById('hand-stage');
+    var steps = opts.steps || 9, rot = opts.rotate || 4, fade = opts.fade, easeIn = opts.easeIn;
+    var O = slotCenterLocal(), k = 1 - from.s; // compensate so the slot centre is the pivot
+    stage.style.transformOrigin = O.x + 'px ' + O.y + 'px';
+    stage.style.transition = 'none';
+    stage.style.opacity = '1';
+    function frame(p, rr, op) {
+      var tx = from.tx + (to.tx - from.tx) * p - k * O.x;
+      var ty = from.ty + (to.ty - from.ty) * p - k * O.y;
+      stage.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + from.s + ') rotate(' + rr + 'deg)';
+      if (fade) stage.style.opacity = String(op);
+    }
+    frame(0, 0, 1);
+    void stage.offsetWidth;
+    var i = 0;
+    var iv = setInterval(function() {
+      i++;
+      var p = Math.min(1, i / steps);
+      var ep = easeIn ? p * p : 1 - (1 - p) * (1 - p);
+      var rr = (i % 2 ? 1 : -1) * (1 - p) * rot;          // decaying wobble
+      var op = fade ? Math.max(0, 1 - p * 1.2) : 1;       // fade out a touch early
+      frame(ep, rr, op);
+      if (i >= steps) { clearInterval(iv); frame(1, 0, fade ? 0 : 1); if (onDone) onDone(); }
+    }, opts.interval || 70);
+    return iv;
+  }
+
+  // Swap to the camera (sesi foto) with a quick fade so the choppy exit resolves
+  // smoothly into the live view.
+  function showCameraSmooth() {
+    show(1);
+    var s1 = document.getElementById('s1');
+    if (!s1) return;
+    s1.style.transition = 'none'; s1.style.opacity = '0';
+    void s1.offsetWidth;
+    s1.style.transition = 'opacity 0.4s ease'; s1.style.opacity = '1';
   }
 
   function resetHandStage() {
@@ -461,29 +475,18 @@
     function start() {
       if (started) return; started = true;
       requestAnimationFrame(function() { requestAnimationFrame(function() {
-        // ZOOM OUT: the template starts filling the view, then the card + hand
-        // recede smoothly to the settled spot. (Compute both transforms before
-        // setting the transition — rectTransform clears it while measuring.)
-        var zt = zoomStartTransform().t;
-        var rt = restTransform().t;
-        stage.style.transformOrigin = '0 0';
-        stage.style.transition = 'none';
-        stage.style.transform = zt;   // template zoomed in (big)
-        stage.style.opacity = '0';
-        if (img) img.classList.add('show');
-        void stage.offsetWidth;
-        stage.style.transition = 'transform 1.0s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease';
-        stage.style.transform = rt;   // recede (zoom out) to rest
-        stage.style.opacity = '1';
+        // RISE: the preview springs up from below the screen in choppy stop-motion
+        // steps with a slight rotate, then settles. (no zoom.)
+        var r = restTransform();
+        var below = window.innerHeight * 0.9;
+        if (img) img.classList.add('show'); // captured photo fades in as it rises
         playDoodles('s1b', false);
-        var done = false;
-        function fin(e) {
-          if (e && e.propertyName && e.propertyName !== 'transform') return;
-          if (done) return; done = true;
-          stage.removeEventListener('transitionend', fin); revealConfirmButtons();
-        }
-        stage.addEventListener('transitionend', fin);
-        setTimeout(fin, 1120);
+        stopMotion(
+          { tx: r.tx, ty: r.ty + below, s: r.s },   // start below, off-screen
+          { tx: r.tx, ty: r.ty, s: r.s },           // settle at rest
+          { rotate: 4, steps: 9, interval: 70 },
+          revealConfirmButtons
+        );
       }); });
     }
     if (img && img.complete && img.naturalWidth) start();
@@ -494,13 +497,19 @@
   function retakePhoto() {
     hideConfirmButtons();
     playDoodles('s1b', true); // doodles reverse out as the card leaves
-    animateStage(restTransform().t, zoomStartTransform().t, 0.65, function() { // zoom back in + fade
-      lastCaptured = null;
-      document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-      show(1);
-      requestCamera();
-      resetHandStage();
-    }, true);
+    var r = restTransform();
+    stopMotion(
+      { tx: r.tx, ty: r.ty, s: r.s },
+      { tx: r.tx, ty: r.ty + window.innerHeight * 1.1, s: r.s }, // reverse back DOWN, off-screen
+      { rotate: 4, steps: 8, interval: 70, fade: true, easeIn: true },
+      function() {
+        lastCaptured = null;
+        document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
+        showCameraSmooth();
+        requestCamera();
+        resetHandStage();
+      }
+    );
   }
 
   function confirmPhoto() {
@@ -514,15 +523,22 @@
         goToProcessing();
       });
     } else {
-      // commit this shot, then zoom back in + reopen camera for the next session.
+      // commit this shot, then the card exits to the RIGHT (choppy + rotate) and
+      // the camera fades back in for the next session.
       photos.push(lastCaptured); photoCount++; lastCaptured = null;
       paintHoles(-1);
       document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-      animateStage(restTransform().t, zoomStartTransform().t, 0.65, function() {
-        show(1);
-        requestCamera();
-        resetHandStage();
-      }, true);
+      var r = restTransform();
+      stopMotion(
+        { tx: r.tx, ty: r.ty, s: r.s },
+        { tx: r.tx + window.innerWidth * 1.15, ty: r.ty, s: r.s }, // exit to the right
+        { rotate: 4, steps: 8, interval: 70, fade: true, easeIn: true },
+        function() {
+          showCameraSmooth();
+          requestCamera();
+          resetHandStage();
+        }
+      );
     }
   }
 
