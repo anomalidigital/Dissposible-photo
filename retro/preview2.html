@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Preview animation — fresh / unusual ideas</title>
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body{ background:#0d0d10; color:#ededf0; font-family:system-ui,-apple-system,'Segoe UI',sans-serif; padding:16px 14px 70px; max-width:480px; margin:0 auto; }
+  h1{ font-size:19px; font-weight:800; }
+  .sub{ color:#9696a0; font-size:12.5px; line-height:1.55; margin:5px 0 14px; }
+
+  .stage{ position:relative; width:100%; aspect-ratio:10/16; background:#111; border-radius:16px; overflow:hidden; perspective:1100px; }
+  .stage::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:30%; background:linear-gradient(to bottom, transparent, #111 88%); pointer-events:none; z-index:3; }
+  .card{ position:absolute; left:50%; top:52%; width:62%; transform:translate(-50%,-50%); transform-origin:center; backface-visibility:hidden; }
+  .wrap{ position:relative; width:100%; aspect-ratio:1086/1448; }
+  .hb,.hf{ position:absolute; inset:0; width:100%; height:100%; } .hf{ z-index:3; }
+  .slot{ position:absolute; left:24%; top:4.71%; width:44%; height:49.5%; z-index:2; }
+  .hole{ position:absolute; left:6.92%; width:87.92%; overflow:hidden; background:#0c0c0c; }
+  .hole.h1{ top:6.72%; height:38.89%; } .hole.h2{ top:48.11%; height:38.94%; }
+  .hole img{ width:100%; height:100%; object-fit:cover; }
+  .tpl{ position:absolute; inset:0; width:100%; height:100%; }
+
+  /* ===== E · STAMP (stop-motion slam + squash) ===== */
+  .play-E{ animation: optStamp 0.85s steps(7) both; }
+  @keyframes optStamp {
+    0%{ opacity:0; transform:translate(-50%,-128%) scale(1.55); }
+    45%{ opacity:1; transform:translate(-50%,-50%) scale(1.5); }
+    58%{ transform:translate(-50%,-47%) scale(1.06,0.86); }
+    72%{ transform:translate(-50%,-50%) scale(0.97,1.04); }
+    100%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+  }
+  /* ===== F · SHAKE & DEVELOP (polaroid) ===== */
+  .play-F{ animation: optShake 1.35s ease both; }
+  @keyframes optShake {
+    0%{ opacity:0; transform:translate(-50%,-135%) rotate(0); }
+    32%{ opacity:1; transform:translate(-50%,-50%) rotate(0); }
+    44%{ transform:translate(-53%,-50%) rotate(-2.5deg); }
+    56%{ transform:translate(-47%,-50%) rotate(2.5deg); }
+    68%{ transform:translate(-52%,-50%) rotate(-1.6deg); }
+    80%{ transform:translate(-49%,-50%) rotate(1deg); }
+    100%{ transform:translate(-50%,-50%) rotate(0); }
+  }
+  .play-F .hole img{ animation: develop 1.5s ease both; }
+  @keyframes develop { 0%{ filter:sepia(1) brightness(0.4) contrast(0.8); } 60%{ filter:sepia(0.4) brightness(0.9); } 100%{ filter:none; } }
+
+  /* ===== G · FILM-STRIP PULL (jerky film advance) ===== */
+  .play-G{ animation: optFilm 0.85s steps(5) both; }
+  @keyframes optFilm { 0%{ opacity:0; transform:translate(70%,-50%); } 20%{ opacity:1; } 100%{ opacity:1; transform:translate(-50%,-50%); } }
+
+  /* ===== H · SPIN-TOSS ===== */
+  .play-H{ animation: optSpin 0.9s cubic-bezier(0.3,1.4,0.5,1) both; }
+  @keyframes optSpin { 0%{ opacity:0; transform:translate(-50%,-95%) scale(0.35) rotate(-38deg); } 55%{ opacity:1; } 100%{ opacity:1; transform:translate(-50%,-50%) scale(1) rotate(0deg); } }
+
+  .flash{ position:absolute; inset:0; background:#fff; opacity:0; z-index:4; pointer-events:none; }
+  .flash.go{ animation: fl 0.4s ease-out; }
+  @keyframes fl{ 0%{opacity:0.8} 100%{opacity:0} }
+
+  .opts{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; }
+  .opt{ text-align:left; border:1px solid #2a2a32; background:#17171d; color:#ededf0; font:inherit; padding:12px 13px; border-radius:12px; cursor:pointer; transition:transform .12s,border-color .15s; }
+  .opt:active{ transform:scale(.97); } .opt.on{ border-color:#ed4836; background:#221316; }
+  .opt b{ font-size:14px; font-weight:800; display:block; } .opt small{ color:#9696a0; font-size:11px; line-height:1.35; display:block; margin-top:3px; }
+  .replay{ width:100%; margin-top:12px; border:1px solid #ed4836; background:#ed4836; color:#fff; font:inherit; font-size:15px; font-weight:800; padding:13px; border-radius:12px; cursor:pointer; }
+  .replay:active{ transform:scale(.98); }
+  .note{ color:#9696a0; font-size:12px; line-height:1.6; margin-top:16px; }
+  .note a{ color:#ed8a7a; }
+</style>
+</head>
+<body>
+  <h1>Animasi snap → preview · ide ga biasa</h1>
+  <p class="sub">Lanjutan dari <a href="preview.html" style="color:#ed8a7a">opsi A–D</a>. Ini 4 ide yang lebih unik. Pencet buat lihat, atau Replay. Bisa juga digabung sama A.</p>
+
+  <div class="stage">
+    <div class="card" id="card">
+      <div class="wrap">
+        <img class="hb" src="../assets/hand-back.webp" alt="">
+        <div class="slot">
+          <div class="hole h1"><img src="sample.jpg" alt=""></div>
+          <div class="hole h2"><img src="sample.jpg" alt=""></div>
+          <img class="tpl" src="../assets/template-artworks.webp" alt="">
+        </div>
+        <img class="hf" src="../assets/hand-front.webp" alt="">
+      </div>
+    </div>
+    <div class="flash" id="flash"></div>
+  </div>
+
+  <div class="opts" id="opts">
+    <button class="opt on" data-opt="E"><b>E · Stamp</b><small>kartu "dicap" turun keras + mantul (stop-motion)</small></button>
+    <button class="opt" data-opt="F"><b>F · Shake &amp; develop</b><small>jatuh, goyang, foto "develop" dari pudar → jelas</small></button>
+    <button class="opt" data-opt="G"><b>G · Film pull</b><small>geser masuk patah-patah kayak film maju</small></button>
+    <button class="opt" data-opt="H"><b>H · Spin-toss</b><small>kartu dilempar muter lalu mendarat</small></button>
+  </div>
+  <button class="replay" id="replay">▶ Replay animasi E</button>
+
+  <p class="note">Favoritku buat retro: <b>F (shake &amp; develop)</b> — paling kerasa polaroid jadul. <b>E (stamp)</b> juga nyatu sama doodle stop-motion. Bilang aja mau yang mana, atau gabung (mis. "A masuknya, terus F develop-nya").</p>
+
+<script>
+  var card=document.getElementById('card'), flash=document.getElementById('flash'), replay=document.getElementById('replay');
+  var cur='E';
+  function play(opt){
+    cur=opt; card.className='card'; flash.className='flash';
+    void card.offsetWidth;
+    flash.classList.add('go'); card.classList.add('play-'+opt);
+    replay.textContent='▶ Replay animasi '+opt;
+    document.querySelectorAll('.opt').forEach(function(b){ b.classList.toggle('on', b.dataset.opt===opt); });
+  }
+  document.getElementById('opts').addEventListener('click', function(e){ var b=e.target.closest('.opt'); if(b) play(b.dataset.opt); });
+  replay.addEventListener('click', function(){ play(cur); });
+  window.addEventListener('load', function(){ setTimeout(function(){ play('E'); }, 350); });
+</script>
+</body>
+</html>
