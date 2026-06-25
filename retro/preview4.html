@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>Preview anim — stop-motion up + zoom-into-frame</title>
+<title>Preview anim — rise (stop-motion) + smooth zoom-in</title>
 <style>
   *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
   body{ background:#0d0d10; color:#ededf0; font-family:system-ui,-apple-system,'Segoe UI',sans-serif; padding:16px 14px 70px; max-width:480px; margin:0 auto; }
-  h1{ font-size:18px; font-weight:800; }
+  h1{ font-size:17px; font-weight:800; }
   .sub{ color:#9696a0; font-size:12.5px; line-height:1.55; margin:5px 0 14px; }
   .stage{ position:relative; width:100%; aspect-ratio:10/16; background:#111; border-radius:16px; overflow:hidden; }
   .stage::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:26%; background:linear-gradient(to bottom, transparent, #111 88%); pointer-events:none; z-index:5; }
@@ -23,21 +23,31 @@
   .upnext{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; background:#16161b; }
   .upnext svg{ width:24%; max-width:48px; opacity:.5; }
   .upnext span{ font-family:system-ui,sans-serif; font-weight:800; font-size:11px; letter-spacing:2px; color:rgba(255,255,255,.42); }
-  .flash{ position:absolute; inset:0; background:#fff; opacity:0; z-index:6; pointer-events:none; }
-  .flash.go{ animation: fl 0.45s ease-out; }
-  @keyframes fl{ 0%{opacity:.85} 100%{opacity:0} }
 
-  .btns{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:16px; }
-  .btns button{ font:inherit; font-size:13px; font-weight:700; padding:12px 8px; border-radius:12px; border:1px solid #2a2a32; background:#17171d; color:#ededf0; cursor:pointer; }
+  /* mock "sesi foto" that fades in once the zoom fills the screen */
+  .cam{ position:absolute; inset:0; background:#0a0a0a; opacity:0; pointer-events:none; z-index:7; display:flex; align-items:center; justify-content:center; transition:opacity .4s ease; }
+  .cam.show{ opacity:1; }
+  .cam .vf{ width:88%; aspect-ratio:3/2; border-radius:12px; background:linear-gradient(135deg,#1b1b24,#101015); border:2px solid #2c2c36; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; }
+  .cam .vf .ico{ font-size:30px; }
+  .cam .vf b{ font-size:15px; font-weight:800; letter-spacing:1px; color:#f4f4f6; }
+  .cam .vf small{ font-size:11.5px; color:#9696a0; }
+
+  .flash{ position:absolute; inset:0; background:#fff; opacity:0; z-index:6; pointer-events:none; }
+  .flash.go{ animation: fl 0.4s ease-out; }
+  @keyframes fl{ 0%{opacity:.8} 100%{opacity:0} }
+
+  .btns{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:16px; }
+  .btns button{ font:inherit; font-size:13.5px; font-weight:700; padding:13px 8px; border-radius:12px; border:1px solid #2a2a32; background:#17171d; color:#ededf0; cursor:pointer; }
   .btns button:active{ transform:scale(.97); }
   .btns .snap{ grid-column:1 / -1; background:#ed4836; border-color:#ed4836; font-size:15px; font-weight:800; }
+  .btns .reset{ grid-column:1 / -1; background:transparent; color:#9696a0; font-weight:600; }
   .note{ color:#9696a0; font-size:12px; line-height:1.6; margin-top:16px; }
   .note b{ color:#ededf0; }
 </style>
 </head>
 <body>
-  <h1>Stop-motion naik + zoom-into-frame</h1>
-  <p class="sub">Pencet <b>Jepret</b> = preview muncul dari bawah ke atas, patah-patah + goyang. <b>Retake</b> = zoom masuk frame 1. <b>Continue</b> = zoom masuk frame 2 (UP NEXT) — kayak ngebuka ke sesi foto.</p>
+  <h1>Naik patah-patah → zoom-in ke frame (smooth)</h1>
+  <p class="sub"><b>Jepret</b> = preview naik dari bawah, patah-patah. <b>Retake</b> = zoom-in penuh ke frame 1 → sesi foto. <b>Continue</b> = zoom-in penuh ke frame 2 (UP NEXT) → sesi foto.</p>
 
   <div class="stage">
     <div class="card" id="card">
@@ -51,47 +61,50 @@
         <img class="hf" src="../assets/hand-front.webp" alt="">
       </div>
     </div>
+    <div class="cam" id="cam"><div class="vf"><div class="ico">📷</div><b>SESI FOTO <span id="camnum">1</span></b><small>kamera mulai…</small></div></div>
     <div class="flash" id="flash"></div>
   </div>
 
   <div class="btns">
-    <button class="snap" id="snap">📸 Jepret (preview naik)</button>
-    <button id="retake">Retake → zoom F1</button>
-    <button id="continue">Continue → zoom F2</button>
-    <button id="reset">Reset</button>
+    <button class="snap" id="snap">📸 Jepret (preview naik, patah-patah)</button>
+    <button id="retake">↺ Retake → zoom-in F1</button>
+    <button id="continue">→ Continue → zoom-in F2</button>
+    <button class="reset" id="reset">Reset</button>
   </div>
-  <p class="note">Catatan: di app, sehabis <b>zoom masuk frame</b> (penuh) langsung lanjut ke <b>kamera</b> (sesi foto). Di sini cuma sampai zoom-nya. Cocok? Bilang aja, nanti kupasang.</p>
+  <p class="note">Alur ini cocok? Kalau ya, kupasang ke app: jepret → naik patah-patah; retake → zoom-in frame 1 → kamera; continue → zoom-in frame 2 → kamera. Mau setel kecepatan/seberapa patah-patah, bilang aja.</p>
 
 <script>
-  var card=document.getElementById('card'), flash=document.getElementById('flash');
+  var card=document.getElementById('card'), flash=document.getElementById('flash'), cam=document.getElementById('cam');
   function stageRect(){ return document.querySelector('.stage').getBoundingClientRect(); }
+  function flash_(){ flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go'); }
 
   // map an element (inside the card) to a target rect in stage-local coords (origin 0 0)
+  // measuring clears the transform/transition; save & RESTORE both so callers
+  // that already set a transition keep it (otherwise the zoom jumps instantly).
   function mapTo(el, tx, ty, w){
-    var st=stageRect(); var keep=card.style.transform;
+    var st=stageRect(); var keepT=card.style.transform, keepTr=card.style.transition;
     card.style.transition='none'; card.style.transform='none'; void card.offsetWidth;
-    var er=el.getBoundingClientRect(); card.style.transform=keep;
+    var er=el.getBoundingClientRect(); card.style.transform=keepT; card.style.transition=keepTr;
     var elx=er.left-st.left, ely=er.top-st.top, s=w/er.width;
     return { t:'translate('+(tx-s*elx)+'px,'+(ty-s*ely)+'px) scale('+s+')', tx:(tx-s*elx), ty:(ty-s*ely), s:s };
   }
   function rest(){ var st=stageRect(); return mapTo(document.querySelector('.slot'), st.width*0.21, st.height*0.20, st.width*0.58); }
   function zoomHole(sel){
-    var st=stageRect(); var keep=card.style.transform;
+    var st=stageRect(); var keepT=card.style.transform, keepTr=card.style.transition;
     card.style.transition='none'; card.style.transform='none'; void card.offsetWidth;
-    var er=document.querySelector(sel).getBoundingClientRect(); card.style.transform=keep;
+    var er=document.querySelector(sel).getBoundingClientRect(); card.style.transform=keepT; card.style.transition=keepTr;
     var elx=er.left-st.left, ely=er.top-st.top, elw=er.width, elh=er.height;
-    var s=Math.max(st.width/elw, st.height/elh)*1.1;            // cover the screen
+    var s=Math.max(st.width/elw, st.height/elh)*1.12;          // cover the screen -> "full"
     var hcx=elx+elw/2, hcy=ely+elh/2;
     return 'translate('+(st.width/2 - s*hcx)+'px,'+(st.height/2 - s*hcy)+'px) scale('+s+')';
   }
 
   var iv=null;
-  function setRest(){ if(iv){clearInterval(iv);iv=null;} card.style.transition='none'; card.style.transform=rest().t; }
+  function setRest(){ if(iv){clearInterval(iv);iv=null;} cam.classList.remove('show'); card.style.transition='none'; card.style.transform=rest().t; }
 
-  // STOP-MOTION: rise from below to rest, choppy + slight shake
+  // STOP-MOTION: rise from below to rest, choppy + slight shake (no settle-sway)
   function playUp(){
-    if(iv) clearInterval(iv);
-    flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go');
+    if(iv) clearInterval(iv); cam.classList.remove('show'); flash_();
     var r=rest(); var below=stageRect().height*0.72;
     var steps=9, i=0;
     card.style.transformOrigin='0 0'; card.style.transition='none';
@@ -106,21 +119,24 @@
     }, 70); // ~14fps -> patah-patah
   }
 
-  // SMOOTH zoom into a frame until it fills (like the logo / circle-wipe)
-  function playZoom(sel){
+  // SMOOTH zoom INTO a frame until it fills, then the photo session fades in
+  function playZoom(sel, n){
     if(iv){clearInterval(iv);iv=null;}
-    card.style.transition='none'; card.style.transform=rest().t; void card.offsetWidth;
-    card.style.transition='transform 0.95s cubic-bezier(0.5,0,0.7,0.45)';
-    card.style.transform=zoomHole(sel);
-    setTimeout(function(){ flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go'); }, 820);
+    cam.classList.remove('show');
+    var startT=rest().t, endT=zoomHole(sel);            // precompute BEFORE setting transition
+    card.style.transition='none'; card.style.transform=startT; void card.offsetWidth;
+    card.style.transition='transform 0.95s cubic-bezier(0.4,0,0.2,1)'; // smooth
+    card.style.transform=endT;
+    document.getElementById('camnum').textContent=n;
+    setTimeout(function(){ flash_(); cam.classList.add('show'); }, 760); // -> sesi foto
   }
 
   document.getElementById('snap').onclick=playUp;
-  document.getElementById('retake').onclick=function(){ playZoom('.h1'); };
-  document.getElementById('continue').onclick=function(){ playZoom('.h2'); };
+  document.getElementById('retake').onclick=function(){ playZoom('.h1', 1); };
+  document.getElementById('continue').onclick=function(){ playZoom('.h2', 2); };
   document.getElementById('reset').onclick=setRest;
   window.addEventListener('load', function(){ setRest(); setTimeout(playUp, 400); });
-  window.addEventListener('resize', setRest);
+  window.addEventListener('resize', function(){ if(!cam.classList.contains('show')) setRest(); });
 </script>
 </body>
 </html>
