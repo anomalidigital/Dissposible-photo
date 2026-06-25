@@ -377,6 +377,13 @@
     var cardW = Math.min(vw * 0.58, 290);
     return rectTransform(document.querySelector('.tpl-slot'), { left: (vw - cardW) / 2, top: vh * 0.24, width: cardW });
   }
+  // Zoomed-in start of a preview: the template nearly fills the view, then the
+  // card + hand recede (zoom out) to the settled spot.
+  function zoomStartTransform() {
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var cardW = vw * 0.95;
+    return rectTransform(document.querySelector('.tpl-slot'), { left: (vw - cardW) / 2, top: vh * 0.07, width: cardW });
+  }
 
   // Animate the hand-stage from one transform string to another (GPU transform).
   // fadeOut=true also fades it away during the move (for the zoom-in to camera).
@@ -454,19 +461,19 @@
     function start() {
       if (started) return; started = true;
       requestAnimationFrame(function() { requestAnimationFrame(function() {
-        // FILM PULL in: the card slides in smoothly from the right to its settled
-        // spot. (restTransform measures with the transition cleared, so compute it
-        // BEFORE setting the slide transition or the slide would jump.)
-        var r = restTransform();
-        var fromT = 'translate(' + (r.tx + window.innerWidth * 1.35) + 'px,' + r.ty + 'px) scale(' + r.s + ')';
+        // ZOOM OUT: the template starts filling the view, then the card + hand
+        // recede smoothly to the settled spot. (Compute both transforms before
+        // setting the transition — rectTransform clears it while measuring.)
+        var zt = zoomStartTransform().t;
+        var rt = restTransform().t;
         stage.style.transformOrigin = '0 0';
         stage.style.transition = 'none';
-        stage.style.transform = fromT;   // off-screen to the right, at rest scale
+        stage.style.transform = zt;   // template zoomed in (big)
         stage.style.opacity = '0';
         if (img) img.classList.add('show');
         void stage.offsetWidth;
-        stage.style.transition = 'transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
-        stage.style.transform = r.t;
+        stage.style.transition = 'transform 1.0s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease';
+        stage.style.transform = rt;   // recede (zoom out) to rest
         stage.style.opacity = '1';
         playDoodles('s1b', false);
         var done = false;
@@ -476,7 +483,7 @@
           stage.removeEventListener('transitionend', fin); revealConfirmButtons();
         }
         stage.addEventListener('transitionend', fin);
-        setTimeout(fin, 1000);
+        setTimeout(fin, 1120);
       }); });
     }
     if (img && img.complete && img.naturalWidth) start();
@@ -487,9 +494,7 @@
   function retakePhoto() {
     hideConfirmButtons();
     playDoodles('s1b', true); // doodles reverse out as the card leaves
-    var r = restTransform();
-    var outT = 'translate(' + (r.tx - window.innerWidth * 1.35) + 'px,' + r.ty + 'px) scale(' + r.s + ')';
-    animateStage(r.t, outT, 0.7, function() { // film pull out to the left
+    animateStage(restTransform().t, zoomStartTransform().t, 0.65, function() { // zoom back in + fade
       lastCaptured = null;
       document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
       show(1);
@@ -509,13 +514,11 @@
         goToProcessing();
       });
     } else {
-      // commit this shot, then FILM PULL the card out to the left + reopen camera.
+      // commit this shot, then zoom back in + reopen camera for the next session.
       photos.push(lastCaptured); photoCount++; lastCaptured = null;
       paintHoles(-1);
       document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-      var r = restTransform();
-      var outT = 'translate(' + (r.tx - window.innerWidth * 1.35) + 'px,' + r.ty + 'px) scale(' + r.s + ')';
-      animateStage(r.t, outT, 0.7, function() {
+      animateStage(restTransform().t, zoomStartTransform().t, 0.65, function() {
         show(1);
         requestCamera();
         resetHandStage();
