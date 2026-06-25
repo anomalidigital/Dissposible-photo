@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Preview anim — stop-motion up + zoom-into-frame</title>
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body{ background:#0d0d10; color:#ededf0; font-family:system-ui,-apple-system,'Segoe UI',sans-serif; padding:16px 14px 70px; max-width:480px; margin:0 auto; }
+  h1{ font-size:18px; font-weight:800; }
+  .sub{ color:#9696a0; font-size:12.5px; line-height:1.55; margin:5px 0 14px; }
+  .stage{ position:relative; width:100%; aspect-ratio:10/16; background:#111; border-radius:16px; overflow:hidden; }
+  .stage::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:26%; background:linear-gradient(to bottom, transparent, #111 88%); pointer-events:none; z-index:5; }
+  .card{ position:absolute; left:0; top:0; width:100%; transform-origin:0 0; will-change:transform; }
+  .wrap{ position:relative; width:100%; aspect-ratio:1086/1448; }
+  .hb,.hf{ position:absolute; inset:0; width:100%; height:100%; } .hf{ z-index:3; }
+  .slot{ position:absolute; left:24%; top:4.71%; width:44%; height:49.5%; z-index:2; }
+  .hole{ position:absolute; left:6.92%; width:87.92%; overflow:hidden; background:#0c0c0c; }
+  .hole.h1{ top:6.72%; height:38.89%; } .hole.h2{ top:48.11%; height:38.94%; }
+  .hole img{ width:100%; height:100%; object-fit:cover; }
+  .tpl{ position:absolute; inset:0; width:100%; height:100%; }
+  .upnext{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; background:#16161b; }
+  .upnext svg{ width:24%; max-width:48px; opacity:.5; }
+  .upnext span{ font-family:system-ui,sans-serif; font-weight:800; font-size:11px; letter-spacing:2px; color:rgba(255,255,255,.42); }
+  .flash{ position:absolute; inset:0; background:#fff; opacity:0; z-index:6; pointer-events:none; }
+  .flash.go{ animation: fl 0.45s ease-out; }
+  @keyframes fl{ 0%{opacity:.85} 100%{opacity:0} }
+
+  .btns{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:16px; }
+  .btns button{ font:inherit; font-size:13px; font-weight:700; padding:12px 8px; border-radius:12px; border:1px solid #2a2a32; background:#17171d; color:#ededf0; cursor:pointer; }
+  .btns button:active{ transform:scale(.97); }
+  .btns .snap{ grid-column:1 / -1; background:#ed4836; border-color:#ed4836; font-size:15px; font-weight:800; }
+  .note{ color:#9696a0; font-size:12px; line-height:1.6; margin-top:16px; }
+  .note b{ color:#ededf0; }
+</style>
+</head>
+<body>
+  <h1>Stop-motion naik + zoom-into-frame</h1>
+  <p class="sub">Pencet <b>Jepret</b> = preview muncul dari bawah ke atas, patah-patah + goyang. <b>Retake</b> = zoom masuk frame 1. <b>Continue</b> = zoom masuk frame 2 (UP NEXT) — kayak ngebuka ke sesi foto.</p>
+
+  <div class="stage">
+    <div class="card" id="card">
+      <div class="wrap">
+        <img class="hb" src="../assets/hand-back.webp" alt="">
+        <div class="slot">
+          <div class="hole h1"><img src="sample.jpg" alt=""></div>
+          <div class="hole h2"><div class="upnext"><svg viewBox="0 0 48 40" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h7l3-5h12l3 5h6a3 3 0 0 1 3 3v18a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3V14a3 3 0 0 1 3-3z"/><circle cx="22" cy="23" r="7"/></svg><span>UP NEXT</span></div></div>
+          <img class="tpl" src="../assets/template-artworks.webp" alt="">
+        </div>
+        <img class="hf" src="../assets/hand-front.webp" alt="">
+      </div>
+    </div>
+    <div class="flash" id="flash"></div>
+  </div>
+
+  <div class="btns">
+    <button class="snap" id="snap">📸 Jepret (preview naik)</button>
+    <button id="retake">Retake → zoom F1</button>
+    <button id="continue">Continue → zoom F2</button>
+    <button id="reset">Reset</button>
+  </div>
+  <p class="note">Catatan: di app, sehabis <b>zoom masuk frame</b> (penuh) langsung lanjut ke <b>kamera</b> (sesi foto). Di sini cuma sampai zoom-nya. Cocok? Bilang aja, nanti kupasang.</p>
+
+<script>
+  var card=document.getElementById('card'), flash=document.getElementById('flash');
+  function stageRect(){ return document.querySelector('.stage').getBoundingClientRect(); }
+
+  // map an element (inside the card) to a target rect in stage-local coords (origin 0 0)
+  function mapTo(el, tx, ty, w){
+    var st=stageRect(); var keep=card.style.transform;
+    card.style.transition='none'; card.style.transform='none'; void card.offsetWidth;
+    var er=el.getBoundingClientRect(); card.style.transform=keep;
+    var elx=er.left-st.left, ely=er.top-st.top, s=w/er.width;
+    return { t:'translate('+(tx-s*elx)+'px,'+(ty-s*ely)+'px) scale('+s+')', tx:(tx-s*elx), ty:(ty-s*ely), s:s };
+  }
+  function rest(){ var st=stageRect(); return mapTo(document.querySelector('.slot'), st.width*0.21, st.height*0.20, st.width*0.58); }
+  function zoomHole(sel){
+    var st=stageRect(); var keep=card.style.transform;
+    card.style.transition='none'; card.style.transform='none'; void card.offsetWidth;
+    var er=document.querySelector(sel).getBoundingClientRect(); card.style.transform=keep;
+    var elx=er.left-st.left, ely=er.top-st.top, elw=er.width, elh=er.height;
+    var s=Math.max(st.width/elw, st.height/elh)*1.1;            // cover the screen
+    var hcx=elx+elw/2, hcy=ely+elh/2;
+    return 'translate('+(st.width/2 - s*hcx)+'px,'+(st.height/2 - s*hcy)+'px) scale('+s+')';
+  }
+
+  var iv=null;
+  function setRest(){ if(iv){clearInterval(iv);iv=null;} card.style.transition='none'; card.style.transform=rest().t; }
+
+  // STOP-MOTION: rise from below to rest, choppy + slight shake
+  function playUp(){
+    if(iv) clearInterval(iv);
+    flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go');
+    var r=rest(); var below=stageRect().height*0.72;
+    var steps=9, i=0;
+    card.style.transformOrigin='0 0'; card.style.transition='none';
+    card.style.transform='translate('+r.tx+'px,'+(r.ty+below)+'px) scale('+r.s+')';
+    iv=setInterval(function(){
+      i++; var p=Math.min(1,i/steps); var ep=1-(1-p)*(1-p); // ease-out rise
+      var ty=r.ty + (1-ep)*below;
+      var wx=(i%2?1:-1)*(1-p)*8;   // goyang X
+      var wy=(i%3===0?-1:1)*(1-p)*4;
+      card.style.transform='translate('+(r.tx+wx)+'px,'+(ty+wy)+'px) scale('+r.s+')';
+      if(i>=steps){ clearInterval(iv); iv=null; card.style.transform=r.t; }
+    }, 70); // ~14fps -> patah-patah
+  }
+
+  // SMOOTH zoom into a frame until it fills (like the logo / circle-wipe)
+  function playZoom(sel){
+    if(iv){clearInterval(iv);iv=null;}
+    card.style.transition='none'; card.style.transform=rest().t; void card.offsetWidth;
+    card.style.transition='transform 0.95s cubic-bezier(0.5,0,0.7,0.45)';
+    card.style.transform=zoomHole(sel);
+    setTimeout(function(){ flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go'); }, 820);
+  }
+
+  document.getElementById('snap').onclick=playUp;
+  document.getElementById('retake').onclick=function(){ playZoom('.h1'); };
+  document.getElementById('continue').onclick=function(){ playZoom('.h2'); };
+  document.getElementById('reset').onclick=setRest;
+  window.addEventListener('load', function(){ setRest(); setTimeout(playUp, 400); });
+  window.addEventListener('resize', setRest);
+</script>
+</body>
+</html>
