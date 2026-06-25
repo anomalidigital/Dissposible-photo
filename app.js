@@ -48,7 +48,7 @@
     retroTimer = setInterval(flip, interval || 2200);
   }
   function updateRetro(n) {
-    if (n === 1) startRetro('cam-retro', 'camera', 2200);
+    if (n === 1) { startRetro('cam-retro', 'camera', 2200); playDoodles('s1', false); }
     else if (n === '1b') startRetro('confirm-retro', 'preview', 2300); // doodles entrance handled in goToConfirm (synced with the template)
     else if (n === 2) { startRetro('status-text', 'process', 1500); playDoodles('s2', false); }
     else if (n === 7) { startRetro('thanks-retro', 'thanks', 2600); playDoodles('s7', false); }
@@ -74,6 +74,16 @@
     };
     return m[k] || '';
   }
+  // Camera screen: a FEW subtle marks in the top + bottom margins only (clear of
+  // the centred viewfinder, header badge and shutter row). Dimmed via .subtle.
+  var CAMERA_DOODLES = [
+    { pos: 'top:11%;left:8%', word: 'SMILE' },
+    { pos: 'top:12%;right:8%', size: 20, k: 'star', anim: 'twinkle1' },
+    { pos: 'top:20%;right:30%', size: 14, k: 'spark', anim: 'twinkle2' },
+    { pos: 'bottom:19%;left:8%', word: 'SAY CHEESE' },
+    { pos: 'bottom:19%;right:9%', size: 20, k: 'heart' },
+    { pos: 'bottom:28%;left:31%', size: 14, k: 'diamond' }
+  ];
   var PREVIEW_DOODLES = [
     { pos: 'top:8%;left:6%', word: 'SMILE' },
     { pos: 'top:7%;left:47%', word: 'CLICK' },
@@ -112,22 +122,21 @@
     { pos: 'top:14%;right:30%', size: 14, k: 'cross', anim: 'twinkle3' },
     { pos: 'bottom:30%;left:24%', size: 16, k: 'spark', anim: 'twinkle2' }
   ];
+  // Download screen: keep WORDS out of the top centre (the "Thank you!" header +
+  // subtitle live there). Words sit in the bottom band; icons in the corners and
+  // thin side margins beside the carousel.
   var DOWNLOAD_DOODLES = [
-    { pos: 'top:9%;left:6%', word: 'THANK YOU' },
-    { pos: 'top:8%;right:8%', size: 22, k: 'heart' },
-    { pos: 'top:18%;left:34%', size: 16, k: 'spark', anim: 'twinkle1' },
-    { pos: 'top:24%;left:6%', size: 18, k: 'star', anim: 'twinkle2' },
-    { pos: 'top:30%;right:6%', word: 'MEMORIES' },
-    { pos: 'top:44%;left:6%', word: 'KEEP IT' },
-    { pos: 'top:45%;right:7%', size: 24, k: 'cam' },
-    { pos: 'top:58%;right:6%', size: 22, k: 'heart' },
-    { pos: 'bottom:20%;left:7%', word: 'SHARE' },
-    { pos: 'bottom:9%;left:30%', size: 16, k: 'spark', anim: 'twinkle3' },
-    { pos: 'bottom:10%;right:8%', word: 'LOVE' },
-    { pos: 'bottom:28%;right:22%', size: 18, k: 'star', anim: 'twinkle1' },
-    { pos: 'top:14%;right:30%', size: 18, k: 'bolt' },
-    { pos: 'bottom:30%;left:22%', size: 14, k: 'diamond' },
-    { pos: 'top:62%;left:8%', size: 30, k: 'squig' }
+    { pos: 'top:4%;left:6%', size: 18, k: 'star', anim: 'twinkle1' },
+    { pos: 'top:4%;right:7%', size: 20, k: 'heart' },
+    { pos: 'top:40%;left:3%', size: 24, k: 'cam' },
+    { pos: 'top:58%;left:3%', size: 26, k: 'squig' },
+    { pos: 'top:40%;right:4%', size: 18, k: 'star', anim: 'twinkle2' },
+    { pos: 'top:58%;right:4%', size: 20, k: 'heart' },
+    { pos: 'bottom:15%;left:6%', word: 'THANK YOU' },
+    { pos: 'bottom:15%;right:7%', word: 'LOVE' },
+    { pos: 'bottom:24%;left:30%', size: 14, k: 'diamond' },
+    { pos: 'bottom:24%;right:30%', size: 16, k: 'spark', anim: 'twinkle3' },
+    { pos: 'bottom:8%;left:33%', size: 16, k: 'bolt' }
   ];
   function buildDoodles(set) {
     return set.map(function(d, i) {
@@ -137,12 +146,12 @@
     }).join('');
   }
   function injectDoodles() {
-    var map = { s1b: PREVIEW_DOODLES, s2: PROCESS_DOODLES, s7: DOWNLOAD_DOODLES };
+    var map = { s1: CAMERA_DOODLES, s1b: PREVIEW_DOODLES, s2: PROCESS_DOODLES, s7: DOWNLOAD_DOODLES };
     Object.keys(map).forEach(function(id) {
       var s = document.getElementById(id);
       if (s && !s.querySelector('.retro-doodles')) {
         var ov = document.createElement('div');
-        ov.className = 'retro-doodles';
+        ov.className = 'retro-doodles' + (id === 's1' ? ' subtle' : '');
         ov.innerHTML = buildDoodles(map[id]);
         s.insertBefore(ov, s.firstChild);
       }
@@ -368,20 +377,6 @@
     return rectTransform(document.querySelector('.tpl-slot'), { left: (vw - cardW) / 2, top: vh * 0.24, width: cardW });
   }
 
-  // Slide the settled card off to the right (keeping its scale) + fade out.
-  function animateSlideOut(onDone) {
-    var stage = document.getElementById('hand-stage');
-    var r = restTransform();
-    stage.style.transformOrigin = '0 0';
-    stage.style.transition = 'none';
-    stage.style.transform = r.t;
-    void stage.offsetWidth;
-    stage.style.transition = 'transform 0.55s cubic-bezier(0.5, 0, 0.7, 0.2), opacity 0.55s ease';
-    stage.style.transform = 'translate(' + (r.tx + window.innerWidth * 1.15) + 'px,' + r.ty + 'px) scale(' + r.s + ')';
-    stage.style.opacity = '0';
-    setTimeout(onDone, 580);
-  }
-
   // Slot (template) centre in the hand-stage's own un-transformed pixels — the
   // pivot so a "slight rotate" tilts the card in place instead of swinging it.
   function slotCenterLocal() {
@@ -468,30 +463,30 @@
     if (img) { img.classList.remove('show'); img.src = lastCaptured; } // rendered at opacity 0 -> fades in
     if (load) load.classList.remove('show'); // hide THIS frame's "UP NEXT" so the captured photo shows
 
-    stage.style.transition = 'none'; stage.style.transform = 'none'; stage.style.opacity = '0';
+    // Reset the retro layer + park the card off-screen below BEFORE s1b paints,
+    // so swapping in never flashes a stale retro/card frame (the "glitch").
+    var ovb = document.getElementById('s1b').querySelector('.retro-doodles');
+    if (ovb) ovb.querySelectorAll('.dood').forEach(function(d) { d.style.animation = 'none'; });
+    var below = window.innerHeight * 0.9;
+    stage.style.transition = 'none'; stage.style.transformOrigin = '0 0'; stage.style.opacity = '0';
     show('1b');
+    var r0 = restTransform();
+    stage.style.transform = 'translate(' + r0.tx + 'px,' + (r0.ty + below) + 'px) scale(' + r0.s + ')';
+    stage.style.opacity = '1';
+    if (img) img.classList.add('show'); // captured photo fades in as the card rises
 
-    var started = false;
-    function start() {
-      if (started) return; started = true;
-      requestAnimationFrame(function() { requestAnimationFrame(function() {
-        // RISE: the preview springs up from below the screen in choppy stop-motion
-        // steps with a slight rotate, then settles. (no zoom.)
-        var r = restTransform();
-        var below = window.innerHeight * 0.9;
-        if (img) img.classList.add('show'); // captured photo fades in as it rises
-        playDoodles('s1b', false);
-        stopMotion(
-          { tx: r.tx, ty: r.ty + below, s: r.s },   // start below, off-screen
-          { tx: r.tx, ty: r.ty, s: r.s },           // settle at rest
-          { rotate: 4, steps: 9, interval: 70 },
-          revealConfirmButtons
-        );
-      }); });
-    }
-    if (img && img.complete && img.naturalWidth) start();
-    else if (img) { img.onload = start; img.onerror = start; setTimeout(start, 500); }
-    else start();
+    // RISE: the preview springs up from below in choppy stop-motion steps + a
+    // slight rotate, then settles. Doodles boil in alongside.
+    requestAnimationFrame(function() {
+      playDoodles('s1b', false);
+      var r = restTransform();
+      stopMotion(
+        { tx: r.tx, ty: r.ty + below, s: r.s },
+        { tx: r.tx, ty: r.ty, s: r.s },
+        { rotate: 4, steps: 9, interval: 70 },
+        revealConfirmButtons
+      );
+    });
   }
 
   function retakePhoto() {
@@ -517,11 +512,19 @@
     playDoodles('s1b', true); // doodles reverse out as the card leaves
     var isLast = (photoCount + 1 >= totalPhotos);
     if (isLast) {
-      animateSlideOut(function() {
-        photos.push(lastCaptured); photoCount++; lastCaptured = null;
-        resetHandStage();
-        goToProcessing();
-      });
+      // last shot ALSO exits to the RIGHT in choppy stop-motion (like Continue),
+      // then straight to processing.
+      var rl = restTransform();
+      stopMotion(
+        { tx: rl.tx, ty: rl.ty, s: rl.s },
+        { tx: rl.tx + window.innerWidth * 1.15, ty: rl.ty, s: rl.s },
+        { rotate: 4, steps: 8, interval: 70, fade: true, easeIn: true },
+        function() {
+          photos.push(lastCaptured); photoCount++; lastCaptured = null;
+          resetHandStage();
+          goToProcessing();
+        }
+      );
     } else {
       // commit this shot, then the card exits to the RIGHT (choppy + rotate) and
       // the camera fades back in for the next session.
