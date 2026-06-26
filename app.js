@@ -201,44 +201,36 @@
     startCamera();
   }
 
-  // Circle reveal: the camera (s1) grows from a centre circle ON TOP of the
-  // current page, which stays fully visible until the circle covers it — no dark
-  // field, no blank. clip-path on s1 keeps the page behind in view through the
-  // wipe, then show(1) hides it once the camera fills the screen.
+  // Camera entry. The fancy circle reveal is parked for now (being chosen from the
+  // retro/ demos) — this is a clean cross-fade so the build is presentable: s1
+  // fades in ON TOP of the current page, then show(1) hides what's behind.
   function playCircleWipe() {
     var s1 = document.getElementById('s1');
     if (!s1) return;
     if (introTimer) { clearTimeout(introTimer); introTimer = null; }
     currentState = 1; // heading to the camera (keeps the startCamera error path happy)
-    s1.style.display = 'flex';
-    s1.style.opacity = '1';
-    s1.style.zIndex = '50';            // on top of the page we came from
-    s1.style.pointerEvents = 'none';   // taps fall through to nothing mid-wipe
-    s1.style.willChange = 'clip-path';
     s1.style.transition = 'none';
-    var c0 = 'circle(0px at 50% 50%)';
-    s1.style.webkitClipPath = c0; s1.style.clipPath = c0;
+    s1.style.clipPath = 'none'; s1.style.webkitClipPath = 'none'; s1.style.willChange = '';
+    s1.style.zIndex = '50';            // on top of the page we came from
+    s1.style.pointerEvents = 'none';
+    s1.style.display = 'flex';
+    s1.style.opacity = '0';
     void s1.offsetWidth;
-    var maxR = Math.ceil(Math.hypot(window.innerWidth, window.innerHeight)) + 40;
-    var cMax = 'circle(' + maxR + 'px at 50% 50%)';
-    var ease = 'cubic-bezier(0.33, 0, 0.15, 1)';
-    s1.style.transition = '-webkit-clip-path 1.9s ' + ease + ', clip-path 1.9s ' + ease;
-    s1.style.webkitClipPath = cMax; s1.style.clipPath = cMax;
+    s1.style.transition = 'opacity 0.5s ease';
+    s1.style.opacity = '1';
 
     var finished = false;
-    function done(e) {
-      if (e && e.propertyName && e.propertyName.indexOf('clip') < 0) return;
+    function done() {
       if (finished) return;
       finished = true;
       if (introTimer) { clearTimeout(introTimer); introTimer = null; }
       s1.removeEventListener('transitionend', done);
       s1.style.transition = 'none';
-      s1.style.clipPath = 'none'; s1.style.webkitClipPath = 'none';
-      s1.style.zIndex = ''; s1.style.pointerEvents = ''; s1.style.willChange = '';
-      show(1); // now hide the page behind + run the camera retro/doodles
+      s1.style.zIndex = ''; s1.style.pointerEvents = '';
+      show(1); // hide the page behind + run the camera retro/doodles
     }
     s1.addEventListener('transitionend', done);
-    introTimer = setTimeout(done, 2400); // fallback if transitionend never fires
+    introTimer = setTimeout(done, 620); // fallback if transitionend never fires
   }
 
   // Cancel a circle reveal in flight + clear the temp clip styles off s1.
