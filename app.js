@@ -221,8 +221,8 @@
     void s1.offsetWidth;
     var maxR = Math.ceil(Math.hypot(window.innerWidth, window.innerHeight)) + 40;
     var cMax = 'circle(' + maxR + 'px at 50% 50%)';
-    var ease = 'cubic-bezier(0.5, 0, 0.25, 1)';
-    s1.style.transition = '-webkit-clip-path 1.05s ' + ease + ', clip-path 1.05s ' + ease;
+    var ease = 'cubic-bezier(0.4, 0, 0.2, 1)';
+    s1.style.transition = '-webkit-clip-path 1.45s ' + ease + ', clip-path 1.45s ' + ease;
     s1.style.webkitClipPath = cMax; s1.style.clipPath = cMax;
 
     var finished = false;
@@ -238,7 +238,7 @@
       show(1); // now hide the page behind + run the camera retro/doodles
     }
     s1.addEventListener('transitionend', done);
-    introTimer = setTimeout(done, 1500); // fallback if transitionend never fires
+    introTimer = setTimeout(done, 1900); // fallback if transitionend never fires
   }
 
   // Cancel a circle reveal in flight + clear the temp clip styles off s1.
@@ -434,17 +434,6 @@
     return iv;
   }
 
-  // Swap to the camera (sesi foto) with a quick fade so the choppy exit resolves
-  // smoothly into the live view.
-  function showCameraSmooth() {
-    show(1);
-    var s1 = document.getElementById('s1');
-    if (!s1) return;
-    s1.style.transition = 'none'; s1.style.opacity = '0';
-    void s1.offsetWidth;
-    s1.style.transition = 'opacity 0.4s ease'; s1.style.opacity = '1';
-  }
-
   function resetHandStage() {
     var stage = document.getElementById('hand-stage');
     if (stage) { stage.style.transition = 'none'; stage.style.transform = 'none'; stage.style.opacity = '1'; }
@@ -501,22 +490,27 @@
     });
   }
 
+  // Card slides off (down for retake / right for continue) WHILE the camera
+  // irises back in over it — the same circle reveal as the intro, so the hand-off
+  // is connected (not a flat fade) and the camera's warm-up is hidden behind the
+  // growing circle.
+  function exitToCamera(dir) {
+    var r = restTransform();
+    var to = (dir === 'down')
+      ? { tx: r.tx, ty: r.ty + window.innerHeight * 1.1, s: r.s }
+      : { tx: r.tx + window.innerWidth * 1.15, ty: r.ty, s: r.s };
+    stopMotion({ tx: r.tx, ty: r.ty, s: r.s }, to,
+      { rotate: 4, steps: 8, interval: 70, fade: true, easeIn: true }, resetHandStage);
+    requestCamera();   // warm the camera while the iris grows
+    playCircleWipe();  // camera circle reveals over the leaving card -> show(1)
+  }
+
   function retakePhoto() {
     hideConfirmButtons();
     playDoodles('s1b', true); // doodles reverse out as the card leaves
-    var r = restTransform();
-    stopMotion(
-      { tx: r.tx, ty: r.ty, s: r.s },
-      { tx: r.tx, ty: r.ty + window.innerHeight * 1.1, s: r.s }, // reverse back DOWN, off-screen
-      { rotate: 4, steps: 8, interval: 70, fade: true, easeIn: true },
-      function() {
-        lastCaptured = null;
-        document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-        showCameraSmooth();
-        requestCamera();
-        resetHandStage();
-      }
-    );
+    lastCaptured = null;
+    document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
+    exitToCamera('down'); // card drops back DOWN, camera irises in
   }
 
   function confirmPhoto() {
@@ -538,22 +532,12 @@
         }
       );
     } else {
-      // commit this shot, then the card exits to the RIGHT (choppy + rotate) and
-      // the camera fades back in for the next session.
+      // commit this shot, then the card slides RIGHT while the camera irises back
+      // in for the next session.
       photos.push(lastCaptured); photoCount++; lastCaptured = null;
       paintHoles(-1);
       document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-      var r = restTransform();
-      stopMotion(
-        { tx: r.tx, ty: r.ty, s: r.s },
-        { tx: r.tx + window.innerWidth * 1.15, ty: r.ty, s: r.s }, // exit to the right
-        { rotate: 4, steps: 8, interval: 70, fade: true, easeIn: true },
-        function() {
-          showCameraSmooth();
-          requestCamera();
-          resetHandStage();
-        }
-      );
+      exitToCamera('right');
     }
   }
 
@@ -563,7 +547,8 @@
       var e = document.getElementById(id);
       if (e) { e.style.transition = ''; e.style.opacity = '0'; }
     });
-    document.getElementById('tpl-frame').style.transform = 'scale(0.4)';
+    var tfr = document.getElementById('tpl-frame');
+    tfr.style.animation = 'none'; tfr.style.transform = 'scale(0.4)';
     var icon = document.getElementById('proc-icon');
     if (icon) { icon.style.transition = ''; icon.style.opacity = '0.3'; }
     document.getElementById('prog-c').style.strokeDashoffset = '150.8';
@@ -633,10 +618,9 @@
     }, 100);
 
     setTimeout(function() {
-      // loading template grows in from the centre, smooth
-      tf.style.transition = 'opacity 0.45s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1)';
-      tf.style.opacity = '1';
-      tf.style.transform = 'scale(1)';
+      // loading template pops in stop-motion (choppy via steps, but reads clean)
+      tf.style.transition = 'none';
+      tf.style.animation = 'procFrameIn 0.6s steps(6) both';
       cp.style.transition = 'opacity 0.4s';
       cp.style.opacity = '1';
     }, 350);
