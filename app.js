@@ -201,36 +201,43 @@
     startCamera();
   }
 
-  // Camera entry. The fancy circle reveal is parked for now (being chosen from the
-  // retro/ demos) — this is a clean cross-fade so the build is presentable: s1
-  // fades in ON TOP of the current page, then show(1) hides what's behind.
+  // Circle reveal: the camera (s1) grows from a centre circle ON TOP of the
+  // current page (which stays visible until the circle covers it), then show(1)
+  // hides what's behind. Used by the intro AND "Snap again". A bit slow (1.7s).
   function playCircleWipe() {
     var s1 = document.getElementById('s1');
     if (!s1) return;
     if (introTimer) { clearTimeout(introTimer); introTimer = null; }
     currentState = 1; // heading to the camera (keeps the startCamera error path happy)
-    s1.style.transition = 'none';
-    s1.style.clipPath = 'none'; s1.style.webkitClipPath = 'none'; s1.style.willChange = '';
+    s1.style.display = 'flex';
+    s1.style.opacity = '1';
     s1.style.zIndex = '50';            // on top of the page we came from
     s1.style.pointerEvents = 'none';
-    s1.style.display = 'flex';
-    s1.style.opacity = '0';
+    s1.style.willChange = 'clip-path';
+    s1.style.transition = 'none';
+    var c0 = 'circle(0px at 50% 50%)';
+    s1.style.webkitClipPath = c0; s1.style.clipPath = c0;
     void s1.offsetWidth;
-    s1.style.transition = 'opacity 0.5s ease';
-    s1.style.opacity = '1';
+    var maxR = Math.ceil(Math.hypot(window.innerWidth, window.innerHeight)) + 40;
+    var cMax = 'circle(' + maxR + 'px at 50% 50%)';
+    var ease = 'cubic-bezier(0.4, 0, 0.2, 1)';
+    s1.style.transition = '-webkit-clip-path 1.7s ' + ease + ', clip-path 1.7s ' + ease;
+    s1.style.webkitClipPath = cMax; s1.style.clipPath = cMax;
 
     var finished = false;
-    function done() {
+    function done(e) {
+      if (e && e.propertyName && e.propertyName.indexOf('clip') < 0) return;
       if (finished) return;
       finished = true;
       if (introTimer) { clearTimeout(introTimer); introTimer = null; }
       s1.removeEventListener('transitionend', done);
       s1.style.transition = 'none';
-      s1.style.zIndex = ''; s1.style.pointerEvents = '';
-      show(1); // hide the page behind + run the camera retro/doodles
+      s1.style.clipPath = 'none'; s1.style.webkitClipPath = 'none';
+      s1.style.zIndex = ''; s1.style.pointerEvents = ''; s1.style.willChange = '';
+      show(1);
     }
     s1.addEventListener('transitionend', done);
-    introTimer = setTimeout(done, 620); // fallback if transitionend never fires
+    introTimer = setTimeout(done, 2100); // fallback if transitionend never fires
   }
 
   // Cancel a circle reveal in flight + clear the temp clip styles off s1.
@@ -483,58 +490,26 @@
     });
   }
 
-  // Hide the preview's chrome (header + retro line) so only the card shows over
-  // the camera while it peels.
-  function s1bChrome(hide) {
-    var els = [document.querySelector('#s1b .header'), document.getElementById('confirm-retro')];
-    els.forEach(function(el) { if (el) { el.style.transition = 'none'; el.style.opacity = hide ? '0' : ''; } });
-  }
-
-  // Re-enter the camera from the preview: the card PEELS UP off its bottom edge in
-  // choppy stop-motion (retro), revealing the live camera sitting behind it.
-  function peelToCamera() {
-    var s1 = document.getElementById('s1');
-    var s1b = document.getElementById('s1b');
-    var ha = document.getElementById('hand-area');
-    if (!s1 || !s1b || !ha) return;
-    if (introTimer) { clearTimeout(introTimer); introTimer = null; }
-    if (!cameraStream) requestCamera(); // only (re)start if it isn't already warm
-    currentState = 1;
-    // live camera sits BEHIND the now-transparent preview while the card peels off
-    s1.style.transition = 'none'; s1.style.opacity = '1';
-    s1.style.clipPath = 'none'; s1.style.webkitClipPath = 'none';
-    s1.style.zIndex = ''; s1.style.pointerEvents = '';
-    s1.style.display = 'flex';
-    s1b.style.zIndex = '2'; s1b.style.background = 'transparent';
-    s1bChrome(true);
-    var ov = s1b.querySelector('.retro-doodles'); // doodles belong to the preview — drop them
-    if (ov) ov.querySelectorAll('.dood').forEach(function(d) { d.style.animation = 'none'; });
-    ha.style.transformOrigin = '50% 100%';
-    ha.style.transition = 'none';
-    ha.style.transform = 'perspective(1200px) rotateX(0deg)'; ha.style.opacity = '1';
-    void ha.offsetWidth;
-    var steps = 7, i = 0, MAX = -104;
-    var iv = setInterval(function() {
-      i++;
-      var p = Math.min(1, i / steps);
-      ha.style.transform = 'perspective(1200px) rotateX(' + (MAX * p * p) + 'deg)'; // accelerate the lift
-      ha.style.opacity = String(Math.max(0, 1 - p * 1.05));
-      if (i >= steps) {
-        clearInterval(iv);
-        ha.style.transition = 'none'; ha.style.transform = 'none'; ha.style.opacity = '1'; ha.style.transformOrigin = '';
-        s1b.style.zIndex = ''; s1b.style.background = '';
-        s1bChrome(false);
-        resetHandStage();
-        show(1); // hand off to the (already live) camera
-      }
-    }, 62);
+  // Re-enter the camera from the preview: the card slides off (down for Retake,
+  // right for Continue) in choppy stop-motion while the camera circle-reveals over
+  // it. Placeholder "seperti awal" while a wow option is chosen from the demos.
+  function exitToCamera(dir) {
+    var r = restTransform();
+    var to = (dir === 'down')
+      ? { tx: r.tx, ty: r.ty + window.innerHeight * 1.1, s: r.s }
+      : { tx: r.tx + window.innerWidth * 1.15, ty: r.ty, s: r.s };
+    stopMotion({ tx: r.tx, ty: r.ty, s: r.s }, to,
+      { rotate: 4, steps: 8, interval: 70, fade: true, easeIn: true }, resetHandStage);
+    if (!cameraStream) requestCamera(); // camera is usually still warm
+    playCircleWipe();                   // camera circle-reveals over the leaving card
   }
 
   function retakePhoto() {
     hideConfirmButtons();
+    playDoodles('s1b', true); // doodles reverse out as the card leaves
     lastCaptured = null;
     document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-    peelToCamera(); // card peels up, live camera revealed behind
+    exitToCamera('down');
   }
 
   function confirmPhoto() {
@@ -557,11 +532,11 @@
         }
       );
     } else {
-      // commit this shot, then the card peels up to reveal the camera for the next.
+      // commit this shot, then the card slides right + camera reveals for the next.
       photos.push(lastCaptured); photoCount++; lastCaptured = null;
       paintHoles(-1);
       document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-      peelToCamera();
+      exitToCamera('right');
     }
   }
 

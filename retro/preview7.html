@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Balik ke kamera — 5 ide WOW (batch 3)</title>
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body{ background:#0d0d10; color:#ededf0; font-family:system-ui,-apple-system,'Segoe UI',sans-serif; padding:16px 14px 70px; max-width:480px; margin:0 auto; }
+  h1{ font-size:17px; font-weight:800; }
+  .sub{ color:#9696a0; font-size:12.5px; line-height:1.55; margin:5px 0 14px; } .sub a{ color:#ed8a7a; }
+  .stage{ position:relative; width:100%; aspect-ratio:10/16; background:#111; border-radius:16px; overflow:hidden; perspective:1100px; }
+  .stage::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:24%; background:linear-gradient(to bottom, transparent, #111 88%); pointer-events:none; z-index:30; }
+
+  .card{ position:absolute; left:0; top:0; width:100%; transform-origin:0 0; z-index:5; will-change:transform; }
+  .wrap{ position:relative; width:100%; aspect-ratio:1086/1448; backface-visibility:hidden; }
+  .hb,.hf{ position:absolute; inset:0; width:100%; height:100%; } .hf{ z-index:3; }
+  .slot{ position:absolute; left:24%; top:4.71%; width:44%; height:49.5%; z-index:2; }
+  .hole{ position:absolute; left:6.92%; width:87.92%; overflow:hidden; background:#0c0c0c; }
+  .hole.h1{ top:6.72%; height:38.89%; } .hole.h2{ top:48.11%; height:38.94%; }
+  .hole img{ width:100%; height:100%; object-fit:cover; }
+  .tpl{ position:absolute; inset:0; width:100%; height:100%; }
+  .upnext{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; background:#16161b; }
+  .upnext svg{ width:24%; max-width:44px; opacity:.5; } .upnext span{ font-weight:800; font-size:10px; letter-spacing:2px; color:rgba(255,255,255,.42); }
+
+  .cam{ position:absolute; inset:0; background:#111; opacity:0; z-index:8; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; backface-visibility:hidden; will-change:transform; }
+  .cam .vf{ position:relative; width:88%; aspect-ratio:3/2; border-radius:10px; overflow:hidden; background:#000; }
+  .cam .vf img{ width:100%; height:100%; object-fit:cover; }
+  .cam .vf i{ position:absolute; width:18px; height:18px; border:2px solid rgba(255,255,255,.8); }
+  .cam .vf i:nth-child(2){ top:8px; left:8px; border-right:0; border-bottom:0; }
+  .cam .vf i:nth-child(3){ top:8px; right:8px; border-left:0; border-bottom:0; }
+  .cam .vf i:nth-child(4){ bottom:8px; left:8px; border-right:0; border-top:0; }
+  .cam .vf i:nth-child(5){ bottom:8px; right:8px; border-left:0; border-top:0; }
+  .cam .snap{ width:54px; height:54px; border-radius:50%; background:#ed4836; box-shadow:0 0 0 3px #ed4836; }
+
+  .burst{ position:absolute; width:60px; height:60px; border-radius:50%; background:radial-gradient(circle, #fff 0%, #fff 45%, rgba(255,255,255,0) 72%); opacity:0; z-index:25; pointer-events:none; will-change:transform,opacity; }
+  .flash{ position:absolute; inset:0; background:#fff; opacity:0; z-index:40; pointer-events:none; }
+  .flash.go{ animation: fl .4s ease-out; } @keyframes fl{ 0%{opacity:.8} 100%{opacity:0} }
+
+  .opts{ display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:16px; }
+  .opt{ text-align:left; border:1px solid #2a2a32; background:#17171d; color:#ededf0; font:inherit; padding:11px 12px; border-radius:12px; cursor:pointer; transition:transform .12s,border-color .15s; }
+  .opt:active{ transform:scale(.97); } .opt.on{ border-color:#ed4836; background:#221316; }
+  .opt b{ font-size:13.5px; font-weight:800; display:block; } .opt small{ color:#9696a0; font-size:10.5px; line-height:1.35; display:block; margin-top:3px; }
+  .replay{ width:100%; margin-top:11px; border:1px solid #ed4836; background:#ed4836; color:#fff; font:inherit; font-size:15px; font-weight:800; padding:13px; border-radius:12px; cursor:pointer; } .replay:active{ transform:scale(.98); }
+  .note{ color:#9696a0; font-size:12px; line-height:1.6; margin-top:14px; } .note b{ color:#ededf0; }
+</style>
+</head>
+<body>
+  <h1>Balik ke kamera · 5 ide WOW (batch 3)</h1>
+  <p class="sub">Lanjutan dari <a href="preview5.html">1–5</a> &amp; <a href="preview6.html">6–10</a>. Ini yang lebih "waw". Pencet / Replay.</p>
+
+  <div class="stage">
+    <div class="card" id="card">
+      <div class="wrap" id="wrap">
+        <img class="hb" src="../assets/hand-back.webp" alt="">
+        <div class="slot">
+          <div class="hole h1"><img src="sample.jpg" alt=""></div>
+          <div class="hole h2"><div class="upnext"><svg viewBox="0 0 48 40" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h7l3-5h12l3 5h6a3 3 0 0 1 3 3v18a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3V14a3 3 0 0 1 3-3z"/><circle cx="22" cy="23" r="7"/></svg><span>UP NEXT</span></div></div>
+          <img class="tpl" src="../assets/template-artworks.webp" alt="">
+        </div>
+        <img class="hf" src="../assets/hand-front.webp" alt="">
+      </div>
+    </div>
+    <div class="cam" id="cam"><div class="vf"><img src="sample.jpg" alt=""><i></i><i></i><i></i><i></i></div><div class="snap"></div></div>
+    <div class="burst" id="burst"></div>
+    <div class="flash" id="flash"></div>
+  </div>
+
+  <div class="opts" id="opts">
+    <button class="opt on" data-opt="1"><b>11 · 3D cube turn</b><small>kartu &amp; kamera sisi kubus, muter 90°</small></button>
+    <button class="opt" data-opt="2"><b>12 · Dolly zoom</b><small>zoom sinematik nyelam ke frame → kamera</small></button>
+    <button class="opt" data-opt="3"><b>13 · Page turn</b><small>kartu kebuka kayak halaman buku → kamera</small></button>
+    <button class="opt" data-opt="4"><b>14 · Flash burst</b><small>kilatan blitz meledak dari frame → kamera</small></button>
+    <button class="opt" data-opt="5"><b>15 · Spin-out</b><small>kartu muter mengecil ke titik → kamera</small></button>
+  </div>
+  <button class="replay" id="replay">▶ Replay opsi 11</button>
+
+  <p class="note">Lebih dramatis/sinematik. Favoritku buat "waw": <b>11 (cube)</b> &amp; <b>14 (flash burst)</b>. Pilih dari <b>semua 1–15</b> (3 demo) yang paling sreg — nanti kupasang.</p>
+
+<script>
+  var card=document.getElementById('card'), wrap=document.getElementById('wrap'), cam=document.getElementById('cam'),
+      burst=document.getElementById('burst'), flash=document.getElementById('flash');
+  function stageRect(){ return document.querySelector('.stage').getBoundingClientRect(); }
+  function flash_(){ flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go'); }
+  function mapTo(el, tx, ty, w){
+    var st=stageRect(), keep=card.style.transform, keepTr=card.style.transition;
+    card.style.transition='none'; card.style.transform='none'; void card.offsetWidth;
+    var er=el.getBoundingClientRect(); card.style.transform=keep; card.style.transition=keepTr;
+    var elx=er.left-st.left, ely=er.top-st.top, s=w/er.width;
+    return { t:'translate('+(tx-s*elx)+'px,'+(ty-s*ely)+'px) scale('+s+')', tx:(tx-s*elx), ty:(ty-s*ely), s:s };
+  }
+  function rest(){ var st=stageRect(); return mapTo(document.querySelector('.slot'), st.width*0.21, st.height*0.20, st.width*0.58); }
+  function zoomHole(sel){
+    var st=stageRect(), keep=card.style.transform, keepTr=card.style.transition;
+    card.style.transition='none'; card.style.transform='none'; void card.offsetWidth;
+    var er=document.querySelector(sel).getBoundingClientRect(); card.style.transform=keep; card.style.transition=keepTr;
+    var elx=er.left-st.left, ely=er.top-st.top, elw=er.width, elh=er.height;
+    var s=Math.max(st.width/elw, st.height/elh)*1.2;
+    return 'translate('+(st.width/2 - s*(elx+elw/2))+'px,'+(st.height/2 - s*(ely+elh/2))+'px) scale('+s+')';
+  }
+  function holeCenterAtRest(sel){
+    var st=stageRect(); card.style.transition='none'; card.style.transform=rest().t; void card.offsetWidth;
+    var hr=document.querySelector(sel).getBoundingClientRect();
+    return { x:(hr.left-st.left)+hr.width/2, y:(hr.top-st.top)+hr.height/2 };
+  }
+
+  var timers=[]; function clearTimers(){ timers.forEach(clearTimeout); timers=[]; }
+  function later(fn,ms){ timers.push(setTimeout(fn,ms)); }
+  function reset(){
+    clearTimers();
+    card.style.transition='none'; card.style.transform=rest().t; card.style.opacity='1'; card.style.zIndex='5'; card.style.transformOrigin='0 0';
+    wrap.style.transition='none'; wrap.style.transform='none'; wrap.style.transformOrigin='center'; wrap.style.opacity='1';
+    cam.style.transition='none'; cam.style.opacity='0'; cam.style.transform='none'; cam.style.zIndex='8'; cam.style.transformOrigin='center';
+    burst.style.transition='none'; burst.style.opacity='0'; burst.style.transform='translate(-50%,-50%) scale(0)';
+    void card.offsetWidth;
+  }
+
+  // 11 · 3D CUBE TURN — card turns away, camera turns in (3D)
+  function opt1(){
+    reset(); cam.style.zIndex='9';
+    requestAnimationFrame(function(){
+      wrap.style.transformOrigin='50% 50%';
+      wrap.style.transition='transform 0.6s cubic-bezier(0.5,0,0.5,1), opacity 0.15s ease 0.5s';
+      wrap.style.transform='perspective(1200px) rotateY(-92deg)'; wrap.style.opacity='0';
+    });
+    later(function(){
+      cam.style.opacity='1'; cam.style.transition='none'; cam.style.transform='perspective(1200px) rotateY(92deg)'; void cam.offsetWidth;
+      cam.style.transition='transform 0.6s cubic-bezier(0.2,0.8,0.3,1)'; cam.style.transform='perspective(1200px) rotateY(0deg)';
+    }, 470);
+  }
+  // 12 · DOLLY ZOOM — cinematic dive into the frame
+  function opt2(){
+    reset(); cam.style.zIndex='9';
+    requestAnimationFrame(function(){
+      card.style.transition='transform 1.05s cubic-bezier(0.55,0,0.3,1), opacity 0.4s ease 0.75s';
+      card.style.transform=zoomHole('.h2'); card.style.opacity='0';
+      cam.style.transition='opacity 0.55s ease 0.6s'; cam.style.opacity='1';
+    });
+    later(flash_, 720);
+  }
+  // 13 · PAGE TURN — card turns away like a book page, camera behind
+  function opt3(){
+    reset(); cam.style.opacity='1'; cam.style.zIndex='1'; card.style.zIndex='6';
+    requestAnimationFrame(function(){
+      wrap.style.transformOrigin='100% 50%';
+      wrap.style.transition='transform 0.98s cubic-bezier(0.45,0,0.25,1), opacity 0.4s ease 0.62s';
+      wrap.style.transform='perspective(1400px) rotateY(-168deg)'; wrap.style.opacity='0.15';
+    });
+  }
+  // 14 · FLASH BURST — blitz pops from the frame, camera underneath
+  function opt4(){
+    reset();
+    var c=holeCenterAtRest('.h2');
+    burst.style.left=c.x+'px'; burst.style.top=c.y+'px';
+    burst.style.opacity='1'; void burst.offsetWidth;
+    burst.style.transition='transform 0.55s cubic-bezier(0.4,0,0.2,1), opacity 0.45s ease 0.2s';
+    burst.style.transform='translate(-50%,-50%) scale(9)'; burst.style.opacity='0';
+    cam.style.zIndex='9'; cam.style.transition='opacity 0.3s ease 0.22s'; cam.style.opacity='1';
+    card.style.transition='opacity 0.25s ease 0.18s'; card.style.opacity='0';
+  }
+  // 15 · SPIN-OUT — card spins + shrinks to a point, camera fades up
+  function opt5(){
+    reset(); cam.style.zIndex='9';
+    var st=stageRect();
+    requestAnimationFrame(function(){
+      card.style.transition='transform 0.82s cubic-bezier(0.5,0,0.4,1), opacity 0.45s ease 0.4s';
+      card.style.transform='translate('+(st.width/2)+'px,'+(st.height/2)+'px) scale(0) rotate(560deg)'; card.style.opacity='0';
+      cam.style.transition='opacity 0.5s ease 0.38s'; cam.style.opacity='1';
+    });
+  }
+
+  var fns={'1':opt1,'2':opt2,'3':opt3,'4':opt4,'5':opt5}, num={'1':'11','2':'12','3':'13','4':'14','5':'15'}, cur='1';
+  function play(o){ cur=o; document.getElementById('replay').textContent='▶ Replay opsi '+num[o];
+    document.querySelectorAll('.opt').forEach(function(b){ b.classList.toggle('on', b.dataset.opt===o); }); fns[o](); }
+  document.getElementById('opts').addEventListener('click', function(e){ var b=e.target.closest('.opt'); if(b) play(b.dataset.opt); });
+  document.getElementById('replay').addEventListener('click', function(){ play(cur); });
+  window.addEventListener('load', function(){ reset(); setTimeout(function(){ play('1'); }, 400); });
+  window.addEventListener('resize', reset);
+</script>
+</body>
+</html>
