@@ -221,8 +221,8 @@
     void s1.offsetWidth;
     var maxR = Math.ceil(Math.hypot(window.innerWidth, window.innerHeight)) + 40;
     var cMax = 'circle(' + maxR + 'px at 50% 50%)';
-    var ease = 'cubic-bezier(0.4, 0, 0.2, 1)';
-    s1.style.transition = '-webkit-clip-path 1.45s ' + ease + ', clip-path 1.45s ' + ease;
+    var ease = 'cubic-bezier(0.33, 0, 0.15, 1)';
+    s1.style.transition = '-webkit-clip-path 1.9s ' + ease + ', clip-path 1.9s ' + ease;
     s1.style.webkitClipPath = cMax; s1.style.clipPath = cMax;
 
     var finished = false;
@@ -238,7 +238,7 @@
       show(1); // now hide the page behind + run the camera retro/doodles
     }
     s1.addEventListener('transitionend', done);
-    introTimer = setTimeout(done, 1900); // fallback if transitionend never fires
+    introTimer = setTimeout(done, 2400); // fallback if transitionend never fires
   }
 
   // Cancel a circle reveal in flight + clear the temp clip styles off s1.

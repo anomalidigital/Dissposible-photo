@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Balik ke kamera — 5 opsi (nyambung template)</title>
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  body{ background:#0d0d10; color:#ededf0; font-family:system-ui,-apple-system,'Segoe UI',sans-serif; padding:16px 14px 70px; max-width:480px; margin:0 auto; }
+  h1{ font-size:17px; font-weight:800; }
+  .sub{ color:#9696a0; font-size:12.5px; line-height:1.55; margin:5px 0 14px; }
+  .stage{ position:relative; width:100%; aspect-ratio:10/16; background:#111; border-radius:16px; overflow:hidden; }
+  .stage::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:24%; background:linear-gradient(to bottom, transparent, #111 88%); pointer-events:none; z-index:30; }
+
+  /* ---- preview card (hand + template) ---- */
+  .card{ position:absolute; left:0; top:0; width:100%; transform-origin:0 0; z-index:5; will-change:transform; }
+  .wrap{ position:relative; width:100%; aspect-ratio:1086/1448; }
+  .hb,.hf{ position:absolute; inset:0; width:100%; height:100%; } .hf{ z-index:3; }
+  .slot{ position:absolute; left:24%; top:4.71%; width:44%; height:49.5%; z-index:2; }
+  .hole{ position:absolute; left:6.92%; width:87.92%; overflow:hidden; background:#0c0c0c; }
+  .hole.h1{ top:6.72%; height:38.89%; } .hole.h2{ top:48.11%; height:38.94%; }
+  .hole img{ width:100%; height:100%; object-fit:cover; }
+  .tpl{ position:absolute; inset:0; width:100%; height:100%; }
+  .upnext{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; background:#16161b; }
+  .upnext svg{ width:24%; max-width:44px; opacity:.5; }
+  .upnext span{ font-family:system-ui,sans-serif; font-weight:800; font-size:10px; letter-spacing:2px; color:rgba(255,255,255,.42); }
+  .cam-hole{ position:absolute; inset:0; opacity:0; }
+  .cam-hole img{ width:100%; height:100%; object-fit:cover; }
+  .cam-hole .scan{ position:absolute; left:0; right:0; top:0; height:14%; background:linear-gradient(to bottom, rgba(120,220,255,.5), transparent); }
+
+  /* ---- full camera screen (target) ---- */
+  .cam{ position:absolute; inset:0; background:#111; opacity:0; z-index:10; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; will-change:transform, clip-path; }
+  .cam .vf{ position:relative; width:88%; aspect-ratio:3/2; border-radius:10px; overflow:hidden; background:#000; }
+  .cam .vf img{ width:100%; height:100%; object-fit:cover; }
+  .cam .vf i{ position:absolute; width:18px; height:18px; border:2px solid rgba(255,255,255,.8); }
+  .cam .vf i:nth-child(2){ top:8px; left:8px; border-right:0; border-bottom:0; }
+  .cam .vf i:nth-child(3){ top:8px; right:8px; border-left:0; border-bottom:0; }
+  .cam .vf i:nth-child(4){ bottom:8px; left:8px; border-right:0; border-top:0; }
+  .cam .vf i:nth-child(5){ bottom:8px; right:8px; border-left:0; border-top:0; }
+  .cam .snap{ width:54px; height:54px; border-radius:50%; background:#ed4836; box-shadow:0 0 0 3px #ed4836, 0 0 0 6px rgba(237,72,54,.25) inset; }
+
+  .flash{ position:absolute; inset:0; background:#fff; opacity:0; z-index:40; pointer-events:none; }
+  .flash.go{ animation: fl .4s ease-out; }
+  @keyframes fl{ 0%{opacity:.8} 100%{opacity:0} }
+
+  .opts{ display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:16px; }
+  .opt{ text-align:left; border:1px solid #2a2a32; background:#17171d; color:#ededf0; font:inherit; padding:11px 12px; border-radius:12px; cursor:pointer; transition:transform .12s,border-color .15s; }
+  .opt:active{ transform:scale(.97); } .opt.on{ border-color:#ed4836; background:#221316; }
+  .opt b{ font-size:13.5px; font-weight:800; display:block; } .opt small{ color:#9696a0; font-size:10.5px; line-height:1.35; display:block; margin-top:3px; }
+  .replay{ width:100%; margin-top:11px; border:1px solid #ed4836; background:#ed4836; color:#fff; font:inherit; font-size:15px; font-weight:800; padding:13px; border-radius:12px; cursor:pointer; }
+  .replay:active{ transform:scale(.98); }
+  .note{ color:#9696a0; font-size:12px; line-height:1.6; margin-top:14px; } .note b{ color:#ededf0; }
+</style>
+</head>
+<body>
+  <h1>Balik ke kamera · 5 opsi (nyambung template)</h1>
+  <p class="sub">Dari preview (kartu template) → balik ke mode kamera. Tiap opsi nyambung sama template/frame. Pencet buat lihat, atau Replay.</p>
+
+  <div class="stage">
+    <div class="card" id="card">
+      <div class="wrap" id="wrap">
+        <img class="hb" src="../assets/hand-back.webp" alt="">
+        <div class="slot">
+          <div class="hole h1"><img src="sample.jpg" alt=""></div>
+          <div class="hole h2">
+            <div class="upnext"><svg viewBox="0 0 48 40" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h7l3-5h12l3 5h6a3 3 0 0 1 3 3v18a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3V14a3 3 0 0 1 3-3z"/><circle cx="22" cy="23" r="7"/></svg><span>UP NEXT</span></div>
+            <div class="cam-hole" id="camHole"><img src="sample.jpg" alt=""><div class="scan"></div></div>
+          </div>
+          <img class="tpl" src="../assets/template-artworks.webp" alt="">
+        </div>
+        <img class="hf" src="../assets/hand-front.webp" alt="">
+      </div>
+    </div>
+    <div class="cam" id="cam">
+      <div class="vf"><img src="sample.jpg" alt=""><i></i><i></i><i></i><i></i></div>
+      <div class="snap"></div>
+    </div>
+    <div class="flash" id="flash"></div>
+  </div>
+
+  <div class="opts" id="opts">
+    <button class="opt on" data-opt="1"><b>1 · Frame zoom-dive</b><small>kartu nyelam masuk ke frame kosong → jadi kamera</small></button>
+    <button class="opt" data-opt="2"><b>2 · Iris dari frame</b><small>kamera kebuka melingkar dari posisi frame</small></button>
+    <button class="opt" data-opt="3"><b>3 · Card flip</b><small>kartu dibalik, belakangnya kamera</small></button>
+    <button class="opt" data-opt="4"><b>4 · Tangan turunin kartu</b><small>kartu diturunin, kamera di belakang muncul</small></button>
+    <button class="opt" data-opt="5"><b>5 · Frame portal</b><small>frame "nyala" jadi kamera, lalu melebar penuh</small></button>
+  </div>
+  <button class="replay" id="replay">▶ Replay opsi 1</button>
+
+  <p class="note">Semua nyambung sama template: kamera lahir dari <b>frame</b>-nya (zoom/iris/portal) atau kartu-nya kebuka/dibalik buat nunjukin kamera. Pilih favoritmu — nanti kupasang. Favoritku: <b>1</b> & <b>5</b> (paling kerasa "frame jadi kamera").</p>
+
+<script>
+  var card=document.getElementById('card'), wrap=document.getElementById('wrap'),
+      cam=document.getElementById('cam'), camHole=document.getElementById('camHole'),
+      flash=document.getElementById('flash');
+  function stageRect(){ return document.querySelector('.stage').getBoundingClientRect(); }
+  function flash_(){ flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go'); }
+
+  // map element -> target rect (stage-local), origin 0 0
+  function mapTo(el, tx, ty, w){
+    var st=stageRect(), keep=card.style.transform, keepTr=card.style.transition;
+    card.style.transition='none'; card.style.transform='none'; void card.offsetWidth;
+    var er=el.getBoundingClientRect(); card.style.transform=keep; card.style.transition=keepTr;
+    var elx=er.left-st.left, ely=er.top-st.top, s=w/er.width;
+    return { t:'translate('+(tx-s*elx)+'px,'+(ty-s*ely)+'px) scale('+s+')', tx:(tx-s*elx), ty:(ty-s*ely), s:s };
+  }
+  function rest(){ var st=stageRect(); return mapTo(document.querySelector('.slot'), st.width*0.21, st.height*0.20, st.width*0.58); }
+  function zoomHole(sel){
+    var st=stageRect(), keep=card.style.transform, keepTr=card.style.transition;
+    card.style.transition='none'; card.style.transform='none'; void card.offsetWidth;
+    var er=document.querySelector(sel).getBoundingClientRect(); card.style.transform=keep; card.style.transition=keepTr;
+    var elx=er.left-st.left, ely=er.top-st.top, elw=er.width, elh=er.height;
+    var s=Math.max(st.width/elw, st.height/elh)*1.15;
+    return 'translate('+(st.width/2 - s*(elx+elw/2))+'px,'+(st.height/2 - s*(ely+elh/2))+'px) scale('+s+')';
+  }
+  function holeCenterAtRest(sel){
+    var st=stageRect(); card.style.transition='none'; card.style.transform=rest().t; void card.offsetWidth;
+    var hr=document.querySelector(sel).getBoundingClientRect();
+    return { x:(hr.left-st.left)+hr.width/2, y:(hr.top-st.top)+hr.height/2 };
+  }
+
+  var timers=[];
+  function clearTimers(){ timers.forEach(clearTimeout); timers=[]; }
+  function later(fn,ms){ timers.push(setTimeout(fn,ms)); }
+  function reset(){
+    clearTimers();
+    card.style.transition='none'; card.style.transform=rest().t; card.style.opacity='1'; card.style.zIndex='5';
+    wrap.style.transition='none'; wrap.style.transform='none'; wrap.style.transformOrigin='center';
+    cam.style.transition='none'; cam.style.opacity='0'; cam.style.transform='none'; cam.style.zIndex='10';
+    cam.style.clipPath='none'; cam.style.webkitClipPath='none'; cam.style.transformOrigin='center';
+    camHole.style.transition='none'; camHole.style.opacity='0';
+    void stage_off();
+  }
+  function stage_off(){ return card.offsetWidth; }
+
+  // 1 · FRAME ZOOM-DIVE — card dives into the empty frame, camera emerges
+  function opt1(){
+    reset();
+    requestAnimationFrame(function(){
+      card.style.transition='transform 1.35s cubic-bezier(0.5,0,0.2,1), opacity 0.5s ease 0.95s';
+      card.style.transform=zoomHole('.h2'); card.style.opacity='0';
+      cam.style.transition='opacity 0.6s ease 0.9s'; cam.style.opacity='1';
+    });
+    later(flash_, 1000);
+  }
+  // 2 · IRIS FROM FRAME — camera circle opens from the frame position
+  function opt2(){
+    reset();
+    var c=holeCenterAtRest('.h2'), st=stageRect();
+    var R=Math.ceil(Math.hypot(st.width, st.height))+40;
+    cam.style.zIndex='12'; cam.style.opacity='1';
+    cam.style.clipPath='circle(0px at '+c.x+'px '+c.y+'px)'; cam.style.webkitClipPath=cam.style.clipPath;
+    void cam.offsetWidth;
+    requestAnimationFrame(function(){
+      var tr='clip-path 1.45s cubic-bezier(0.4,0,0.2,1), -webkit-clip-path 1.45s cubic-bezier(0.4,0,0.2,1)';
+      cam.style.transition=tr;
+      cam.style.clipPath='circle('+R+'px at '+c.x+'px '+c.y+'px)'; cam.style.webkitClipPath=cam.style.clipPath;
+    });
+  }
+  // 3 · CARD FLIP — card squashes to an edge, camera unfolds from it
+  function opt3(){
+    reset();
+    requestAnimationFrame(function(){
+      wrap.style.transition='transform 0.5s cubic-bezier(0.5,0,0.9,0.35)';
+      wrap.style.transform='scaleX(0.02)';
+    });
+    later(function(){
+      cam.style.opacity='1'; cam.style.transition='none'; cam.style.transform='scaleX(0.02)'; void cam.offsetWidth;
+      cam.style.transition='transform 0.55s cubic-bezier(0.2,0.85,0.3,1)'; cam.style.transform='scaleX(1)';
+    }, 470);
+  }
+  // 4 · HAND LOWERS CARD — card drops away, camera behind revealed
+  function opt4(){
+    reset();
+    cam.style.zIndex='1'; cam.style.opacity='1'; card.style.zIndex='6';
+    var r=rest(), st=stageRect();
+    requestAnimationFrame(function(){
+      card.style.transition='transform 1.05s cubic-bezier(0.45,0,0.25,1)';
+      card.style.transform='translate('+r.tx+'px,'+(r.ty+st.height*0.95)+'px) scale('+r.s+') rotate(3deg)';
+    });
+  }
+  // 5 · FRAME PORTAL — the empty frame turns into a live camera, then expands
+  function opt5(){
+    reset();
+    camHole.style.transition='opacity 0.4s ease'; camHole.style.opacity='1';
+    later(flash_, 120);
+    later(function(){
+      card.style.transition='transform 1.05s cubic-bezier(0.5,0,0.2,1), opacity 0.4s ease 0.75s';
+      card.style.transform=zoomHole('.h2'); card.style.opacity='0';
+      cam.style.transition='opacity 0.5s ease 0.7s'; cam.style.opacity='1';
+    }, 720);
+  }
+
+  var fns={'1':opt1,'2':opt2,'3':opt3,'4':opt4,'5':opt5}, cur='1';
+  function play(o){ cur=o; document.getElementById('replay').textContent='▶ Replay opsi '+o;
+    document.querySelectorAll('.opt').forEach(function(b){ b.classList.toggle('on', b.dataset.opt===o); }); fns[o](); }
+  document.getElementById('opts').addEventListener('click', function(e){ var b=e.target.closest('.opt'); if(b) play(b.dataset.opt); });
+  document.getElementById('replay').addEventListener('click', function(){ play(cur); });
+  window.addEventListener('load', function(){ reset(); setTimeout(function(){ play('1'); }, 400); });
+  window.addEventListener('resize', reset);
+</script>
+</body>
+</html>
