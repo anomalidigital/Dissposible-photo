@@ -319,7 +319,8 @@
     flash.classList.add('flash');
 
     setTimeout(function() {
-      stopCamera();
+      // keep the camera warm through the preview so Retake/Continue can peel away
+      // the card and reveal the LIVE camera behind it (no "loading" flash)
       goToConfirm();
     }, 400);
   }
@@ -482,27 +483,58 @@
     });
   }
 
-  // Card slides off (down for retake / right for continue) WHILE the camera
-  // irises back in over it — the same circle reveal as the intro, so the hand-off
-  // is connected (not a flat fade) and the camera's warm-up is hidden behind the
-  // growing circle.
-  function exitToCamera(dir) {
-    var r = restTransform();
-    var to = (dir === 'down')
-      ? { tx: r.tx, ty: r.ty + window.innerHeight * 1.1, s: r.s }
-      : { tx: r.tx + window.innerWidth * 1.15, ty: r.ty, s: r.s };
-    stopMotion({ tx: r.tx, ty: r.ty, s: r.s }, to,
-      { rotate: 4, steps: 8, interval: 70, fade: true, easeIn: true }, resetHandStage);
-    requestCamera();   // warm the camera while the iris grows
-    playCircleWipe();  // camera circle reveals over the leaving card -> show(1)
+  // Hide the preview's chrome (header + retro line) so only the card shows over
+  // the camera while it peels.
+  function s1bChrome(hide) {
+    var els = [document.querySelector('#s1b .header'), document.getElementById('confirm-retro')];
+    els.forEach(function(el) { if (el) { el.style.transition = 'none'; el.style.opacity = hide ? '0' : ''; } });
+  }
+
+  // Re-enter the camera from the preview: the card PEELS UP off its bottom edge in
+  // choppy stop-motion (retro), revealing the live camera sitting behind it.
+  function peelToCamera() {
+    var s1 = document.getElementById('s1');
+    var s1b = document.getElementById('s1b');
+    var ha = document.getElementById('hand-area');
+    if (!s1 || !s1b || !ha) return;
+    if (introTimer) { clearTimeout(introTimer); introTimer = null; }
+    if (!cameraStream) requestCamera(); // only (re)start if it isn't already warm
+    currentState = 1;
+    // live camera sits BEHIND the now-transparent preview while the card peels off
+    s1.style.transition = 'none'; s1.style.opacity = '1';
+    s1.style.clipPath = 'none'; s1.style.webkitClipPath = 'none';
+    s1.style.zIndex = ''; s1.style.pointerEvents = '';
+    s1.style.display = 'flex';
+    s1b.style.zIndex = '2'; s1b.style.background = 'transparent';
+    s1bChrome(true);
+    var ov = s1b.querySelector('.retro-doodles'); // doodles belong to the preview — drop them
+    if (ov) ov.querySelectorAll('.dood').forEach(function(d) { d.style.animation = 'none'; });
+    ha.style.transformOrigin = '50% 100%';
+    ha.style.transition = 'none';
+    ha.style.transform = 'perspective(1200px) rotateX(0deg)'; ha.style.opacity = '1';
+    void ha.offsetWidth;
+    var steps = 7, i = 0, MAX = -104;
+    var iv = setInterval(function() {
+      i++;
+      var p = Math.min(1, i / steps);
+      ha.style.transform = 'perspective(1200px) rotateX(' + (MAX * p * p) + 'deg)'; // accelerate the lift
+      ha.style.opacity = String(Math.max(0, 1 - p * 1.05));
+      if (i >= steps) {
+        clearInterval(iv);
+        ha.style.transition = 'none'; ha.style.transform = 'none'; ha.style.opacity = '1'; ha.style.transformOrigin = '';
+        s1b.style.zIndex = ''; s1b.style.background = '';
+        s1bChrome(false);
+        resetHandStage();
+        show(1); // hand off to the (already live) camera
+      }
+    }, 62);
   }
 
   function retakePhoto() {
     hideConfirmButtons();
-    playDoodles('s1b', true); // doodles reverse out as the card leaves
     lastCaptured = null;
     document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-    exitToCamera('down'); // card drops back DOWN, camera irises in
+    peelToCamera(); // card peels up, live camera revealed behind
   }
 
   function confirmPhoto() {
@@ -519,17 +551,17 @@
         { rotate: 4, steps: 8, interval: 70, fade: true, easeIn: true },
         function() {
           photos.push(lastCaptured); photoCount++; lastCaptured = null;
+          stopCamera(); // last shot taken — the camera isn't needed anymore
           resetHandStage();
           goToProcessing();
         }
       );
     } else {
-      // commit this shot, then the card slides RIGHT while the camera irises back
-      // in for the next session.
+      // commit this shot, then the card peels up to reveal the camera for the next.
       photos.push(lastCaptured); photoCount++; lastCaptured = null;
       paintHoles(-1);
       document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-      exitToCamera('right');
+      peelToCamera();
     }
   }
 
