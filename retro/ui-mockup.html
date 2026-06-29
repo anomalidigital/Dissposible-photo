@@ -12,44 +12,18 @@
   h1{ font-size:18px; font-weight:800; }
   .sub{ color:#9696a0; font-size:12.5px; line-height:1.5; margin:5px 0 16px; } .sub b{ color:#ededf0; }
   .lbl{ font-size:11px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:#7a7a82; margin:22px 0 10px; }
-  .replay-btn{ padding:9px 18px; border-radius:10px; border:none; cursor:pointer; font:inherit; font-weight:800; font-size:13px;
-    color:#fff; background:linear-gradient(180deg,#fa6753 0%,#ed4836 48%,#cf3320 100%);
-    box-shadow:0 4px 10px rgba(207,51,32,.35), inset 0 1px 1px rgba(255,255,255,.45), inset 0 -2px 4px rgba(140,25,12,.4); }
-  .replay-btn:active{ transform:translateY(1px); box-shadow:inset 0 2px 6px rgba(120,20,10,.6); }
-
   /* ============ TACTILE TOKENS (no idle anim) ============ */
   .chrome{ background:linear-gradient(145deg,#fbfbfd 0%,#d2d2d6 42%,#9a9aa0 52%,#c4c4ca 60%,#eaeaee 100%);
     box-shadow:0 3px 7px rgba(0,0,0,.4), inset 0 1px 1px rgba(255,255,255,.95), inset 0 -2px 3px rgba(0,0,0,.28);
     transition:transform .12s cubic-bezier(.3,.6,.2,1), box-shadow .12s ease; }
   .chrome:active{ background:linear-gradient(145deg,#c0c0c6,#a6a6ac 55%,#cacace);
     box-shadow:inset 0 3px 7px rgba(0,0,0,.5), inset 0 -1px 1px rgba(255,255,255,.5); transform:translateY(1px); }
-  .engrave{ color:#55555b; filter:drop-shadow(0 1px 0 rgba(255,255,255,.85)); }
+  /* etched dark icon on chrome; explicit stroke so SVGs always render dark + a
+     soft top highlight to read as engraved into the metal */
+  .engrave{ color:#2b2b30; stroke:#2b2b30; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round;
+    filter:drop-shadow(0 1px 0 rgba(255,255,255,.9)); }
 
-  /* ============ ENTRANCE / TRANSITION (the only animations now) ============ */
-  /* shared "appear" — soft, dimensional, fits the look */
-  @keyframes appear { 0%{ opacity:0; transform:translateY(14px) scale(.97); } 100%{ opacity:1; transform:none; } }
-  @keyframes appearDown { 0%{ opacity:0; transform:translateY(-14px); } 100%{ opacity:1; transform:none; } }
-  @keyframes appearUp   { 0%{ opacity:0; transform:translateY(20px); } 100%{ opacity:1; transform:none; } }
-  @keyframes appearPop  { 0%{ opacity:0; transform:scale(.7); } 70%{ opacity:1; transform:scale(1.05); } 100%{ opacity:1; transform:scale(1); } }
-  .anim-in .topbar     { animation:appearDown .55s cubic-bezier(.3,.7,.2,1) .05s both; }
-  .anim-in .vf-bezel   { animation:appear     .7s  cubic-bezier(.25,.8,.3,1)  .15s both; }
-  .anim-in .retro-strip{ animation:appearDown .5s  ease .55s both; }
-  .anim-in .deck       { animation:appearUp   .6s  cubic-bezier(.25,.8,.3,1)  .35s both; }
-  .anim-in .deck .ctrl,
-  .anim-in .deck .shutter-wrap{ animation:appearPop .55s cubic-bezier(.35,1.5,.5,1) calc(.55s + var(--i,0) * .08s) both; transform-origin:center; }
-
-  /* "next step" transitions — three flavours, all skeuo-friendly */
-  /* 1) Circle wipe out (mirrors the app's intro wipe) */
-  .wipe{ position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:50; overflow:hidden; }
-  .wipe-iris{ position:absolute; left:50%; top:50%; width:0; height:0; transform:translate(-50%,-50%); border-radius:50%;
-    box-shadow:0 0 0 1600px rgba(20,20,22,0); }
-  .device.wiping .wipe-iris{ animation:irisOut 1.2s cubic-bezier(.4,0,.2,1) forwards; }
-  @keyframes irisOut { 0%{ box-shadow:0 0 0 1600px rgba(20,20,22,0); } 100%{ box-shadow:0 0 0 1600px rgba(20,20,22,1); } }
-  /* 2) Cross-step slide: current screen slides up + out */
-  .device.stepOut{ animation:stepOutAnim .55s cubic-bezier(.5,0,.3,1) forwards; }
-  @keyframes stepOutAnim { 100%{ opacity:0; transform:translateY(-22px) scale(.97); filter:brightness(.7); } }
-  /* 3) Card-rise (for preview entry feel) */
-  @keyframes rise { 0%{ opacity:0; transform:translateY(80px) scale(.96); } 100%{ opacity:1; transform:none; } }
+  /* (Entrance + next-step transitions removed — focus on UI only.) */
 
   /* ============ CAMERA SCREEN ============ */
   .device{ position:relative; border-radius:26px; overflow:hidden;
@@ -138,32 +112,18 @@
   .chip span{ font-size:10px; color:#7a7a82; font-weight:700; }
   .note{ color:#9696a0; font-size:12px; line-height:1.6; margin-top:22px; }
   .note b{ color:#ededf0; }
-
-  /* "Next step" demo: pretend preview card rises from bottom */
-  .next-screen{ position:absolute; inset:0; z-index:55; display:flex; align-items:center; justify-content:center; padding:30px; pointer-events:none; opacity:0; }
-  .next-screen.show{ pointer-events:auto; }
-  .next-screen.show .next-card{ animation:rise .7s cubic-bezier(.25,.85,.3,1) forwards; }
-  .next-screen.show{ animation:fadeBg .5s ease forwards; }
-  @keyframes fadeBg { 100%{ opacity:1; } }
-  .next-card{ position:relative; width:78%; aspect-ratio:1086/1448; opacity:0;
-    background:#fff; border-radius:6px; overflow:hidden;
-    box-shadow:0 18px 40px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.15); }
-  .next-card .pf{ position:absolute; left:6%; right:6%; height:42%; background:#222 center/cover no-repeat; }
-  .next-card .pf.t{ top:5%; background-image:url("sample.jpg"); }
-  .next-card .pf.b{ bottom:13%; background:linear-gradient(135deg,#1a1a1d,#0d0d10); display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.45); font-family:'Bungee'; font-size:11px; letter-spacing:2px; }
-  .next-card .lbl-strip{ position:absolute; left:0; right:0; bottom:0; height:9%; background:#111; color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Bungee'; font-size:9px; letter-spacing:2px; }
 </style>
 </head>
 <body>
-  <h1>Skeuomorphism UI · v3 (transisi)</h1>
-  <p class="sub">Tombol-tombolnya <b>diam</b> — yang gerak cuma <b>transisi muncul</b> dan <b>pindah step</b>. Tap shutter merah → demo "next step": circle wipe gelap lalu kartu preview <b>naik dari bawah</b>.</p>
-
-  <button class="replay-btn" id="replay">▶ Replay animasi muncul</button>
+  <h1>Skeuomorphism UI · v5 (fokus UI + ikon)</h1>
+  <p class="sub">Tombol-tombolnya <b>diam total</b> — fokus ke UI dulu. Ikon sekarang jelas (etched gelap di krom).</p>
 
   <div class="lbl">Layar kamera (s1)</div>
-  <div class="device anim-in" id="device">
+  <div class="device" id="device">
     <div class="topbar">
-      <div class="arrow chrome" title="Back"><svg class="engrave" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div class="arrow chrome" title="Back">
+        <svg class="engrave" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </div>
       <div class="counter" id="counter">01 / 02</div>
       <div class="brand-plate">LOL</div>
     </div>
@@ -176,28 +136,34 @@
     </div>
     <div class="retro-strip">SAY CHEESE!</div>
     <div class="deck">
-      <div class="ctrl chrome" title="Galeri" style="--i:0">
-        <svg class="engrave" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      <!-- Gallery: stack of two photos (back photo behind) -->
+      <div class="ctrl chrome" title="Galeri / Browse">
+        <svg class="engrave" viewBox="0 0 24 24">
+          <rect x="3" y="6" width="14" height="14" rx="1.5"/>
+          <rect x="7" y="2" width="14" height="14" rx="1.5"/>
+          <circle cx="11.5" cy="6" r="1.7"/>
+          <polyline points="21 12 17 8 13 12 11 10 7 14"/>
+        </svg>
       </div>
-      <div class="shutter-wrap" id="shutter" title="Jepret" style="--i:1">
+      <!-- Shutter -->
+      <div class="shutter-wrap" id="shutter" title="Jepret">
         <div class="shutter"></div>
         <div class="shutter-icon"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
       </div>
-      <div class="ctrl chrome" title="Flip kamera" style="--i:2">
-        <svg class="engrave" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-      </div>
-    </div>
-    <div class="wipe"><div class="wipe-iris"></div></div>
-    <div class="next-screen" id="nextScreen">
-      <div class="next-card">
-        <div class="pf t"></div>
-        <div class="pf b">UP NEXT</div>
-        <div class="lbl-strip">ARTWORKS · LOL PHOTOBOOTH</div>
+      <!-- Flip camera (front/back): camera silhouette + rotation arrows -->
+      <div class="ctrl chrome" title="Flip kamera (depan/belakang)">
+        <svg class="engrave" viewBox="0 0 24 24">
+          <path d="M5 9h2l1.2-2h7.6L17 9h2a1.5 1.5 0 0 1 1.5 1.5V17A1.5 1.5 0 0 1 19 18.5H5A1.5 1.5 0 0 1 3.5 17v-6.5A1.5 1.5 0 0 1 5 9z"/>
+          <path d="M9 13.5a3 3 0 0 1 5.4-1.8"/>
+          <polyline points="14.6 10 14.4 11.7 12.7 11.5"/>
+          <path d="M15 14a3 3 0 0 1-5.4 1.8"/>
+          <polyline points="9.4 17.6 9.6 15.9 11.3 16.1"/>
+        </svg>
       </div>
     </div>
   </div>
 
-  <div class="lbl">Pill (juga diam — cuma transisi pas muncul)</div>
+  <div class="lbl">Pill (tombol panjang)</div>
   <div class="row">
     <button class="pill secondary"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Retake</button>
     <button class="pill primary">Continue <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
@@ -206,40 +172,10 @@
     <button class="pill primary" style="padding:16px 30px"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Snap your photo now</button>
   </div>
 
-  <p class="note">Yang berubah dari v2:<br>
-  • <b>Buang semua animasi idle</b> di tombol (halo shutter, kilauan krom, LCD napas, bracket pulse). Tombol = diam, cuma press feedback (kepencet ke bawah).<br>
-  • <b>Animasi muncul</b>: topbar turun, bezel viewfinder fade-in halus, retro strip turun, control deck naik dari bawah, tiap tombol di deck <b>pop</b> bergantian (ber-stagger).<br>
-  • <b>Next-step transition</b>: shutter dipencet → device circle-wipe ke gelap → kartu preview <b>naik dari bawah</b> (mirroring app's preview entry). Klik di kartu / Replay buat ulang.<br><br>
-  Untuk app: <b>circle wipe home → kamera</b> tetap, <b>Snap again</b> juga tetap pakai circle wipe. App belum kusentuh — animasi lama masih aman di <code>app.js</code>.</p>
-
-<script>
-  var device=document.getElementById('device'), shutter=document.getElementById('shutter'),
-      nextScreen=document.getElementById('nextScreen'), replay=document.getElementById('replay');
-
-  function reset(){
-    device.classList.remove('anim-in','wiping','stepOut');
-    nextScreen.classList.remove('show');
-    nextScreen.style.opacity=''; nextScreen.style.animation='';
-    void device.offsetWidth;
-  }
-  function appear(){
-    reset();
-    device.classList.add('anim-in');
-  }
-  function nextStep(){
-    if (device.classList.contains('wiping') || nextScreen.classList.contains('show')) return;
-    device.classList.add('wiping');
-    setTimeout(function(){
-      nextScreen.classList.add('show');
-      setTimeout(function(){ // auto-return to demo so user can try again
-        nextScreen.classList.remove('show'); device.classList.remove('wiping');
-        appear();
-      }, 1900);
-    }, 900);
-  }
-  shutter.addEventListener('click', nextStep);
-  nextScreen.addEventListener('click', function(){ nextScreen.classList.remove('show'); device.classList.remove('wiping'); appear(); });
-  replay.addEventListener('click', appear);
-</script>
+  <p class="note">Ikon di tiap tombol sekarang jelas (etched dark stroke di krom):<br>
+  • <b>Back</b> = chevron ‹ &nbsp; • <b>Galeri / Browse</b> = tumpukan foto &nbsp; • <b>Shutter</b> = kamera (etched putih)<br>
+  • <b>Flip kamera</b> = kamera + panah putar (depan↔belakang)<br>
+  • Pill: panah ← Retake, Continue ›, kamera + Snap your photo now<br><br>
+  Tombol = diam total (cuma feedback pas dipencet). Animasi entrance/transisi udah dibuang — fokus UI dulu. App belum kusentuh.</p>
 </body>
 </html>
