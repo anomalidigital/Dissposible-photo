@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>Skeuomorphism UI — mockup</title>
+<title>Skeuomorphism UI — mockup v2 (ikon + animasi)</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Bungee&display=swap" rel="stylesheet">
 <style>
   *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
@@ -13,36 +13,46 @@
   .sub{ color:#9696a0; font-size:12.5px; line-height:1.5; margin:5px 0 16px; }
   .lbl{ font-size:11px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:#7a7a82; margin:22px 0 10px; }
 
-  /* ============ SKEUOMORPHIC TOKENS ============ */
-  /* CHROME / brushed metal */
-  .chrome{ background:linear-gradient(145deg,#fbfbfd 0%,#d2d2d6 42%,#9a9aa0 52%,#c4c4ca 60%,#eaeaee 100%);
-    box-shadow:0 3px 7px rgba(0,0,0,.4), inset 0 1px 1px rgba(255,255,255,.95), inset 0 -2px 3px rgba(0,0,0,.28); }
+  /* ============ TOKENS ============ */
+  /* CHROME / brushed metal — sweeping highlight (idle gleam keyframe) */
+  .chrome{ position:relative; background:linear-gradient(145deg,#fbfbfd 0%,#d2d2d6 42%,#9a9aa0 52%,#c4c4ca 60%,#eaeaee 100%);
+    box-shadow:0 3px 7px rgba(0,0,0,.4), inset 0 1px 1px rgba(255,255,255,.95), inset 0 -2px 3px rgba(0,0,0,.28);
+    transition:transform .12s cubic-bezier(.3,.6,.2,1), box-shadow .12s ease; overflow:hidden; }
+  .chrome::before{ content:""; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+    background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.55) 48%, transparent 65%);
+    transform:translateX(-130%); animation:gleam 6.2s ease-in-out infinite; }
+  @keyframes gleam { 0%,82%,100%{ transform:translateX(-130%); } 90%{ transform:translateX(130%); } }
   .chrome:active{ background:linear-gradient(145deg,#c0c0c6,#a6a6ac 55%,#cacace);
-    box-shadow:inset 0 2px 6px rgba(0,0,0,.45), inset 0 -1px 1px rgba(255,255,255,.5); }
+    box-shadow:inset 0 3px 7px rgba(0,0,0,.5), inset 0 -1px 1px rgba(255,255,255,.5);
+    transform:translateY(1px); }
   .engrave{ color:#55555b; filter:drop-shadow(0 1px 0 rgba(255,255,255,.85)); }
 
-  /* ============ CAMERA SCREEN (hero) ============ */
+  /* ============ CAMERA SCREEN ============ */
   .device{ position:relative; border-radius:26px; overflow:hidden;
     background:
       radial-gradient(120% 80% at 50% -10%, #3a3a40 0%, rgba(58,58,64,0) 55%),
       linear-gradient(168deg,#303036 0%,#202024 55%,#141417 100%);
     box-shadow:inset 0 1px 0 rgba(255,255,255,.12), inset 0 -3px 8px rgba(0,0,0,.6), 0 14px 34px rgba(0,0,0,.55);
     padding:14px 14px 20px; }
-  /* fine plastic grain */
   .device::before{ content:""; position:absolute; inset:0; pointer-events:none; opacity:.5; mix-blend-mode:overlay;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E"); }
 
   .topbar{ display:flex; align-items:center; justify-content:space-between; padding:4px 4px 12px; position:relative; z-index:2; }
-  /* LCD film counter */
+  /* LCD film counter — mechanical "advance" flicker + breathing glow */
   .counter{ font-family:'Bungee',monospace; font-size:13px; letter-spacing:2px; color:#ff5a44; padding:6px 14px; border-radius:7px;
     background:linear-gradient(180deg,#161618,#26262a); border:1px solid #050505;
-    text-shadow:0 0 7px rgba(255,80,60,.7);
-    box-shadow:inset 0 2px 6px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.08), 0 1px 0 rgba(255,255,255,.1); }
+    text-shadow:0 0 7px rgba(255,80,60,.65);
+    box-shadow:inset 0 2px 6px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.08), 0 1px 0 rgba(255,255,255,.1);
+    animation:lcdGlow 2.6s ease-in-out infinite; }
+  @keyframes lcdGlow { 0%,100%{ text-shadow:0 0 6px rgba(255,80,60,.55); } 50%{ text-shadow:0 0 10px rgba(255,80,60,.85); } }
+  .counter.flick{ animation:lcdFlick .25s steps(2) 2; }
+  @keyframes lcdFlick { 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
+
   .brand-plate{ font-family:'Bungee'; font-size:11px; letter-spacing:.5px; color:#cfcfd4; padding:5px 12px; border-radius:6px;
     background:linear-gradient(180deg,#2c2c31,#1b1b1e); border:1px solid #0a0a0b;
     text-shadow:0 1px 0 rgba(0,0,0,.6); box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 1px 0 rgba(255,255,255,.06); }
 
-  /* viewfinder in a chrome lens bezel */
+  /* viewfinder in chrome bezel */
   .vf-bezel{ position:relative; z-index:2; border-radius:16px; padding:9px;
     background:linear-gradient(150deg,#e9e9ed,#b4b4ba 45%,#76767c 52%,#aeaeb4 60%,#dcdce0);
     box-shadow:0 6px 16px rgba(0,0,0,.5), inset 0 1px 1px rgba(255,255,255,.9), inset 0 -3px 5px rgba(0,0,0,.35); }
@@ -50,11 +60,20 @@
     box-shadow:inset 0 0 0 2px #1c1c1e, inset 0 4px 14px rgba(0,0,0,.8); }
   .vf img{ width:100%; height:100%; object-fit:cover; }
   .vf .curtain{ position:absolute; top:0; bottom:0; width:15%; background:#000; opacity:.92; } .vf .curtain.l{ left:0 } .vf .curtain.r{ right:0 }
-  .vf i.br{ position:absolute; width:16px; height:16px; border:2px solid rgba(255,255,255,.75); }
+  .vf i.br{ position:absolute; width:16px; height:16px; border:2px solid rgba(255,255,255,.75); animation:focusPulse 2.8s ease-in-out infinite; }
   .vf i.br:nth-of-type(1){ top:9%; left:19%; border-right:0; border-bottom:0; }
-  .vf i.br:nth-of-type(2){ top:9%; right:19%; border-left:0; border-bottom:0; }
-  .vf i.br:nth-of-type(3){ bottom:9%; left:19%; border-right:0; border-top:0; }
-  .vf i.br:nth-of-type(4){ bottom:9%; right:19%; border-left:0; border-top:0; }
+  .vf i.br:nth-of-type(2){ top:9%; right:19%; border-left:0; border-bottom:0; animation-delay:.15s; }
+  .vf i.br:nth-of-type(3){ bottom:9%; left:19%; border-right:0; border-top:0; animation-delay:.3s; }
+  .vf i.br:nth-of-type(4){ bottom:9%; right:19%; border-left:0; border-top:0; animation-delay:.45s; }
+  @keyframes focusPulse { 0%,100%{ transform:scale(1); opacity:.7; } 50%{ transform:scale(.88); opacity:1; } }
+  /* shutter close + flash overlays */
+  .vf .blade{ position:absolute; left:0; right:0; background:#0a0a0b; z-index:4; transition:transform .14s cubic-bezier(.5,0,.7,.4); }
+  .vf .blade.t{ top:0; height:50%; transform-origin:top; transform:scaleY(0); }
+  .vf .blade.b{ bottom:0; height:50%; transform-origin:bottom; transform:scaleY(0); }
+  .vf.snap .blade{ transform:scaleY(1); }
+  .vf .vfFlash{ position:absolute; inset:0; background:#fff; opacity:0; z-index:5; pointer-events:none; }
+  .vf.snap .vfFlash{ animation:vfFlashAnim .35s ease-out; }
+  @keyframes vfFlashAnim { 0%{ opacity:0;} 18%{ opacity:.92;} 100%{ opacity:0;} }
 
   .retro-strip{ text-align:center; font-family:'Bungee'; font-size:12px; color:#ed7a6a; letter-spacing:.5px; margin:13px 0 4px; position:relative; z-index:2;
     text-shadow:0 1px 0 rgba(0,0,0,.5); }
@@ -65,40 +84,59 @@
     background:linear-gradient(180deg,#2c2c31,#1a1a1d);
     box-shadow:inset 0 1px 0 rgba(255,255,255,.1), inset 0 -2px 6px rgba(0,0,0,.55), 0 2px 0 rgba(255,255,255,.04); }
 
-  /* round chrome control (gallery / flip) */
   .ctrl{ width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-  .ctrl svg{ width:21px; height:21px; stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+  .ctrl svg{ width:21px; height:21px; stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round; position:relative; z-index:1; }
 
-  /* THE SHUTTER */
-  .shutter-wrap{ width:84px; height:84px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;
+  /* THE SHUTTER — idle halo, depress on press */
+  .shutter-wrap{ position:relative; width:84px; height:84px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;
     background:linear-gradient(145deg,#f4f4f6,#bcbcc2 45%,#86868c 54%,#cacace);
-    box-shadow:0 7px 17px rgba(0,0,0,.55), inset 0 1px 2px rgba(255,255,255,.95), inset 0 -3px 6px rgba(0,0,0,.32); }
+    box-shadow:0 7px 17px rgba(0,0,0,.55), inset 0 1px 2px rgba(255,255,255,.95), inset 0 -3px 6px rgba(0,0,0,.32);
+    transition:transform .12s cubic-bezier(.3,.6,.2,1), box-shadow .12s ease; }
+  .shutter-wrap::after{ content:""; position:absolute; inset:-9px; border-radius:50%; border:2px solid rgba(237,72,54,.55); pointer-events:none;
+    animation:halo 2.1s ease-out infinite; }
+  @keyframes halo { 0%{ transform:scale(.86); opacity:1;} 80%,100%{ transform:scale(1.18); opacity:0;} }
   .shutter{ position:relative; width:62px; height:62px; border-radius:50%;
     background:radial-gradient(circle at 38% 30%, #ff8a78 0%, #ed4836 42%, #c52f1e 78%, #8f1f12 100%);
-    box-shadow:inset 0 2px 3px rgba(255,255,255,.5), inset 0 -6px 11px rgba(95,16,8,.7), 0 3px 6px rgba(0,0,0,.45); }
+    box-shadow:inset 0 2px 3px rgba(255,255,255,.5), inset 0 -6px 11px rgba(95,16,8,.7), 0 3px 6px rgba(0,0,0,.45);
+    transition:background .1s ease, box-shadow .1s ease, transform .1s cubic-bezier(.4,.6,.2,1); }
   .shutter::after{ content:""; position:absolute; top:13%; left:20%; width:46%; height:32%; border-radius:50%;
     background:radial-gradient(circle, rgba(255,255,255,.6), rgba(255,255,255,0) 70%); }
-  .shutter-wrap:active .shutter{ background:radial-gradient(circle at 40% 35%, #e8503e, #c52f1e 60%, #7e1b0f);
+  /* tiny engraved dot in the centre = "press here" affordance */
+  .shutter::before{ content:""; position:absolute; left:50%; top:50%; width:9px; height:9px; border-radius:50%;
+    transform:translate(-50%,-50%);
+    background:radial-gradient(circle at 50% 35%, rgba(255,255,255,.18), rgba(0,0,0,.55) 70%);
+    box-shadow:inset 0 1px 1px rgba(0,0,0,.7), inset 0 -1px 1px rgba(255,255,255,.18); }
+  .shutter-wrap:active{ box-shadow:0 3px 8px rgba(0,0,0,.5), inset 0 3px 7px rgba(0,0,0,.4); transform:translateY(2px); }
+  .shutter-wrap:active .shutter{ transform:scale(.96);
+    background:radial-gradient(circle at 40% 35%, #e8503e, #c52f1e 60%, #7e1b0f);
     box-shadow:inset 0 4px 9px rgba(80,12,6,.85), inset 0 1px 2px rgba(255,255,255,.25); }
-  .shutter-wrap:active{ box-shadow:0 3px 8px rgba(0,0,0,.5), inset 0 2px 4px rgba(0,0,0,.3); }
+  /* "fired" state — held briefly via JS to simulate capture */
+  .shutter-wrap.fire{ box-shadow:0 3px 8px rgba(0,0,0,.5), inset 0 3px 7px rgba(0,0,0,.4); transform:translateY(2px); }
+  .shutter-wrap.fire .shutter{ transform:scale(.94);
+    background:radial-gradient(circle at 40% 35%, #d2422f, #af2818 65%, #6f1809);
+    box-shadow:inset 0 5px 10px rgba(60,10,5,.9), inset 0 1px 2px rgba(255,255,255,.2); }
 
-  /* back arrow (top-left of camera, shown in parts) */
+  /* arrow / chrome chip — same press feel as ctrl */
   .arrow{ width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-  .arrow svg{ width:17px; height:17px; stroke-width:2.6; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+  .arrow svg{ width:17px; height:17px; stroke-width:2.6; fill:none; stroke-linecap:round; stroke-linejoin:round; position:relative; z-index:1; }
 
   /* ============ PILL BUTTONS ============ */
-  .pill{ display:inline-flex; align-items:center; gap:8px; padding:14px 26px; border-radius:14px; cursor:pointer;
-    font-family:'Nunito'; font-size:14.5px; font-weight:800; border:none; }
-  .pill svg{ width:15px; height:15px; stroke-width:2.6; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+  .pill{ position:relative; display:inline-flex; align-items:center; gap:8px; padding:14px 26px; border-radius:14px; cursor:pointer; overflow:hidden;
+    font-family:'Nunito'; font-size:14.5px; font-weight:800; border:none;
+    transition:transform .12s cubic-bezier(.3,.6,.2,1), box-shadow .12s ease, background .12s ease; }
+  .pill svg{ width:15px; height:15px; stroke-width:2.6; fill:none; stroke-linecap:round; stroke-linejoin:round; position:relative; z-index:1; }
+  .pill::before{ content:""; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+    background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.45) 48%, transparent 65%);
+    transform:translateX(-140%); animation:gleam 6.2s ease-in-out infinite 1.4s; }
   .pill.primary{ color:#fff; text-shadow:0 -1px 0 rgba(120,20,10,.55);
     background:linear-gradient(180deg,#fa6753 0%,#ed4836 48%,#cf3320 100%);
     box-shadow:0 6px 14px rgba(207,51,32,.42), inset 0 1px 1px rgba(255,255,255,.55), inset 0 -3px 6px rgba(140,25,12,.5); }
-  .pill.primary:active{ background:linear-gradient(180deg,#e0492f,#c5301f); box-shadow:inset 0 3px 8px rgba(120,20,10,.7); transform:translateY(1px); }
+  .pill.primary:active{ background:linear-gradient(180deg,#e0492f,#c5301f); box-shadow:0 2px 6px rgba(207,51,32,.3), inset 0 3px 9px rgba(120,20,10,.75); transform:translateY(2px); }
   .pill.primary svg{ stroke:#fff; }
   .pill.secondary{ color:#c5301f; text-shadow:0 1px 0 rgba(255,255,255,.9); border:1px solid rgba(0,0,0,.1);
     background:linear-gradient(180deg,#ffffff,#ececef 50%,#d6d6da 100%);
     box-shadow:0 5px 11px rgba(0,0,0,.22), inset 0 1px 1px rgba(255,255,255,.95), inset 0 -2px 4px rgba(0,0,0,.16); }
-  .pill.secondary:active{ background:linear-gradient(180deg,#dcdce0,#c6c6ca); box-shadow:inset 0 3px 7px rgba(0,0,0,.28); transform:translateY(1px); }
+  .pill.secondary:active{ background:linear-gradient(180deg,#dcdce0,#c6c6ca); box-shadow:0 2px 5px rgba(0,0,0,.18), inset 0 3px 8px rgba(0,0,0,.28); transform:translateY(2px); }
   .pill.secondary svg{ stroke:#c5301f; }
 
   .row{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
@@ -109,49 +147,96 @@
 </style>
 </head>
 <body>
-  <h1>Skeuomorphism UI · mockup</h1>
-  <p class="sub">Fase 0 — preview gaya "kamera jadul": tombol tactile (timbul/krom/glossy), bisa dipencet. Belum ke app, ini buat validasi arah dulu.</p>
+  <h1>Skeuomorphism UI · v2 (ikon + animasi)</h1>
+  <p class="sub">Tiap tombol dapet ikon yang jelas. Animasinya tactile/mekanis: shutter mendelep + flash, LCD nyala napas, krom kilap, bracket fokus berdenyut. <b>Coba pencet shutter merah</b> — ada efek jepret + counter maju.</p>
 
   <div class="lbl">Layar kamera (s1)</div>
   <div class="device">
     <div class="topbar">
-      <div class="arrow chrome"><svg class="engrave" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
-      <div class="counter">01 / 02</div>
+      <div class="arrow chrome" title="Back"><svg class="engrave" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div class="counter" id="counter">01 / 02</div>
       <div class="brand-plate">LOL</div>
     </div>
     <div class="vf-bezel">
-      <div class="vf">
+      <div class="vf" id="vf">
         <img src="sample.jpg" alt="">
         <div class="curtain l"></div><div class="curtain r"></div>
         <i class="br"></i><i class="br"></i><i class="br"></i><i class="br"></i>
+        <div class="blade t"></div><div class="blade b"></div>
+        <div class="vfFlash"></div>
       </div>
     </div>
-    <div class="retro-strip">SAY CHEESE!</div>
+    <div class="retro-strip" id="strip">SAY CHEESE!</div>
     <div class="deck">
-      <div class="ctrl chrome"><svg class="engrave" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
-      <div class="shutter-wrap"><div class="shutter"></div></div>
-      <div class="ctrl chrome"><svg class="engrave" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div>
+      <!-- Gallery (jelas: gambar dgn matahari) -->
+      <div class="ctrl chrome" title="Galeri">
+        <svg class="engrave" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </div>
+      <!-- Shutter (dot tengah = "tekan di sini") -->
+      <div class="shutter-wrap" id="shutter" title="Jepret"><div class="shutter"></div></div>
+      <!-- Flip kamera (jelas: refresh arrow) -->
+      <div class="ctrl chrome" title="Flip kamera">
+        <svg class="engrave" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </div>
     </div>
   </div>
 
-  <div class="lbl">Tombol (pencet buat rasain)</div>
+  <div class="lbl">Tiap tombol punya ikon (pencet buat rasain)</div>
   <div class="row">
-    <div class="chip"><div class="shutter-wrap" style="width:64px;height:64px"><div class="shutter" style="width:48px;height:48px"></div></div><span>Shutter</span></div>
-    <div class="chip"><div class="arrow chrome"><svg class="engrave" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span>Back</span></div>
-    <div class="chip"><div class="arrow chrome"><svg class="engrave" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div><span>Next</span></div>
-    <div class="chip"><div class="ctrl chrome"><svg class="engrave" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><span>Galeri</span></div>
+    <div class="chip"><div class="shutter-wrap" style="width:64px;height:64px"><div class="shutter" style="width:48px;height:48px"></div></div><span>Jepret</span></div>
+    <div class="chip"><div class="arrow chrome" title="Back"><svg class="engrave" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span>Back</span></div>
+    <div class="chip"><div class="arrow chrome" title="Next"><svg class="engrave" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div><span>Next</span></div>
+    <div class="chip"><div class="ctrl chrome" title="Galeri"><svg class="engrave" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><span>Galeri</span></div>
+    <div class="chip"><div class="ctrl chrome" title="Flip kamera"><svg class="engrave" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div><span>Flip</span></div>
+    <div class="chip"><div class="ctrl chrome" title="Centang"><svg class="engrave" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><span>Done</span></div>
+    <div class="chip"><div class="ctrl chrome" title="Download"><svg class="engrave" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><span>Save</span></div>
+    <div class="chip"><div class="ctrl chrome" title="Heart"><svg class="engrave" viewBox="0 0 24 24"><path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/></svg></div><span>Like</span></div>
     <div class="chip"><div class="counter">12</div><span>Counter</span></div>
   </div>
 
-  <div class="lbl">Tombol panjang</div>
+  <div class="lbl">Tombol panjang (semua ber-ikon)</div>
   <div class="row">
-    <button class="pill secondary"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Retake</button>
+    <button class="pill secondary"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg> Retake</button>
     <button class="pill primary">Continue <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
   </div>
   <div class="row" style="margin-top:14px">
-    <button class="pill primary" style="padding:16px 34px"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Snap your photo now</button>
+    <button class="pill secondary"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Snap again</button>
+    <button class="pill primary">Done <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button>
+  </div>
+  <div class="row" style="margin-top:14px">
+    <button class="pill primary" style="padding:16px 30px"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Snap your photo now</button>
   </div>
 
-  <p class="note">Arah: <b>kamera jadul</b> — bodi plastik gelap + krom, shutter merah glossy timbul, counter LCD, tombol panjang molded. Brand orange tetep (jadi merah glossy).<br><br>Kalau <b>sreg</b>, bilang — aku lanjut pasang ke app (Fase 1–5). Mau lebih <b>krom</b>/lebih <b>plastik</b>/warna bodi beda (krem? hitam?) atau coba arah lain (kulit-metal iOS / retro 70an) juga boleh.</p>
+  <p class="note">Animasi yang nempel sama gaya jadul:<br>
+  • <b>Shutter</b>: dome mendelep + ada halo merah pelan napas; pas jepret = rana hitam atas/bawah ketemu di tengah + flash putih.<br>
+  • <b>LCD counter</b>: glow naik-turun (kayak segmen LED bernapas) + flicker pas counter maju.<br>
+  • <b>Krom</b> (back/arrow/galeri/flip): kilauan sapuan tiap ~6 detik (kayak metal kena cahaya), inset pas dipencet.<br>
+  • <b>Bracket fokus</b>: berdenyut bergiliran (auto-focus jadul).<br>
+  • <b>Pill</b>: timbul → ke-press 2px ke bawah dengan inset shadow, ada kilauan halus juga.<br><br>
+  Animasi flow di app (slide/rise/dll) belum kuubah — masih aman di <code>app.js</code>.</p>
+
+<script>
+  // Demo: tap shutter = close blades + flash + advance counter
+  var shutter=document.getElementById('shutter'), vf=document.getElementById('vf'),
+      counter=document.getElementById('counter'), strip=document.getElementById('strip');
+  var n=1, max=2;
+  var quips=['SAY CHEESE!','STRIKE A POSE!','LOOK ALIVE!','WORK IT!','BIG SMILES!'];
+  function pad(x){ return ('0'+x).slice(-2); }
+  function fire(){
+    if(vf.classList.contains('snap')) return;
+    shutter.classList.add('fire');
+    setTimeout(function(){ shutter.classList.remove('fire'); }, 220);
+    vf.classList.add('snap');
+    setTimeout(function(){
+      vf.classList.remove('snap');
+      n = n>=max ? 1 : n+1;
+      counter.textContent = pad(n)+' / '+pad(max);
+      counter.classList.remove('flick'); void counter.offsetWidth; counter.classList.add('flick');
+      strip.textContent = quips[Math.floor(Math.random()*quips.length)];
+    }, 420);
+  }
+  shutter.addEventListener('click', fire);
+  shutter.addEventListener('touchstart', function(e){ e.preventDefault(); fire(); }, {passive:false});
+</script>
 </body>
 </html>
