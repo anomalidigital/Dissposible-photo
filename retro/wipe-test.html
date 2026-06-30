@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Circle wipe — diagnostic</title>
+<style>
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; overflow:hidden; font-family:system-ui,sans-serif; background:#000; color:#fff; -webkit-tap-highlight-color:transparent; user-select:none; }
+
+  /* Layer 1: "home page" — photobooth-like pattern bg */
+  .page{
+    position:fixed; inset:0; z-index:1;
+    background:
+      radial-gradient(circle at 20% 25%, rgba(0,0,0,.06) 0 1px, transparent 2px),
+      radial-gradient(circle at 70% 60%, rgba(0,0,0,.05) 0 1px, transparent 2px),
+      linear-gradient(180deg,#ebebeb,#d8d8d8);
+    color:#2c2c2c;
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+    padding:60px 16px 16px;
+  }
+  .page h1{ font-size:22px; font-style:italic; }
+  .page .cta{ position:absolute; left:16px; right:16px; bottom:20px; padding:14px;
+    background:linear-gradient(180deg,#fa6753,#cf3320); color:#fff; border:none; border-radius:12px; font:inherit; font-weight:800; font-size:15px;
+    box-shadow:0 6px 14px rgba(207,51,32,.42), inset 0 1px 1px rgba(255,255,255,.55), inset 0 -3px 6px rgba(140,25,12,.5); }
+
+  /* Layer 2: "camera screen" — what the wipe reveals */
+  .cam{
+    position:fixed; inset:0; z-index:5;
+    background:
+      radial-gradient(120% 80% at 50% -10%, #3a3a40 0%, rgba(58,58,64,0) 55%),
+      linear-gradient(168deg,#303036 0%,#202024 55%,#141417 100%);
+    display:none;
+    pointer-events:none;
+  }
+  .cam.on{ display:block; }
+  .cam .label{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:22px; font-weight:800; letter-spacing:1px; color:#ed4836; }
+
+  /* Debug + controls */
+  .dbg{ position:fixed; left:8px; right:8px; top:8px; z-index:20; padding:10px 12px; border-radius:10px;
+    background:rgba(0,0,0,.75); color:#fff; font-size:12px; font-family:ui-monospace,monospace; line-height:1.45;
+    pointer-events:none; }
+  .dbg b{ color:#9bd1ff; }
+  .panel{ position:fixed; left:8px; right:8px; bottom:8px; z-index:21; display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+  .panel button{ padding:14px 6px; font:inherit; font-weight:800; font-size:13px; border:none; border-radius:10px;
+    background:#222; color:#fff; cursor:pointer; box-shadow:0 0 0 1px rgba(255,255,255,.1) inset; }
+  .panel button:active{ transform:scale(.96); }
+  .panel button.primary{ background:#ed4836; }
+</style>
+</head>
+<body>
+
+<div class="page" id="page">
+  <h1>Home Page (mock)</h1>
+  <p style="margin-top:8px;font-size:13px;color:#555">pencet salah satu tombol bawah → wipe ke "kamera"</p>
+  <button class="cta">Snap your photo now</button>
+</div>
+
+<div class="cam" id="cam"><div class="label">📷 CAMERA SCREEN</div></div>
+
+<div class="dbg" id="dbg">debug…</div>
+
+<div class="panel">
+  <button id="bA" class="primary">A · clip-path on .cam (current)</button>
+  <button id="bB">B · clip-path · radius 3000</button>
+  <button id="bC">C · radial-gradient mask</button>
+  <button id="bD">D · box-shadow iris (old)</button>
+</div>
+
+<script>
+  var page=document.getElementById('page'), cam=document.getElementById('cam'), dbg=document.getElementById('dbg');
+
+  function info(extra){
+    var sr = cam.getBoundingClientRect();
+    var dpr = window.devicePixelRatio||1;
+    var screenW = (window.screen && window.screen.width)||'?', screenH = (window.screen && window.screen.height)||'?';
+    var diag = Math.hypot(window.innerWidth, window.innerHeight).toFixed(0);
+    var sDiag = Math.hypot(sr.width, sr.height).toFixed(0);
+    dbg.innerHTML =
+      '<b>vw×vh</b>: '+window.innerWidth+' × '+window.innerHeight+'  · <b>dpr</b>: '+dpr+'<br>'+
+      '<b>screen</b>: '+screenW+' × '+screenH+'<br>'+
+      '<b>cam rect</b>: '+Math.round(sr.width)+' × '+Math.round(sr.height)+'<br>'+
+      '<b>viewport diag</b>: '+diag+' · <b>cam diag</b>: '+sDiag+'<br>'+
+      (extra||'');
+  }
+  info();
+  addEventListener('resize', function(){ info(); });
+
+  function reset(){
+    cam.classList.remove('on');
+    cam.style.transition='none'; cam.style.clipPath='none'; cam.style.webkitClipPath='none'; cam.style.boxShadow=''; cam.style.maskImage=''; cam.style.webkitMaskImage='';
+  }
+
+  function watchEnd(label, expectedMs){
+    var t0 = performance.now();
+    function onEnd(e){
+      cam.removeEventListener('transitionend', onEnd);
+      var dur = (performance.now()-t0).toFixed(0);
+      info('<b>'+label+'</b> ended · ' + dur + 'ms (target ' + expectedMs + 'ms) · prop=' + e.propertyName);
+    }
+    cam.addEventListener('transitionend', onEnd);
+    setTimeout(function(){
+      cam.removeEventListener('transitionend', onEnd);
+    }, expectedMs+500);
+  }
+
+  // A — clip-path on .cam using s1's own rect (current app approach)
+  function runA(){
+    reset(); cam.classList.add('on');
+    var sr = cam.getBoundingClientRect();
+    var w = Math.max(sr.width, window.innerWidth);
+    var h = Math.max(sr.height, window.innerHeight);
+    var maxR = Math.ceil(Math.hypot(w, h)) + 80;
+    cam.style.clipPath = 'circle(0px at 50% 50%)'; cam.style.webkitClipPath = 'circle(0px at 50% 50%)';
+    void cam.offsetWidth;
+    cam.style.transition = 'clip-path 1.7s ease, -webkit-clip-path 1.7s ease';
+    cam.style.clipPath = 'circle('+maxR+'px at 50% 50%)'; cam.style.webkitClipPath = 'circle('+maxR+'px at 50% 50%)';
+    info('A · clip-path · maxR=' + maxR);
+    watchEnd('A', 1700);
+    setTimeout(reset, 4000);
+  }
+  // B — clip-path with HUGE fixed radius (no math)
+  function runB(){
+    reset(); cam.classList.add('on');
+    cam.style.clipPath = 'circle(0px at 50% 50%)'; cam.style.webkitClipPath = 'circle(0px at 50% 50%)';
+    void cam.offsetWidth;
+    cam.style.transition = 'clip-path 1.7s ease, -webkit-clip-path 1.7s ease';
+    cam.style.clipPath = 'circle(3000px at 50% 50%)'; cam.style.webkitClipPath = 'circle(3000px at 50% 50%)';
+    info('B · clip-path · maxR=3000 (fixed)');
+    watchEnd('B', 1700);
+    setTimeout(reset, 4000);
+  }
+  // C — radial-gradient mask (alternative when clip-path on phones is finicky)
+  function runC(){
+    reset(); cam.classList.add('on');
+    cam.style.maskImage = 'radial-gradient(circle at 50% 50%, #000 0px, transparent 0px)';
+    cam.style.webkitMaskImage = 'radial-gradient(circle at 50% 50%, #000 0px, transparent 0px)';
+    void cam.offsetWidth;
+    cam.style.transition = 'mask-image 1.7s ease, -webkit-mask-image 1.7s ease';
+    cam.style.maskImage = 'radial-gradient(circle at 50% 50%, #000 3000px, transparent 3001px)';
+    cam.style.webkitMaskImage = 'radial-gradient(circle at 50% 50%, #000 3000px, transparent 3001px)';
+    info('C · mask-image radial-gradient');
+    watchEnd('C', 1700);
+    setTimeout(reset, 4000);
+  }
+  // D — old box-shadow iris: tiny ::before pseudo, outer shadow shrinks. Here simulated with a div.
+  var iris;
+  function runD(){
+    reset(); cam.classList.add('on');
+    // Re-purpose: a dark ring that grows OUTWARD (covers behind through clip-path-less means)
+    if(!iris){ iris=document.createElement('div'); iris.id='iris';
+      iris.style.cssText='position:absolute;left:50%;top:50%;width:1px;height:1px;border-radius:50%;transform:translate(-50%,-50%);background:transparent;box-shadow:0 0 0 0 #0d0d10;pointer-events:none;';
+      cam.appendChild(iris);
+    }
+    iris.style.transition='none'; iris.style.boxShadow='0 0 0 0 #0d0d10';
+    void iris.offsetWidth;
+    iris.style.transition='box-shadow 1.7s ease';
+    iris.style.boxShadow='0 0 0 3000px #0d0d10';
+    info('D · box-shadow expanding from centre');
+    setTimeout(reset, 4000);
+  }
+
+  document.getElementById('bA').onclick = runA;
+  document.getElementById('bB').onclick = runB;
+  document.getElementById('bC').onclick = runC;
+  document.getElementById('bD').onclick = runD;
+</script>
+</body>
+</html>
