@@ -217,7 +217,12 @@
     var c0 = 'circle(0px at 50% 50%)';
     s1.style.webkitClipPath = c0; s1.style.clipPath = c0;
     void s1.offsetWidth;
-    var maxR = Math.ceil(Math.hypot(window.innerWidth, window.innerHeight)) + 40;
+    // Use s1's OWN rect (not the viewport) so the circle always covers it fully,
+    // even if .app is narrower / the document overflows / the page scrolls.
+    var sr = s1.getBoundingClientRect();
+    var w = Math.max(sr.width, window.innerWidth);
+    var h = Math.max(sr.height, window.innerHeight);
+    var maxR = Math.ceil(Math.hypot(w, h)) + 80;
     var cMax = 'circle(' + maxR + 'px at 50% 50%)';
     var ease = 'cubic-bezier(0.4, 0, 0.2, 1)';
     s1.style.transition = '-webkit-clip-path 1.7s ' + ease + ', clip-path 1.7s ' + ease;
