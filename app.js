@@ -47,12 +47,11 @@
     flip();
     retroTimer = setInterval(flip, interval || 2200);
   }
+  // Retro microcopy + doodle backgrounds are PARKED for now (per user request).
+  // The startRetro / playDoodles / RETRO / *_DOODLES code is kept untouched so we
+  // can switch them back on by restoring the per-screen calls here.
   function updateRetro(n) {
-    if (n === 1) { startRetro('cam-retro', 'camera', 2200); playDoodles('s1', false); }
-    else if (n === '1b') startRetro('confirm-retro', 'preview', 2300); // doodles entrance handled in goToConfirm (synced with the template)
-    else if (n === 2) { startRetro('status-text', 'process', 1500); playDoodles('s2', false); }
-    else if (n === 7) { startRetro('thanks-retro', 'thanks', 2600); playDoodles('s7', false); }
-    else stopRetro();
+    stopRetro();
   }
 
   // ===== Retro doodle layer: hand-drawn photobooth marks scattered round the

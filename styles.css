@@ -943,6 +943,10 @@
        centre circle on top of the current page (clip-path on s1, set in JS), so
        the page stays visible until the camera covers it. */
 
+    /* Retro microcopy + doodle background — parked (kept in source for reuse) */
+    .retro-line { display: none !important; }
+    .retro-doodles { display: none !important; }
+
     /* ============================================================ */
     /* ==================== SKEUOMORPHISM SKIN ==================== */
     /* Tactile vintage-camera look. Buttons stay still (no idle anim).
