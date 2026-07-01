@@ -1009,6 +1009,12 @@
       width: 21px; height: 21px; stroke: #2b2b30; fill: none; stroke-width: 2;
       filter: drop-shadow(0 1px 0 rgba(255,255,255,.9));
     }
+    /* Font Awesome-style filled icons: flip stroke/fill so their solid paths
+       render as dark engraved shapes on the chrome. Preferred source going
+       forward: https://fontawesome.com/search?ic=free-collection */
+    .btn-circle svg.fa, .btn-back svg.fa {
+      stroke: none; fill: #2b2b30;
+    }
 
     /* --- SHUTTER (.btn-snap) — glossy red dome inside a chrome ring --- */
     .btn-snap {
