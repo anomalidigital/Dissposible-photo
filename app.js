@@ -216,17 +216,17 @@
     s1.style.transition = 'none';
     var c0 = 'circle(0px at 50% 50%)';
     s1.style.webkitClipPath = c0; s1.style.clipPath = c0;
-    void s1.offsetWidth;
-    // Use s1's OWN rect (not the viewport) so the circle always covers it fully,
-    // even if .app is narrower / the document overflows / the page scrolls.
-    var sr = s1.getBoundingClientRect();
-    var w = Math.max(sr.width, window.innerWidth);
-    var h = Math.max(sr.height, window.innerHeight);
-    var maxR = Math.ceil(Math.hypot(w, h)) + 80;
-    var cMax = 'circle(' + maxR + 'px at 50% 50%)';
-    var ease = 'cubic-bezier(0.45, 0.05, 0.15, 1)';
-    s1.style.transition = '-webkit-clip-path 2s ' + ease + ', clip-path 2s ' + ease;
-    s1.style.webkitClipPath = cMax; s1.style.clipPath = cMax;
+    // Force initial paint so the "0px" state is actually the animation start.
+    getComputedStyle(s1).clipPath;
+    // Fix #1: use a HUGE fixed radius (bypasses ALL viewport / rect math) so the
+    // circle always grows past every viewport corner. 3000px covers any phone,
+    // tablet, or touch-screen laptop without measuring.
+    var cMax = 'circle(3000px at 50% 50%)';
+    var ease = 'cubic-bezier(0.4, 0, 0.15, 1)';
+    requestAnimationFrame(function() {
+      s1.style.transition = '-webkit-clip-path 1.8s ' + ease + ', clip-path 1.8s ' + ease;
+      s1.style.webkitClipPath = cMax; s1.style.clipPath = cMax;
+    });
 
     var finished = false;
     function done(e) {
@@ -241,7 +241,7 @@
       show(1);
     }
     s1.addEventListener('transitionend', done);
-    introTimer = setTimeout(done, 2400); // fallback if transitionend never fires
+    introTimer = setTimeout(done, 2200); // fallback if transitionend never fires
   }
 
   // Cancel a circle reveal in flight + clear the temp clip styles off s1.
@@ -443,9 +443,11 @@
     if (stage) { stage.style.transition = 'none'; stage.style.transform = 'none'; stage.style.opacity = '1'; }
   }
 
+  // Fix #2 / #3: quick reveal with a snappy stagger (0.22s each, 40ms apart)
+  // instead of 0.4s + 100ms stagger. Feels immediate on both preview and session 2.
   function revealConfirmButtons() {
     document.getElementById('confirm-btns').querySelectorAll('button').forEach(function(b, i) {
-      b.style.transition = 'opacity 0.4s ease ' + (i * 0.1) + 's'; b.style.opacity = '1';
+      b.style.transition = 'opacity 0.22s ease ' + (i * 0.04) + 's'; b.style.opacity = '1';
     });
   }
   function hideConfirmButtons() {
@@ -477,20 +479,13 @@
     stage.style.opacity = '1';
     if (img) img.classList.add('show');
 
-    // SMOOTH RISE: the preview slides up from below with a soft ease-out. No
-    // stop-motion chop — a tactile "print handed to you" feel.
+    // SMOOTH RISE: the preview slides up from below with a soft ease-out.
+    // Fix #2/#3: fire revealConfirmButtons DURING the rise (not after) so Retake /
+    // Continue / Confirm show up quickly on every session.
     requestAnimationFrame(function() { requestAnimationFrame(function() {
-      stage.style.transition = 'transform 0.75s cubic-bezier(0.22, 1, 0.36, 1)';
+      stage.style.transition = 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
       stage.style.transform = 'translate(' + r0.tx + 'px,' + r0.ty + 'px) scale(' + r0.s + ')';
-      var done = false;
-      function fin(e) {
-        if (e && e.propertyName && e.propertyName !== 'transform') return;
-        if (done) return; done = true;
-        stage.removeEventListener('transitionend', fin);
-        revealConfirmButtons();
-      }
-      stage.addEventListener('transitionend', fin);
-      setTimeout(fin, 850);
+      setTimeout(revealConfirmButtons, 200); // ~200ms after the rise starts
     }); });
   }
 
@@ -553,10 +548,11 @@
     hideConfirmButtons();
     var isLast = (photoCount + 1 >= totalPhotos);
     if (isLast) {
-      // commit + slide the finished card UP + fade, then processing fades in.
+      // Fix #4: commit + slide the finished card RIGHT (was 'up') so the hand +
+      // photo exit sideways, matching the continue direction. Then processing fades in.
       photos.push(lastCaptured); photoCount++; lastCaptured = null;
       stopCamera(); // last shot taken — camera not needed anymore
-      slidePreviewOff('up', goToProcessing);
+      slidePreviewOff('right', goToProcessing);
     } else {
       // commit this shot, slide the card RIGHT + fade, camera cross-fades in.
       photos.push(lastCaptured); photoCount++; lastCaptured = null;
@@ -644,9 +640,10 @@
     }, 100);
 
     setTimeout(function() {
-      // loading template pops in stop-motion (choppy via steps, but reads clean)
+      // Fix #5: loading template appears with a completely smooth fade+scale
+      // (was choppy via steps(6)). Soft ease-out that settles into place.
       tf.style.transition = 'none';
-      tf.style.animation = 'procFrameIn 0.6s steps(6) both';
+      tf.style.animation = 'procFrameIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both';
       cp.style.transition = 'opacity 0.4s';
       cp.style.opacity = '1';
     }, 350);
