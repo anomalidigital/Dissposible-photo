@@ -224,8 +224,8 @@
     var h = Math.max(sr.height, window.innerHeight);
     var maxR = Math.ceil(Math.hypot(w, h)) + 80;
     var cMax = 'circle(' + maxR + 'px at 50% 50%)';
-    var ease = 'cubic-bezier(0.4, 0, 0.2, 1)';
-    s1.style.transition = '-webkit-clip-path 1.7s ' + ease + ', clip-path 1.7s ' + ease;
+    var ease = 'cubic-bezier(0.45, 0.05, 0.15, 1)';
+    s1.style.transition = '-webkit-clip-path 2s ' + ease + ', clip-path 2s ' + ease;
     s1.style.webkitClipPath = cMax; s1.style.clipPath = cMax;
 
     var finished = false;
@@ -241,7 +241,7 @@
       show(1);
     }
     s1.addEventListener('transitionend', done);
-    introTimer = setTimeout(done, 2100); // fallback if transitionend never fires
+    introTimer = setTimeout(done, 2400); // fallback if transitionend never fires
   }
 
   // Cancel a circle reveal in flight + clear the temp clip styles off s1.
@@ -468,79 +468,102 @@
     if (img) { img.classList.remove('show'); img.src = lastCaptured; } // rendered at opacity 0 -> fades in
     if (load) load.classList.remove('show'); // hide THIS frame's "UP NEXT" so the captured photo shows
 
-    // Reset the retro layer + park the card off-screen below BEFORE s1b paints,
-    // so swapping in never flashes a stale retro/card frame (the "glitch").
-    var ovb = document.getElementById('s1b').querySelector('.retro-doodles');
-    if (ovb) ovb.querySelectorAll('.dood').forEach(function(d) { d.style.animation = 'none'; });
-    var below = window.innerHeight * 0.9;
+    // Park the card off-screen below BEFORE s1b paints so nothing flashes.
+    var below = window.innerHeight;
     stage.style.transition = 'none'; stage.style.transformOrigin = '0 0'; stage.style.opacity = '0';
     show('1b');
     var r0 = restTransform();
     stage.style.transform = 'translate(' + r0.tx + 'px,' + (r0.ty + below) + 'px) scale(' + r0.s + ')';
     stage.style.opacity = '1';
-    if (img) img.classList.add('show'); // captured photo fades in as the card rises
+    if (img) img.classList.add('show');
 
-    // RISE: the preview springs up from below in choppy stop-motion steps + a
-    // slight rotate, then settles. Doodles boil in alongside.
-    requestAnimationFrame(function() {
-      playDoodles('s1b', false);
-      var r = restTransform();
-      stopMotion(
-        { tx: r.tx, ty: r.ty + below, s: r.s },
-        { tx: r.tx, ty: r.ty, s: r.s },
-        { rotate: 4, steps: 9, interval: 70 },
-        revealConfirmButtons
-      );
-    });
+    // SMOOTH RISE: the preview slides up from below with a soft ease-out. No
+    // stop-motion chop — a tactile "print handed to you" feel.
+    requestAnimationFrame(function() { requestAnimationFrame(function() {
+      stage.style.transition = 'transform 0.75s cubic-bezier(0.22, 1, 0.36, 1)';
+      stage.style.transform = 'translate(' + r0.tx + 'px,' + r0.ty + 'px) scale(' + r0.s + ')';
+      var done = false;
+      function fin(e) {
+        if (e && e.propertyName && e.propertyName !== 'transform') return;
+        if (done) return; done = true;
+        stage.removeEventListener('transitionend', fin);
+        revealConfirmButtons();
+      }
+      stage.addEventListener('transitionend', fin);
+      setTimeout(fin, 850);
+    }); });
   }
 
-  // Re-enter the camera from the preview: the card slides off (down for Retake,
-  // right for Continue) in choppy stop-motion while the camera circle-reveals over
-  // it. Placeholder "seperti awal" while a wow option is chosen from the demos.
-  function exitToCamera(dir) {
+  // Cross-fade s1 (camera) in from behind the leaving preview. Camera is kept
+  // warm through the preview so this reveals the LIVE view (no loading flash).
+  function fadeInCamera(cb) {
+    if (!cameraStream) requestCamera();
+    var s1 = document.getElementById('s1');
+    if (!s1) { if (cb) cb(); return; }
+    if (introTimer) { clearTimeout(introTimer); introTimer = null; }
+    currentState = 1;
+    s1.style.transition = 'none';
+    s1.style.clipPath = 'none'; s1.style.webkitClipPath = 'none'; s1.style.willChange = '';
+    s1.style.display = 'flex';
+    s1.style.zIndex = '';       // camera sits behind the leaving preview, no clip
+    s1.style.pointerEvents = '';
+    s1.style.opacity = '0';
+    void s1.offsetWidth;
+    s1.style.transition = 'opacity 0.45s ease';
+    s1.style.opacity = '1';
+    setTimeout(function() {
+      s1.style.transition = 'none';
+      show(1);
+      if (cb) cb();
+    }, 500);
+  }
+
+  // Slide the preview card off (down for Retake, right for Continue, up for the
+  // last-shot Confirm) with a smooth ease + fade. No circle wipe here.
+  function slidePreviewOff(dir, onDone) {
+    var stage = document.getElementById('hand-stage');
     var r = restTransform();
-    var to = (dir === 'down')
-      ? { tx: r.tx, ty: r.ty + window.innerHeight * 1.1, s: r.s }
-      : { tx: r.tx + window.innerWidth * 1.15, ty: r.ty, s: r.s };
-    stopMotion({ tx: r.tx, ty: r.ty, s: r.s }, to,
-      { rotate: 4, steps: 8, interval: 70, fade: true, easeIn: true }, resetHandStage);
-    if (!cameraStream) requestCamera(); // camera is usually still warm
-    playCircleWipe();                   // camera circle-reveals over the leaving card
+    var toX = r.tx, toY = r.ty;
+    if (dir === 'down')  toY = r.ty + window.innerHeight * 1.05;
+    if (dir === 'right') toX = r.tx + window.innerWidth  * 1.15;
+    if (dir === 'up')    toY = r.ty - window.innerHeight * 1.05;
+    stage.style.transformOrigin = '0 0';
+    stage.style.transition = 'none';
+    stage.style.transform = 'translate(' + r.tx + 'px,' + r.ty + 'px) scale(' + r.s + ')';
+    stage.style.opacity = '1';
+    void stage.offsetWidth;
+    stage.style.transition = 'transform 0.6s cubic-bezier(0.5, 0, 0.6, 0.2), opacity 0.5s ease 0.15s';
+    stage.style.transform = 'translate(' + toX + 'px,' + toY + 'px) scale(' + r.s + ')';
+    stage.style.opacity = '0';
+    setTimeout(function() {
+      resetHandStage();
+      if (onDone) onDone();
+    }, 640);
   }
 
   function retakePhoto() {
     hideConfirmButtons();
-    playDoodles('s1b', true); // doodles reverse out as the card leaves
     lastCaptured = null;
     document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-    exitToCamera('down');
+    fadeInCamera();                    // camera cross-fades in behind
+    slidePreviewOff('down');           // card slides down out
   }
 
   function confirmPhoto() {
     hideConfirmButtons();
-    playDoodles('s1b', true); // doodles reverse out as the card leaves
     var isLast = (photoCount + 1 >= totalPhotos);
     if (isLast) {
-      // last shot ALSO exits to the RIGHT in choppy stop-motion (like Continue),
-      // then straight to processing.
-      var rl = restTransform();
-      stopMotion(
-        { tx: rl.tx, ty: rl.ty, s: rl.s },
-        { tx: rl.tx + window.innerWidth * 1.15, ty: rl.ty, s: rl.s },
-        { rotate: 4, steps: 8, interval: 70, fade: true, easeIn: true },
-        function() {
-          photos.push(lastCaptured); photoCount++; lastCaptured = null;
-          stopCamera(); // last shot taken — the camera isn't needed anymore
-          resetHandStage();
-          goToProcessing();
-        }
-      );
+      // commit + slide the finished card UP + fade, then processing fades in.
+      photos.push(lastCaptured); photoCount++; lastCaptured = null;
+      stopCamera(); // last shot taken — camera not needed anymore
+      slidePreviewOff('up', goToProcessing);
     } else {
-      // commit this shot, then the card slides right + camera reveals for the next.
+      // commit this shot, slide the card RIGHT + fade, camera cross-fades in.
       photos.push(lastCaptured); photoCount++; lastCaptured = null;
       paintHoles(-1);
       document.getElementById('photo-badge').textContent = (photoCount + 1) + ' of ' + totalPhotos;
-      exitToCamera('right');
+      fadeInCamera();
+      slidePreviewOff('right');
     }
   }
 
@@ -753,6 +776,14 @@
   function goToDelivery() {
     setupDeliveryPreviews();
     show(7); // final download design = Design 4 (carousel)
+    // Smooth fade-in on entry (skeuo-friendly, no jump).
+    var s7 = document.getElementById('s7');
+    if (!s7) return;
+    s7.style.transition = 'none'; s7.style.opacity = '0';
+    void s7.offsetWidth;
+    s7.style.transition = 'opacity 0.55s ease';
+    s7.style.opacity = '1';
+    setTimeout(function() { s7.style.transition = 'none'; s7.style.opacity = ''; }, 620);
   }
 
   function setupDeliveryPreviews() {

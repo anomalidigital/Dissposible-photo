@@ -1137,3 +1137,45 @@
     }
     #s7 .delivery-title { color: #fff; }
     #s7 .delivery-sub { color: rgba(255,255,255,.75); }
+
+    /* ============================================================ */
+    /* ================ TABLET / DESKTOP / TOUCH ================== */
+    /* ============================================================ */
+
+    /* Every tappable control gets touch-action: manipulation so tablets and
+       touch-screen laptops don't double-tap-zoom on the buttons. */
+    .btn-snap, .btn-snap-landing, .btn-back, .btn-circle, .btn-outline, .btn-solid,
+    .btn-allow, .badge, .car-dl-btn, .dl-row-btn {
+      touch-action: manipulation;
+    }
+    /* prevent iOS callout on long-press */
+    button, .btn-circle, .btn-back, .btn-snap {
+      -webkit-touch-callout: none;
+    }
+
+    /* On wider viewports (tablet portrait, laptop, desktop, touch-screen), keep
+       the app in a phone-shaped column but present it as a framed "device" so the
+       dark sides read intentional and the layout stays consistent. */
+    @media (min-width: 520px) {
+      body { background: #08080a; }
+      .app {
+        max-width: 430px;
+        box-shadow:
+          0 0 0 8px #2a2a30,                   /* device bezel */
+          0 0 0 9px rgba(0,0,0,.6),
+          0 0 0 14px #444448,                  /* outer plastic ring */
+          0 30px 60px rgba(0,0,0,.7);
+        border-radius: 34px;
+      }
+      /* Landing background stays inside the framed device */
+      .landing { border-radius: 26px; }
+    }
+
+    /* Landscape mobiles / small tablets: give the viewfinder a bit less vertical
+       so the shutter deck stays visible without scrolling. */
+    @media (max-height: 620px) and (orientation: landscape) {
+      #s1 .viewfinder-wrap { width: 72%; }
+      #s1 .bottom-bar { margin: 6px 12px max(10px, env(safe-area-inset-bottom)); padding: 8px; }
+      .btn-snap { width: 64px; height: 64px; }
+      .btn-snap::before { width: 46px; height: 46px; }
+    }
