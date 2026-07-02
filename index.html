@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Satisfy&family=Bungee&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=27">
+  <link rel="stylesheet" href="styles.css?v=28">
 </head>
 <body>
 
@@ -45,9 +45,13 @@
       </div>
       <div style="width:40px"></div>
     </div>
-    <!-- Vent-slat decorative strip above the viewfinder (mechanical, no branding) -->
-    <div class="cam-strip cam-strip-top" aria-hidden="true">
-      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    <!-- Top panel: twin knurled chrome dials + hotshoe rail (rangefinder feel) -->
+    <div class="cam-top-panel" aria-hidden="true">
+      <div class="cam-dial-big"><span class="cam-dial-face"></span></div>
+      <div class="cam-hotshoe">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="cam-dial-big"><span class="cam-dial-face"></span></div>
     </div>
     <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px 16px 0">
       <div class="viewfinder-wrap" id="viewfinder">
@@ -81,13 +85,12 @@
         </div>
       </div>
     </div>
-    <!-- Filmstrip band between viewfinder and control deck (perforations + 35mm mark) -->
-    <div class="cam-filmstrip" aria-hidden="true">
-      <div class="cam-filmstrip-perf"></div>
-      <div class="cam-filmstrip-body">
-        <span class="cam-filmstrip-num">24 · 25 · 26</span>
+    <!-- Leather grip band between viewfinder and control deck (skeuomorphic warmth) -->
+    <div class="cam-grip" aria-hidden="true">
+      <div class="cam-grip-inner">
+        <span class="cam-grip-led"></span>
+        <span class="cam-grip-strap"></span>
       </div>
-      <div class="cam-filmstrip-perf"></div>
     </div>
     <div class="retro-line" id="cam-retro"></div>
     <div class="bottom-bar" style="display:flex;align-items:center;justify-content:center;gap:32px">
@@ -443,7 +446,7 @@
 
 </div>
 
-<script src="app.js?v=27"></script>
+<script src="app.js?v=28"></script>
 
 </body>
 </html>
