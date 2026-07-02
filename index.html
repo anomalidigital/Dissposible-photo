@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Satisfy&family=Bungee&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=26">
+  <link rel="stylesheet" href="styles.css?v=27">
 </head>
 <body>
 
@@ -45,15 +45,12 @@
       </div>
       <div style="width:40px"></div>
     </div>
-    <!-- Retro chrome brand plate above the viewfinder -->
-    <div class="cam-brand">
-      <span class="cam-brand-txt">LOL · PHOTOBOOTH</span>
-      <span class="cam-brand-sub">MODEL DP-1  ·  35mm</span>
+    <!-- Vent-slat decorative strip above the viewfinder (mechanical, no branding) -->
+    <div class="cam-strip cam-strip-top" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
     </div>
     <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px 16px 0">
       <div class="viewfinder-wrap" id="viewfinder">
-        <span class="cam-screw tl"></span><span class="cam-screw tr"></span>
-        <span class="cam-screw bl"></span><span class="cam-screw br"></span>
         <video id="cam-video" autoplay playsinline muted></video>
         <canvas id="cam-canvas"></canvas>
         <div class="vf-curtain left"></div>
@@ -84,10 +81,13 @@
         </div>
       </div>
     </div>
-    <!-- Retro speaker grille panel between viewfinder and control deck -->
-    <div class="cam-grille" aria-hidden="true">
-      <div class="cam-grille-inner"></div>
-      <span class="cam-dial" title="ISO 400"><span></span></span>
+    <!-- Filmstrip band between viewfinder and control deck (perforations + 35mm mark) -->
+    <div class="cam-filmstrip" aria-hidden="true">
+      <div class="cam-filmstrip-perf"></div>
+      <div class="cam-filmstrip-body">
+        <span class="cam-filmstrip-num">24 · 25 · 26</span>
+      </div>
+      <div class="cam-filmstrip-perf"></div>
     </div>
     <div class="retro-line" id="cam-retro"></div>
     <div class="bottom-bar" style="display:flex;align-items:center;justify-content:center;gap:32px">
@@ -443,7 +443,7 @@
 
 </div>
 
-<script src="app.js?v=26"></script>
+<script src="app.js?v=27"></script>
 
 </body>
 </html>

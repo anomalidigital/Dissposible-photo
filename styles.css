@@ -225,10 +225,19 @@
 
     /* Camera viewfinder */
     .viewfinder-wrap {
-      width: 94%;
-      aspect-ratio: 1055 / 700; /* landscape 3:2 — curtains make the visible centre read 1:1 */
+      /* Flex sizing — every dimension can be overridden per-instance via CSS vars.
+         Defaults preserve the current 3:2 landscape look. To resize the live view
+         later: change --vf-aspect / --vf-width / --vf-max / --vf-radius on this
+         element (inline style, per-page class, or a media query override). */
+      --vf-aspect: 1055 / 700;
+      --vf-width: 94%;
+      --vf-max: 100%;
+      --vf-radius: 12px;
+      width: var(--vf-width);
+      max-width: var(--vf-max);
+      aspect-ratio: var(--vf-aspect);
       background: #000;
-      border-radius: 12px;
+      border-radius: var(--vf-radius);
       overflow: hidden;
       position: relative;
     }
@@ -1154,79 +1163,62 @@
 
     /* ============================================================ */
     /* ============= VINTAGE CAMERA DETAILS (s1 body) ============= */
-    /* Fills the "empty" space above + below the viewfinder with real-camera
-       touches: an engraved brand plate, corner screws around the lens bezel,
-       and a speaker-grille panel above the shutter deck. */
+    /* Fills the empty space above + below the viewfinder with mechanical touches
+       (vents, filmstrip). No branding, no screws. */
 
-    /* Brand plate above the viewfinder — engraved letterpress on brushed metal */
-    #s1 .cam-brand {
+    /* NOTE: viewfinder-wrap size is driven by CSS variables defined earlier in
+       .viewfinder-wrap. Override --vf-aspect / --vf-width / --vf-max / --vf-radius
+       on the wrap element (inline / per-class / media query) to change the live
+       view dimensions — all children (video, canvas, curtains, focus brackets)
+       follow automatically. */
+
+    /* Vent-slat strip above the viewfinder (mechanical, no text) */
+    #s1 .cam-strip-top {
       position: relative; z-index: 2;
-      margin: 6px 22px 0;
-      padding: 8px 14px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      border-radius: 8px;
-      background: linear-gradient(180deg,#3a3a40 0%,#2a2a2f 45%,#1c1c20 100%);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.14), inset 0 -2px 5px rgba(0,0,0,.55),
-                  0 1px 0 rgba(255,255,255,.06);
-    }
-    #s1 .cam-brand-txt {
-      font-family: 'Bungee', sans-serif; font-size: 13px; letter-spacing: 3px;
-      color: #cfcfd4;
-      text-shadow: 0 -1px 0 rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.08);
-    }
-    #s1 .cam-brand-sub {
-      margin-top: 2px;
-      font-family: 'Nunito', monospace; font-size: 9px; letter-spacing: 2px; font-weight: 800;
-      color: rgba(207,207,212,.55);
-      text-shadow: 0 -1px 0 rgba(0,0,0,.6);
-    }
-
-    /* Screws in the 4 corners of the viewfinder chrome bezel */
-    #s1 .viewfinder-wrap { overflow: visible; }
-    #s1 .cam-screw {
-      position: absolute; width: 9px; height: 9px; border-radius: 50%; z-index: 3;
-      background:
-        linear-gradient(135deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 40%),
-        radial-gradient(circle at 40% 35%, #d6d6da, #7a7a80 60%, #4a4a4f 100%);
-      box-shadow: inset 0 -1px 1px rgba(0,0,0,.55), 0 1px 2px rgba(0,0,0,.6);
-    }
-    #s1 .cam-screw::after {
-      content: ""; position: absolute; left: 20%; right: 20%; top: 45%; height: 1.2px;
-      background: rgba(0,0,0,.7); transform: rotate(-32deg); border-radius: 1px;
-    }
-    #s1 .cam-screw.tl { top: -6px; left: -6px; } #s1 .cam-screw.tr { top: -6px; right: -6px; }
-    #s1 .cam-screw.bl { bottom: -6px; left: -6px; } #s1 .cam-screw.br { bottom: -6px; right: -6px; }
-
-    /* Speaker grille panel between viewfinder and the shutter deck */
-    #s1 .cam-grille {
-      position: relative; z-index: 2;
-      margin: 12px 20px 0;
-      padding: 10px 14px;
-      display: flex; align-items: center; gap: 12px;
-      border-radius: 10px;
-      background: linear-gradient(180deg,#1c1c20 0%,#131317 100%);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 -2px 5px rgba(0,0,0,.5),
+      margin: 6px 42px 0;
+      height: 18px;
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+      padding: 0 12px;
+      border-radius: 4px;
+      background: linear-gradient(180deg,#222227 0%,#141418 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 3px rgba(0,0,0,.55),
                   0 1px 0 rgba(255,255,255,.05);
     }
-    #s1 .cam-grille-inner {
-      flex: 1; height: 22px; border-radius: 4px;
-      background-image: radial-gradient(circle, rgba(255,255,255,.12) 1px, transparent 1.4px);
-      background-size: 7px 7px;
-      background-position: center;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,.75);
+    #s1 .cam-strip-top > span {
+      width: 3px; height: 10px; border-radius: 1.5px;
+      background: linear-gradient(180deg,#4a4a52,#26262b);
+      box-shadow: inset 0 1px 1px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.08);
     }
-    /* Small ISO dial on the right of the grille */
-    #s1 .cam-dial {
-      position: relative; width: 26px; height: 26px; border-radius: 50%;
+
+    /* Filmstrip band below the viewfinder — perforations + frame number stamp */
+    #s1 .cam-filmstrip {
+      position: relative; z-index: 2;
+      margin: 12px 20px 0;
+      padding: 4px 0;
+      border-radius: 6px;
+      background: linear-gradient(180deg,#101013 0%,#0a0a0d 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 -2px 5px rgba(0,0,0,.55),
+                  0 1px 0 rgba(255,255,255,.04);
+    }
+    /* Perforation rows — repeating rectangles simulate 35mm sprocket holes */
+    #s1 .cam-filmstrip-perf {
+      height: 8px; margin: 0 8px;
       background:
-        radial-gradient(circle at 35% 30%, rgba(255,255,255,.6), rgba(255,255,255,0) 45%),
-        conic-gradient(#a5a5aa, #6c6c72, #d4d4d8, #7c7c82, #a5a5aa);
-      box-shadow: 0 1px 3px rgba(0,0,0,.6), inset 0 1px 1px rgba(255,255,255,.6), inset 0 -2px 3px rgba(0,0,0,.4);
+        repeating-linear-gradient(90deg,
+          rgba(210,210,215,.85) 0px,
+          rgba(210,210,215,.85) 5px,
+          transparent 5px,
+          transparent 11px);
+      border-radius: 2px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,.65);
     }
-    #s1 .cam-dial > span {
-      position: absolute; left: 50%; top: 12%; width: 2px; height: 30%;
-      background: #2b2b30; transform: translateX(-50%); border-radius: 1px;
-      box-shadow: 0 1px 0 rgba(255,255,255,.4);
+    #s1 .cam-filmstrip-body {
+      padding: 4px 12px; display: flex; align-items: center; justify-content: space-between;
+    }
+    #s1 .cam-filmstrip-num {
+      font-family: 'Bungee', sans-serif; font-size: 10px; letter-spacing: 3px;
+      color: rgba(210,210,215,.65);
+      text-shadow: 0 -1px 0 rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.05);
     }
 
     /* Landscape template: give the preview a bit more vertical room by tightening
