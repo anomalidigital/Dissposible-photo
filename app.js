@@ -386,11 +386,21 @@
   }
 
   // The settled "card in hand" view: zoom in on the template so the photos read
-  // clearly and the hand isn't dominant (forearm runs off-screen, fingers stay).
+  // clearly. Bigger now — the hand is allowed to run off the bottom of the
+  // screen. Orientation-aware: for a landscape template (slot wider than tall)
+  // we allow a wider card so it doesn't crop, and lift it slightly higher.
   function restTransform() {
     var vw = window.innerWidth, vh = window.innerHeight;
-    var cardW = Math.min(vw * 0.58, 290);
-    return rectTransform(document.querySelector('.tpl-slot'), { left: (vw - cardW) / 2, top: vh * 0.24, width: cardW });
+    var slot = document.querySelector('.tpl-slot');
+    var slotR = slot ? slot.getBoundingClientRect() : { width: 1, height: 1 };
+    var isLandscape = slotR.width > slotR.height;
+    // Portrait template: fill ~78% of the viewport width, capped at 380px.
+    // Landscape template: allow up to 90% so both frames read clearly.
+    var cardW = isLandscape
+      ? Math.min(vw * 0.90, 440)
+      : Math.min(vw * 0.78, 380);
+    var top = isLandscape ? vh * 0.18 : vh * 0.14;
+    return rectTransform(slot, { left: (vw - cardW) / 2, top: top, width: cardW });
   }
 
   // Slot (template) centre in the hand-stage's own un-transformed pixels — the
@@ -489,8 +499,9 @@
     }); });
   }
 
-  // Cross-fade s1 (camera) in from behind the leaving preview. Camera is kept
-  // warm through the preview so this reveals the LIVE view (no loading flash).
+  // Cross-fade s1 (camera) in from behind the leaving preview, with a subtle
+  // "push forward" scale so the camera feels like it's stepping in rather than
+  // just appearing. Camera is kept warm so this reveals the LIVE view.
   function fadeInCamera(cb) {
     if (!cameraStream) requestCamera();
     var s1 = document.getElementById('s1');
@@ -500,40 +511,46 @@
     s1.style.transition = 'none';
     s1.style.clipPath = 'none'; s1.style.webkitClipPath = 'none'; s1.style.willChange = '';
     s1.style.display = 'flex';
-    s1.style.zIndex = '';       // camera sits behind the leaving preview, no clip
+    s1.style.zIndex = '';
     s1.style.pointerEvents = '';
     s1.style.opacity = '0';
+    s1.style.transformOrigin = 'center';
+    s1.style.transform = 'scale(0.96)';
     void s1.offsetWidth;
-    s1.style.transition = 'opacity 0.45s ease';
+    s1.style.transition = 'opacity 0.5s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1)';
     s1.style.opacity = '1';
+    s1.style.transform = 'scale(1)';
     setTimeout(function() {
-      s1.style.transition = 'none';
+      s1.style.transition = 'none'; s1.style.transform = ''; s1.style.transformOrigin = '';
       show(1);
       if (cb) cb();
-    }, 500);
+    }, 570);
   }
 
-  // Slide the preview card off (down for Retake, right for Continue, up for the
-  // last-shot Confirm) with a smooth ease + fade. No circle wipe here.
+  // Flick the preview card off (down for Retake, right for Continue, right for
+  // the last-shot Confirm). Adds a wind-up pre-lean (opposite direction) then a
+  // rotating, accelerating slide — feels like the hand physically tossing the
+  // card away instead of a flat slide.
   function slidePreviewOff(dir, onDone) {
     var stage = document.getElementById('hand-stage');
     var r = restTransform();
-    var toX = r.tx, toY = r.ty;
-    if (dir === 'down')  toY = r.ty + window.innerHeight * 1.05;
-    if (dir === 'right') toX = r.tx + window.innerWidth  * 1.15;
-    if (dir === 'up')    toY = r.ty - window.innerHeight * 1.05;
+    var toX = r.tx, toY = r.ty, rot = 0, preX = 0, preY = 0, preRot = 0;
+    if (dir === 'down')  { toY = r.ty + window.innerHeight * 1.05; rot = -6;  preY = -8;  preRot = -2; }
+    if (dir === 'right') { toX = r.tx + window.innerWidth  * 1.20; rot =  14; preX = -12; preRot = -3; }
+    if (dir === 'up')    { toY = r.ty - window.innerHeight * 1.05; rot =  6;  preY =  8;  preRot =  2; }
     stage.style.transformOrigin = '0 0';
-    stage.style.transition = 'none';
-    stage.style.transform = 'translate(' + r.tx + 'px,' + r.ty + 'px) scale(' + r.s + ')';
+    stage.style.transition = 'transform 0.14s cubic-bezier(0.3, 0.7, 0.4, 1)';
+    stage.style.transform = 'translate(' + (r.tx + preX) + 'px,' + (r.ty + preY) + 'px) scale(' + r.s + ') rotate(' + preRot + 'deg)';
     stage.style.opacity = '1';
-    void stage.offsetWidth;
-    stage.style.transition = 'transform 0.6s cubic-bezier(0.5, 0, 0.6, 0.2), opacity 0.5s ease 0.15s';
-    stage.style.transform = 'translate(' + toX + 'px,' + toY + 'px) scale(' + r.s + ')';
-    stage.style.opacity = '0';
+    setTimeout(function() {
+      stage.style.transition = 'transform 0.55s cubic-bezier(0.55, 0, 0.15, 1), opacity 0.4s ease 0.15s';
+      stage.style.transform = 'translate(' + toX + 'px,' + toY + 'px) scale(' + r.s + ') rotate(' + rot + 'deg)';
+      stage.style.opacity = '0';
+    }, 150);
     setTimeout(function() {
       resetHandStage();
       if (onDone) onDone();
-    }, 640);
+    }, 730);
   }
 
   function retakePhoto() {

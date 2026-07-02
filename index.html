@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Satisfy&family=Bungee&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=24">
+  <link rel="stylesheet" href="styles.css?v=26">
 </head>
 <body>
 
@@ -43,10 +43,17 @@
       <div style="flex:1;display:flex;justify-content:center">
         <div class="badge" id="photo-badge">1 of 2</div>
       </div>
-      <div style="width:36px"></div>
+      <div style="width:40px"></div>
     </div>
-    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px 16px 0">
+    <!-- Retro chrome brand plate above the viewfinder -->
+    <div class="cam-brand">
+      <span class="cam-brand-txt">LOL · PHOTOBOOTH</span>
+      <span class="cam-brand-sub">MODEL DP-1  ·  35mm</span>
+    </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px 16px 0">
       <div class="viewfinder-wrap" id="viewfinder">
+        <span class="cam-screw tl"></span><span class="cam-screw tr"></span>
+        <span class="cam-screw bl"></span><span class="cam-screw br"></span>
         <video id="cam-video" autoplay playsinline muted></video>
         <canvas id="cam-canvas"></canvas>
         <div class="vf-curtain left"></div>
@@ -77,6 +84,11 @@
         </div>
       </div>
     </div>
+    <!-- Retro speaker grille panel between viewfinder and control deck -->
+    <div class="cam-grille" aria-hidden="true">
+      <div class="cam-grille-inner"></div>
+      <span class="cam-dial" title="ISO 400"><span></span></span>
+    </div>
     <div class="retro-line" id="cam-retro"></div>
     <div class="bottom-bar" style="display:flex;align-items:center;justify-content:center;gap:32px">
       <!-- Icon: Font Awesome 6 free "fa-images" (solid) — https://fontawesome.com/icons/images -->
@@ -98,11 +110,11 @@
   <!-- STATE 1b: Confirm single photo -->
   <div class="state camera-bg" id="s1b">
     <div class="header">
-      <div style="width:36px"></div>
+      <div style="width:40px"></div>
       <div style="flex:1;display:flex;justify-content:center">
         <div class="badge" id="confirm-badge">1 of 2</div>
       </div>
-      <div style="width:36px"></div>
+      <div style="width:40px"></div>
     </div>
     <div class="hand-area" id="hand-area">
       <div class="hand-stage" id="hand-stage">
@@ -431,7 +443,7 @@
 
 </div>
 
-<script src="app.js?v=24"></script>
+<script src="app.js?v=26"></script>
 
 </body>
 </html>

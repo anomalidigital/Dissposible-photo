@@ -1009,6 +1009,12 @@
       width: 21px; height: 21px; stroke: #2b2b30; fill: none; stroke-width: 2;
       filter: drop-shadow(0 1px 0 rgba(255,255,255,.9));
     }
+    /* Font Awesome solid icons are filled paths, not strokes — override so they
+       render as filled etched icons on the chrome disc. */
+    .btn-circle svg.fa, .btn-back svg.fa, .btn-snap svg.fa {
+      fill: #2b2b30; stroke: none; stroke-width: 0;
+      width: 22px; height: 20px;
+    }
     /* Font Awesome-style filled icons: flip stroke/fill so their solid paths
        render as dark engraved shapes on the chrome. Preferred source going
        forward: https://fontawesome.com/search?ic=free-collection */
@@ -1048,10 +1054,12 @@
     }
     .camera-bg .btn-snap { box-shadow: 0 7px 17px rgba(0,0,0,.55), inset 0 1px 2px rgba(255,255,255,.95), inset 0 -3px 6px rgba(0,0,0,.32); }
 
-    /* --- BADGE (LCD film counter) --- */
+    /* --- BADGE (LCD film counter) --- fixed size so s1 and s1b look identical */
     .badge {
+      display: inline-flex; align-items: center; justify-content: center;
       font-family: 'Bungee', monospace; font-size: 13px; letter-spacing: 2px; color: #ff5a44;
-      padding: 6px 14px; border-radius: 7px; border: 1px solid #050505; background: linear-gradient(180deg,#161618,#26262a);
+      padding: 6px 16px; min-width: 84px; height: 30px; box-sizing: border-box;
+      border-radius: 7px; border: 1px solid #050505; background: linear-gradient(180deg,#161618,#26262a);
       text-shadow: 0 0 7px rgba(255,80,60,.65);
       box-shadow: inset 0 2px 6px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.08), 0 1px 0 rgba(255,255,255,.1);
     }
@@ -1143,6 +1151,88 @@
     }
     #s7 .delivery-title { color: #fff; }
     #s7 .delivery-sub { color: rgba(255,255,255,.75); }
+
+    /* ============================================================ */
+    /* ============= VINTAGE CAMERA DETAILS (s1 body) ============= */
+    /* Fills the "empty" space above + below the viewfinder with real-camera
+       touches: an engraved brand plate, corner screws around the lens bezel,
+       and a speaker-grille panel above the shutter deck. */
+
+    /* Brand plate above the viewfinder — engraved letterpress on brushed metal */
+    #s1 .cam-brand {
+      position: relative; z-index: 2;
+      margin: 6px 22px 0;
+      padding: 8px 14px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border-radius: 8px;
+      background: linear-gradient(180deg,#3a3a40 0%,#2a2a2f 45%,#1c1c20 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.14), inset 0 -2px 5px rgba(0,0,0,.55),
+                  0 1px 0 rgba(255,255,255,.06);
+    }
+    #s1 .cam-brand-txt {
+      font-family: 'Bungee', sans-serif; font-size: 13px; letter-spacing: 3px;
+      color: #cfcfd4;
+      text-shadow: 0 -1px 0 rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.08);
+    }
+    #s1 .cam-brand-sub {
+      margin-top: 2px;
+      font-family: 'Nunito', monospace; font-size: 9px; letter-spacing: 2px; font-weight: 800;
+      color: rgba(207,207,212,.55);
+      text-shadow: 0 -1px 0 rgba(0,0,0,.6);
+    }
+
+    /* Screws in the 4 corners of the viewfinder chrome bezel */
+    #s1 .viewfinder-wrap { overflow: visible; }
+    #s1 .cam-screw {
+      position: absolute; width: 9px; height: 9px; border-radius: 50%; z-index: 3;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 40%),
+        radial-gradient(circle at 40% 35%, #d6d6da, #7a7a80 60%, #4a4a4f 100%);
+      box-shadow: inset 0 -1px 1px rgba(0,0,0,.55), 0 1px 2px rgba(0,0,0,.6);
+    }
+    #s1 .cam-screw::after {
+      content: ""; position: absolute; left: 20%; right: 20%; top: 45%; height: 1.2px;
+      background: rgba(0,0,0,.7); transform: rotate(-32deg); border-radius: 1px;
+    }
+    #s1 .cam-screw.tl { top: -6px; left: -6px; } #s1 .cam-screw.tr { top: -6px; right: -6px; }
+    #s1 .cam-screw.bl { bottom: -6px; left: -6px; } #s1 .cam-screw.br { bottom: -6px; right: -6px; }
+
+    /* Speaker grille panel between viewfinder and the shutter deck */
+    #s1 .cam-grille {
+      position: relative; z-index: 2;
+      margin: 12px 20px 0;
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 12px;
+      border-radius: 10px;
+      background: linear-gradient(180deg,#1c1c20 0%,#131317 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 -2px 5px rgba(0,0,0,.5),
+                  0 1px 0 rgba(255,255,255,.05);
+    }
+    #s1 .cam-grille-inner {
+      flex: 1; height: 22px; border-radius: 4px;
+      background-image: radial-gradient(circle, rgba(255,255,255,.12) 1px, transparent 1.4px);
+      background-size: 7px 7px;
+      background-position: center;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,.75);
+    }
+    /* Small ISO dial on the right of the grille */
+    #s1 .cam-dial {
+      position: relative; width: 26px; height: 26px; border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(255,255,255,.6), rgba(255,255,255,0) 45%),
+        conic-gradient(#a5a5aa, #6c6c72, #d4d4d8, #7c7c82, #a5a5aa);
+      box-shadow: 0 1px 3px rgba(0,0,0,.6), inset 0 1px 1px rgba(255,255,255,.6), inset 0 -2px 3px rgba(0,0,0,.4);
+    }
+    #s1 .cam-dial > span {
+      position: absolute; left: 50%; top: 12%; width: 2px; height: 30%;
+      background: #2b2b30; transform: translateX(-50%); border-radius: 1px;
+      box-shadow: 0 1px 0 rgba(255,255,255,.4);
+    }
+
+    /* Landscape template: give the preview a bit more vertical room by tightening
+       the s1b header/badge. The card itself is sized in restTransform (JS). */
+    #s1b.tpl-landscape .header { padding-top: max(10px, env(safe-area-inset-top)); padding-bottom: 4px; }
+    #s1b.tpl-landscape .bottom-bar { padding-top: 10px; }
 
     /* ============================================================ */
     /* ================ TABLET / DESKTOP / TOUCH ================== */
