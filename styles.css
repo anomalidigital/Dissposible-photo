@@ -969,8 +969,11 @@
         linear-gradient(168deg,#303036 0%,#202024 55%,#141417 100%);
     }
     .camera-bg::before, .processing-bg::before, .delivery-bg::before {
-      content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .45; mix-blend-mode: overlay; z-index: 0;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+      content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .4; mix-blend-mode: overlay; z-index: 0;
+      /* Perf: the feTurbulence tile is rasterized ONCE at 64x64 and repeated,
+         instead of scaling a big SVG to fill the screen (much cheaper paint). */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+      background-size: 64px 64px;
     }
 
     /* --- shared tokens --- */

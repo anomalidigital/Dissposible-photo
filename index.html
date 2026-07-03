@@ -11,8 +11,11 @@
   <link rel="icon" type="image/png" href="assets/logo-ico.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Satisfy&family=Bungee&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=28">
+  <!-- Perf: dropped the unused 'Satisfy' font; keep only Nunito + Bungee. -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Bungee&display=swap" rel="stylesheet">
+  <!-- Perf: warm the first-paint landing artwork so the home screen shows instantly. -->
+  <link rel="preload" as="image" href="assets/capture-every-moment.png">
+  <link rel="stylesheet" href="styles.css?v=29">
 </head>
 <body>
 
@@ -121,7 +124,7 @@
     </div>
     <div class="hand-area" id="hand-area">
       <div class="hand-stage" id="hand-stage">
-        <img class="hand-layer hand-back" src="assets/hand-back.webp" alt="" draggable="false">
+        <img class="hand-layer hand-back" src="assets/hand-back.webp" alt="" draggable="false" loading="lazy" decoding="async">
         <div class="tpl-slot">
           <div class="frame-hole hole-1">
             <img class="hole-photo" id="hole-photo-1" alt="">
@@ -131,9 +134,9 @@
             <img class="hole-photo" id="hole-photo-2" alt="">
             <div class="hole-load show" id="hole-load-2"><svg viewBox="0 0 48 40" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h7l3-5h12l3 5h6a3 3 0 0 1 3 3v18a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3V14a3 3 0 0 1 3-3z"/><circle cx="22" cy="23" r="7"/></svg><span class="hl-next">UP NEXT</span></div>
           </div>
-          <img class="tpl-img" src="assets/template-artworks.webp" alt="" draggable="false">
+          <img class="tpl-img" src="assets/template-artworks.webp" alt="" draggable="false" loading="lazy" decoding="async">
         </div>
-        <img class="hand-layer hand-front" src="assets/hand-front.webp" alt="" draggable="false">
+        <img class="hand-layer hand-front" src="assets/hand-front.webp" alt="" draggable="false" loading="lazy" decoding="async">
       </div>
     </div>
     <div class="retro-line" id="confirm-retro"></div>
@@ -446,7 +449,7 @@
 
 </div>
 
-<script src="app.js?v=28"></script>
+<script src="app.js?v=29"></script>
 
 </body>
 </html>
