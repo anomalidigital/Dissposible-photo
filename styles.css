@@ -1175,97 +1175,75 @@
        view dimensions — all children (video, canvas, curtains, focus brackets)
        follow automatically. */
 
-    /* TOP PANEL: twin knurled chrome dials + hotshoe accessory rail — the top of
-       a vintage rangefinder camera. Substantial 3D detail, no text/branding. */
+    /* TOP PANEL: point-and-shoot look — glass flash lamp on the left, amber AF
+       assist LED in the middle, optical finder window on the right. */
     #s1 .cam-top-panel {
       position: relative; z-index: 2;
       margin: 10px 20px 0;
-      padding: 8px 18px;
-      display: flex; align-items: center; justify-content: space-between; gap: 14px;
-      border-radius: 10px;
-      background: linear-gradient(180deg,#242428 0%,#151517 100%);
+      padding: 10px 16px;
+      display: flex; align-items: center; gap: 14px;
+      border-radius: 12px;
+      background: linear-gradient(180deg,#2a2a2f 0%,#161619 100%);
       box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 5px rgba(0,0,0,.55),
                   0 1px 0 rgba(255,255,255,.05);
     }
-    #s1 .cam-dial-big {
-      position: relative; width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
-      background:
-        repeating-conic-gradient(from 0deg, #d8d8dc 0deg 6deg, #7a7a80 6deg 12deg);
-      box-shadow:
-        0 4px 8px rgba(0,0,0,.6),
-        inset 0 1px 2px rgba(255,255,255,.7),
-        inset 0 -3px 5px rgba(0,0,0,.45);
+    /* Flash lamp — frosted white glass with a slanted highlight sheen */
+    #s1 .cam-flash {
+      position: relative; width: 42px; height: 28px; border-radius: 6px; flex-shrink: 0;
+      overflow: hidden;
+      background: linear-gradient(135deg,#fdfdff 0%,#c7d4e0 45%,#9fb0c2 100%);
+      box-shadow: inset 0 1px 2px rgba(255,255,255,.9), inset 0 -2px 4px rgba(0,0,0,.3),
+                  0 1px 3px rgba(0,0,0,.5);
     }
-    #s1 .cam-dial-big .cam-dial-face {
-      position: absolute; inset: 5px; border-radius: 50%;
-      background:
-        radial-gradient(circle at 35% 25%, rgba(255,255,255,.65), rgba(255,255,255,0) 50%),
-        linear-gradient(145deg, #c8c8ce 0%, #8e8e94 55%, #b6b6bc 100%);
-      box-shadow: inset 0 1px 1px rgba(255,255,255,.6), inset 0 -2px 3px rgba(0,0,0,.4),
+    #s1 .cam-flash::after {
+      content: ""; position: absolute; top: -8px; left: -14px;
+      width: 22px; height: 48px; background: rgba(255,255,255,.55);
+      transform: rotate(28deg);
+    }
+    /* AF assist LED — amber glow dot */
+    #s1 .cam-af {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+      background: radial-gradient(circle at 35% 30%, #ffd98a, #c98a1a 60%, #5a3a08);
+      box-shadow: 0 0 8px rgba(255,190,80,.6), inset 0 -1px 1px rgba(0,0,0,.4);
+    }
+    /* Optical finder — dark blue-tinted rectangle with chrome bezel */
+    #s1 .cam-finder {
+      width: 54px; height: 30px; border-radius: 4px; margin-left: auto; flex-shrink: 0;
+      background: radial-gradient(circle at 50% 40%, #2a3540, #0a0f14 75%);
+      box-shadow: inset 0 0 0 2px #4a4a50, inset 0 2px 5px rgba(0,0,0,.9),
                   0 1px 2px rgba(0,0,0,.5);
     }
-    #s1 .cam-dial-big::before {           /* red pointer tick at 12 o'clock */
-      content: ""; position: absolute; left: 50%; top: -2px; width: 3px; height: 7px;
-      background: #ed4836; transform: translateX(-50%); border-radius: 1px;
-      box-shadow: 0 0 4px rgba(237,72,54,.55), inset 0 -1px 0 rgba(120,20,10,.5);
-    }
-    /* Hotshoe accessory rail in the middle */
-    #s1 .cam-hotshoe {
-      flex: 1; height: 24px; border-radius: 4px;
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-      background: linear-gradient(180deg,#0f0f12 0%,#050506 100%);
-      box-shadow: inset 0 2px 4px rgba(0,0,0,.75), inset 0 -1px 0 rgba(255,255,255,.06),
-                  0 1px 0 rgba(255,255,255,.05);
-    }
-    #s1 .cam-hotshoe > span {
-      width: 4px; height: 4px; border-radius: 50%;
-      background: radial-gradient(circle at 40% 30%, #d4d4d8, #6c6c72);
-      box-shadow: 0 0 3px rgba(255,255,255,.15), inset 0 -1px 1px rgba(0,0,0,.5);
-    }
 
-    /* LEATHER GRIP band below the viewfinder — dark rubberized panel with
-       stitched border, tiny green power LED, and an embossed model tag. */
+    /* GRIP BAND: diagonal rubber texture, REC indicator on the left, zoom rocker
+       on the right — like the thumb-grip area on a P&S camera. */
     #s1 .cam-grip {
       position: relative; z-index: 2;
       margin: 14px 20px 0;
-      padding: 4px;
-      height: 62px;
-      border-radius: 10px;
-      background:
-        radial-gradient(circle at 20% 30%, rgba(255,255,255,.03) 1px, transparent 2px),
-        radial-gradient(circle at 60% 70%, rgba(0,0,0,.15) 1px, transparent 2px),
-        radial-gradient(circle at 80% 20%, rgba(255,255,255,.02) 1px, transparent 2px),
-        linear-gradient(160deg,#1e1a17 0%,#141110 60%,#0e0c0a 100%);
-      background-size: 20px 20px, 24px 24px, 27px 27px, 100% 100%;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 -2px 6px rgba(0,0,0,.55),
+      height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 18px;
+      border-radius: 12px;
+      background: repeating-linear-gradient(-45deg,#2a2a2e 0 4px,#1c1c20 4px 8px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06), inset 0 -2px 6px rgba(0,0,0,.6),
                   0 2px 6px rgba(0,0,0,.4);
     }
-    #s1 .cam-grip-inner {
-      position: relative;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 12px; height: 100%; border-radius: 7px;
-      border: 1.5px dashed rgba(255,255,255,.09);         /* stitched border */
-      box-shadow: inset 0 0 12px rgba(0,0,0,.45);
+    /* Red REC button/indicator on the left */
+    #s1 .cam-rec {
+      width: 16px; height: 16px; border-radius: 4px;
+      background: linear-gradient(180deg,#ff5a44,#c5301f);
+      box-shadow: 0 0 8px rgba(237,72,54,.55), inset 0 1px 1px rgba(255,255,255,.4),
+                  inset 0 -2px 3px rgba(120,20,10,.5);
     }
-    /* Tiny green power LED on the left */
-    #s1 .cam-grip-led {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #6cff8a 0%, #1c8a37 55%, #0a3a18 100%);
-      box-shadow: 0 0 8px rgba(90,255,120,.55), inset 0 -1px 1px rgba(0,0,0,.5);
+    /* Chrome zoom rocker pill with two triangle arrows */
+    #s1 .cam-rocker {
+      display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 20px;
+      background: linear-gradient(180deg,#3a3a40,#1c1c20);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,.15), inset 0 -1px 2px rgba(0,0,0,.5),
+                  0 1px 2px rgba(0,0,0,.5);
     }
-    /* Chrome strap lug on the right (empty pill = no text) */
-    #s1 .cam-grip-strap {
-      width: 22px; height: 10px; border-radius: 5px;
-      background: linear-gradient(180deg,#d0d0d4,#7a7a80 55%,#b6b6bc);
-      box-shadow: inset 0 1px 1px rgba(255,255,255,.55), inset 0 -2px 3px rgba(0,0,0,.4),
-                  0 1px 2px rgba(0,0,0,.6);
-      position: relative;
-    }
-    #s1 .cam-grip-strap::after {
-      content: ""; position: absolute; inset: 3px 5px; border-radius: 4px;
-      background: linear-gradient(180deg,#0f0d0b,#050403);
-      box-shadow: inset 0 1px 2px rgba(0,0,0,.7);
-    }
+    #s1 .cam-rocker b { width: 0; height: 0; border: 6px solid transparent; }
+    #s1 .cam-rocker b.l { border-right-color: #c8c8ce; }
+    #s1 .cam-rocker b.r { border-left-color: #c8c8ce; }
 
     /* Landscape template: give the preview a bit more vertical room by tightening
        the s1b header/badge. The card itself is sized in restTransform (JS). */

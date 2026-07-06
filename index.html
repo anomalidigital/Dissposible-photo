@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Bungee&display=swap" rel="stylesheet">
   <!-- Perf: warm the first-paint landing artwork so the home screen shows instantly. -->
   <link rel="preload" as="image" href="assets/capture-every-moment.png">
-  <link rel="stylesheet" href="styles.css?v=29">
+  <link rel="stylesheet" href="styles.css?v=30">
 </head>
 <body>
 
@@ -48,13 +48,11 @@
       </div>
       <div style="width:40px"></div>
     </div>
-    <!-- Top panel: twin knurled chrome dials + hotshoe rail (rangefinder feel) -->
+    <!-- Top panel: point-and-shoot style — flash lamp + AF assist + optical finder -->
     <div class="cam-top-panel" aria-hidden="true">
-      <div class="cam-dial-big"><span class="cam-dial-face"></span></div>
-      <div class="cam-hotshoe">
-        <span></span><span></span><span></span>
-      </div>
-      <div class="cam-dial-big"><span class="cam-dial-face"></span></div>
+      <div class="cam-flash"></div>
+      <div class="cam-af"></div>
+      <div class="cam-finder"></div>
     </div>
     <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px 16px 0">
       <div class="viewfinder-wrap" id="viewfinder">
@@ -88,12 +86,10 @@
         </div>
       </div>
     </div>
-    <!-- Leather grip band between viewfinder and control deck (skeuomorphic warmth) -->
+    <!-- Rubber grip band with REC indicator + zoom rocker (P&S feel) -->
     <div class="cam-grip" aria-hidden="true">
-      <div class="cam-grip-inner">
-        <span class="cam-grip-led"></span>
-        <span class="cam-grip-strap"></span>
-      </div>
+      <span class="cam-rec"></span>
+      <span class="cam-rocker"><b class="l"></b><b class="r"></b></span>
     </div>
     <div class="retro-line" id="cam-retro"></div>
     <div class="bottom-bar" style="display:flex;align-items:center;justify-content:center;gap:32px">
@@ -449,7 +445,7 @@
 
 </div>
 
-<script src="app.js?v=29"></script>
+<script src="app.js?v=30"></script>
 
 </body>
 </html>
