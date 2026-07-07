@@ -185,7 +185,7 @@
     updateRetro(n);
   }
 
-  function goToCamera() {
+  function goToCamera(entryAnim) {
     photoCount = 0;
     photos = [];
     lastCaptured = null;
@@ -193,10 +193,13 @@
     document.getElementById('cam-perm').classList.add('hidden');
     document.getElementById('cam-denied').classList.remove('show');
     document.getElementById('cam-ph').style.display = 'flex';
-    // Play the wipe IMMEDIATELY on tap (no waiting for the camera) and warm the
-    // camera up in parallel, so there's zero pause between click and transition.
-    var s1r = document.getElementById('s1'); if (s1r) { s1r.style.transition = 'none'; s1r.style.opacity = '1'; }
-    playCircleWipe();
+    // Play the entrance animation IMMEDIATELY on tap (no waiting for the camera)
+    // and warm the camera up in parallel, so there's zero pause between click and
+    // transition. Landing uses the circle reveal; startOver ("Snap again") passes
+    // 'slide-up' so the camera panels rise from below.
+    var s1r = document.getElementById('s1'); if (s1r) { s1r.style.transition = 'none'; s1r.style.opacity = '1'; s1r.style.transform = ''; }
+    if (entryAnim === 'slide-up') playSlideUpReveal();
+    else                          playCircleWipe();
     startCamera();
   }
 
@@ -244,13 +247,55 @@
     introTimer = setTimeout(done, 2200); // fallback if transitionend never fires
   }
 
-  // Cancel a circle reveal in flight + clear the temp clip styles off s1.
+  // Slide-up reveal (used by "Snap again"): s1 rises up from below the viewport
+  // and settles into place — feels like pulling a fresh camera up from a pocket.
+  // Distinct from the circle wipe so "restart" reads different from "first start".
+  function playSlideUpReveal() {
+    var s1 = document.getElementById('s1');
+    if (!s1) return;
+    if (introTimer) { clearTimeout(introTimer); introTimer = null; }
+    currentState = 1;
+    s1.style.display = 'flex';
+    s1.style.opacity = '1';
+    s1.style.zIndex = '50';
+    s1.style.pointerEvents = 'none';
+    s1.style.willChange = 'transform';
+    s1.style.transition = 'none';
+    s1.style.clipPath = 'none'; s1.style.webkitClipPath = 'none';
+    s1.style.transform = 'translateY(100%)';
+    // Force the browser to paint the "below screen" state before we transition.
+    getComputedStyle(s1).transform;
+    requestAnimationFrame(function() {
+      var ease = 'cubic-bezier(0.22, 1, 0.36, 1)'; // smooth ease-out landing
+      s1.style.transition = 'transform 0.9s ' + ease;
+      s1.style.transform = 'translateY(0)';
+    });
+
+    var finished = false;
+    function done(e) {
+      if (e && e.propertyName && e.propertyName !== 'transform') return;
+      if (finished) return;
+      finished = true;
+      if (introTimer) { clearTimeout(introTimer); introTimer = null; }
+      s1.removeEventListener('transitionend', done);
+      s1.style.transition = 'none';
+      s1.style.transform = '';
+      s1.style.zIndex = ''; s1.style.pointerEvents = ''; s1.style.willChange = '';
+      show(1);
+    }
+    s1.addEventListener('transitionend', done);
+    introTimer = setTimeout(done, 1100);
+  }
+
+  // Cancel any intro reveal in flight (circle wipe or slide-up) + clear the temp
+  // styles off s1.
   function hideIntroOverlay() {
     if (introTimer) { clearTimeout(introTimer); introTimer = null; }
     var s1 = document.getElementById('s1');
     if (s1) {
       s1.style.transition = 'none';
       s1.style.clipPath = 'none'; s1.style.webkitClipPath = 'none';
+      s1.style.transform = '';
       s1.style.zIndex = ''; s1.style.pointerEvents = ''; s1.style.willChange = '';
     }
   }
@@ -761,12 +806,13 @@
     show(0);
   }
 
-  // Start Over (download page): restart from session 1 with the circle wipe.
+  // Start Over ("Snap again" on the download page): restart from session 1 with
+  // the slide-up reveal (visually distinct from the landing's circle wipe).
   function startOver() {
     if (procInterval) clearInterval(procInterval);
     resetHandStage();
     hideIntroOverlay();
-    goToCamera(); // resets counters, requests camera, plays the circle wipe into session 1
+    goToCamera('slide-up');
   }
 
   function pickFromGallery() {
