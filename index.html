@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Bungee&display=swap" rel="stylesheet">
   <!-- Perf: warm the first-paint landing artwork so the home screen shows instantly. -->
   <link rel="preload" as="image" href="assets/capture-every-moment.png">
-  <link rel="stylesheet" href="styles.css?v=31">
+  <link rel="stylesheet" href="styles.css?v=32">
 </head>
 <body>
 
@@ -46,7 +46,10 @@
       <div style="flex:1;display:flex;justify-content:center">
         <div class="badge" id="photo-badge">1 of 2</div>
       </div>
-      <div style="width:40px"></div>
+      <!-- Flash toggle (visible only when back camera has torch capability) -->
+      <div class="btn-flash hidden" id="flash-btn" onclick="toggleFlash()" role="button" aria-label="Toggle flash">
+        <svg viewBox="0 0 24 24"><path d="M13 2 L4 14 h6 l-1 9 9-13 h-6 z"/></svg>
+      </div>
     </div>
     <!-- Top panel: point-and-shoot style — flash lamp + AF assist + optical finder -->
     <div class="cam-top-panel" aria-hidden="true">
@@ -445,7 +448,7 @@
 
 </div>
 
-<script src="app.js?v=31"></script>
+<script src="app.js?v=32"></script>
 
 </body>
 </html>

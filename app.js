@@ -8,6 +8,11 @@
   var lastCaptured = null;
   var introTimer = null;
   var confirmRevealTimer = null;
+  // Flash / torch (only meaningful on the BACK camera). Android Chrome exposes
+  // `torch` in the video track's capabilities; iOS Safari does not, so the button
+  // stays hidden there. flashSupported is re-evaluated after every startCamera().
+  var flashSupported = false;
+  var flashOn = false;
 
   // Per-frame box rects for the polaroid clip (fractions of the frame W/H);
   // the captured photo is drawn into rects[k] each frame so it rides the moving box.
@@ -329,6 +334,7 @@
       document.getElementById('cam-ph').style.display = 'none';
       document.getElementById('cam-perm').classList.add('hidden');
       document.getElementById('cam-denied').classList.remove('show');
+      checkFlashSupport(); // detect torch on the new stream's video track
       if (typeof onReady === 'function') onReady();
     }).catch(function(err) {
       // make sure the camera screen is visible to show the message (we may still be on the landing)
@@ -344,8 +350,43 @@
   }
 
   function flipCamera() {
+    // Turn any active torch OFF before switching (the new track may not support it)
+    if (flashOn) { flashOn = false; applyTorch(false); }
     facingMode = (facingMode === 'user') ? 'environment' : 'user';
     if (cameraStream) startCamera();
+    updateFlashButton(); // hide the button immediately while the new stream warms
+  }
+
+  // Flash button — visible only when the LIVE track exposes the `torch` capability
+  // AND we're on the back camera. iOS Safari doesn't expose torch, so the button
+  // simply stays hidden there (graceful, no error). Android Chrome does.
+  function checkFlashSupport() {
+    flashSupported = false;
+    try {
+      var track = cameraStream && cameraStream.getVideoTracks()[0];
+      var caps = track && track.getCapabilities ? track.getCapabilities() : null;
+      flashSupported = !!(caps && caps.torch);
+    } catch (e) { flashSupported = false; }
+    updateFlashButton();
+  }
+  function updateFlashButton() {
+    var btn = document.getElementById('flash-btn');
+    if (!btn) return;
+    var showBtn = flashSupported && facingMode === 'environment';
+    btn.classList.toggle('hidden', !showBtn);
+    btn.classList.toggle('on', showBtn && flashOn);
+  }
+  function applyTorch(on) {
+    if (!cameraStream) return Promise.resolve();
+    var track = cameraStream.getVideoTracks()[0];
+    if (!track || !track.applyConstraints) return Promise.resolve();
+    return track.applyConstraints({ advanced: [{ torch: !!on }] }).catch(function() {});
+  }
+  function toggleFlash() {
+    if (!flashSupported) return;
+    flashOn = !flashOn;
+    updateFlashButton();
+    applyTorch(flashOn); // fire-and-forget; button state already reflects the intent
   }
 
   function capturePhoto() {
@@ -382,12 +423,17 @@
   }
 
   function stopCamera() {
+    // Make sure the torch is off before releasing the track (some Androids latch
+    // the torch on until the app process is killed if we skip this).
+    if (flashOn) { applyTorch(false); flashOn = false; }
     if (cameraStream) {
       cameraStream.getTracks().forEach(function(t) { t.stop(); });
       cameraStream = null;
     }
     var v = document.getElementById('cam-video');
     if (v) v.srcObject = null;
+    flashSupported = false;
+    updateFlashButton();
   }
 
   // ---- Confirm preview: the captured photo lands inside the real template,

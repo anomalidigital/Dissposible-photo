@@ -1005,6 +1005,37 @@
       filter: drop-shadow(0 1px 0 rgba(255,255,255,.9));
     }
 
+    /* --- FLASH TOGGLE (top-right, hidden on front camera / iOS Safari) --- */
+    .btn-flash {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; touch-action: manipulation; -webkit-touch-callout: none;
+      background: linear-gradient(145deg,#fbfbfd 0%,#d2d2d6 42%,#9a9aa0 52%,#c4c4ca 60%,#eaeaee 100%);
+      box-shadow: 0 3px 7px rgba(0,0,0,.4), inset 0 1px 1px rgba(255,255,255,.95), inset 0 -2px 3px rgba(0,0,0,.28);
+      transition: transform .12s cubic-bezier(.3,.6,.2,1), box-shadow .12s ease, background .18s ease;
+    }
+    .btn-flash svg {
+      width: 16px; height: 20px; fill: #2b2b30; stroke: none;
+      filter: drop-shadow(0 1px 0 rgba(255,255,255,.9));
+      transition: fill .18s ease, filter .18s ease;
+    }
+    .btn-flash:active {
+      background: linear-gradient(145deg,#c0c0c6,#a6a6ac 55%,#cacace);
+      box-shadow: inset 0 3px 7px rgba(0,0,0,.5);
+      transform: translateY(1px);
+    }
+    /* On: amber gradient body + glowing bolt icon */
+    .btn-flash.on {
+      background: linear-gradient(145deg,#ffe38a 0%,#ffb54a 45%,#c98a1a 100%);
+      box-shadow: 0 3px 10px rgba(255,180,80,.55), inset 0 1px 1px rgba(255,255,255,.9), inset 0 -2px 3px rgba(140,80,10,.4);
+    }
+    .btn-flash.on svg {
+      fill: #6b3a08;
+      filter: drop-shadow(0 1px 0 rgba(255,240,180,.9));
+    }
+    /* Hidden: keep the 40px slot so the header stays symmetric */
+    .btn-flash.hidden { visibility: hidden; pointer-events: none; }
+
     /* --- ROUND CTRLS (.btn-circle for gallery, flip) --- */
     .btn-circle {
       width: 46px; height: 46px; border-radius: 50%; border: none;
