@@ -214,8 +214,16 @@
   function playCircleWipe() {
     var s1 = document.getElementById('s1');
     if (!s1) return;
-    if (introTimer) { clearTimeout(introTimer); introTimer = null; }
+    // Guard against re-entry: if a wipe is already running, ignore extra taps.
+    // (Prevents the loop where a leaked click on the landing button re-fires it.)
+    if (introTimer) return;
     currentState = 1; // heading to the camera (keeps the startCamera error path happy)
+    // Block clicks on EVERY other state during the wipe so a tap that lands over
+    // s1's pointer-events:none area can't fall through to a stale landing button
+    // and re-trigger goToCamera. Restored in finish().
+    document.querySelectorAll('.state').forEach(function(s) {
+      if (s.id !== 's1') s.style.pointerEvents = 'none';
+    });
     s1.style.display = 'flex';
     s1.style.opacity = '1';
     s1.style.zIndex = '50';            // on top of the page we came from
@@ -224,32 +232,24 @@
     s1.style.transition = 'none';
     var c0 = 'circle(0px at 50% 50%)';
     s1.style.webkitClipPath = c0; s1.style.clipPath = c0;
-    // Force initial paint so the "0px" state is actually the animation start.
-    getComputedStyle(s1).clipPath;
-    // Fix #1: use a HUGE fixed radius (bypasses ALL viewport / rect math) so the
-    // circle always grows past every viewport corner. 3000px covers any phone,
-    // tablet, or touch-screen laptop without measuring.
+    getComputedStyle(s1).clipPath; // force initial paint before we animate
     var cMax = 'circle(3000px at 50% 50%)';
     var ease = 'cubic-bezier(0.4, 0, 0.15, 1)';
     requestAnimationFrame(function() {
       s1.style.transition = '-webkit-clip-path 1.8s ' + ease + ', clip-path 1.8s ' + ease;
       s1.style.webkitClipPath = cMax; s1.style.clipPath = cMax;
     });
-
-    var finished = false;
-    function done(e) {
-      if (e && e.propertyName && e.propertyName.indexOf('clip') < 0) return;
-      if (finished) return;
-      finished = true;
-      if (introTimer) { clearTimeout(introTimer); introTimer = null; }
-      s1.removeEventListener('transitionend', done);
+    // Pure-timer cleanup — mobile Chrome sometimes drops the transitionend event
+    // for clip-path (which was leaving pointer-events:none stuck + s0 clickable,
+    // the exact "circle wipe replays on shutter tap" bug). Timer always runs.
+    introTimer = setTimeout(function() {
+      introTimer = null;
       s1.style.transition = 'none';
       s1.style.clipPath = 'none'; s1.style.webkitClipPath = 'none';
       s1.style.zIndex = ''; s1.style.pointerEvents = ''; s1.style.willChange = '';
+      document.querySelectorAll('.state').forEach(function(s) { s.style.pointerEvents = ''; });
       show(1);
-    }
-    s1.addEventListener('transitionend', done);
-    introTimer = setTimeout(done, 2200); // fallback if transitionend never fires
+    }, 1850);
   }
 
   // Slide-up reveal (used by "Snap again"): s1 rises up from below the viewport
@@ -258,8 +258,13 @@
   function playSlideUpReveal() {
     var s1 = document.getElementById('s1');
     if (!s1) return;
-    if (introTimer) { clearTimeout(introTimer); introTimer = null; }
+    if (introTimer) return; // guard re-entry (same reason as playCircleWipe)
     currentState = 1;
+    // Block clicks on every other state during the slide so a tap can't leak to
+    // the previous screen's buttons (e.g., "Done" on s7) and re-fire startOver.
+    document.querySelectorAll('.state').forEach(function(s) {
+      if (s.id !== 's1') s.style.pointerEvents = 'none';
+    });
     s1.style.display = 'flex';
     s1.style.opacity = '1';
     s1.style.zIndex = '50';
@@ -268,32 +273,26 @@
     s1.style.transition = 'none';
     s1.style.clipPath = 'none'; s1.style.webkitClipPath = 'none';
     s1.style.transform = 'translateY(100%)';
-    // Force the browser to paint the "below screen" state before we transition.
-    getComputedStyle(s1).transform;
+    getComputedStyle(s1).transform; // force initial paint
     requestAnimationFrame(function() {
-      var ease = 'cubic-bezier(0.22, 1, 0.36, 1)'; // smooth ease-out landing
+      var ease = 'cubic-bezier(0.22, 1, 0.36, 1)';
       s1.style.transition = 'transform 0.9s ' + ease;
       s1.style.transform = 'translateY(0)';
     });
-
-    var finished = false;
-    function done(e) {
-      if (e && e.propertyName && e.propertyName !== 'transform') return;
-      if (finished) return;
-      finished = true;
-      if (introTimer) { clearTimeout(introTimer); introTimer = null; }
-      s1.removeEventListener('transitionend', done);
+    // Timer-only cleanup — same reliability reason as playCircleWipe.
+    introTimer = setTimeout(function() {
+      introTimer = null;
       s1.style.transition = 'none';
       s1.style.transform = '';
       s1.style.zIndex = ''; s1.style.pointerEvents = ''; s1.style.willChange = '';
+      document.querySelectorAll('.state').forEach(function(s) { s.style.pointerEvents = ''; });
       show(1);
-    }
-    s1.addEventListener('transitionend', done);
-    introTimer = setTimeout(done, 1100);
+    }, 950);
   }
 
   // Cancel any intro reveal in flight (circle wipe or slide-up) + clear the temp
-  // styles off s1.
+  // styles off s1 AND restore pointer-events on every other state (the wipe
+  // functions disable them to prevent click leakage).
   function hideIntroOverlay() {
     if (introTimer) { clearTimeout(introTimer); introTimer = null; }
     var s1 = document.getElementById('s1');
@@ -303,6 +302,7 @@
       s1.style.transform = '';
       s1.style.zIndex = ''; s1.style.pointerEvents = ''; s1.style.willChange = '';
     }
+    document.querySelectorAll('.state').forEach(function(s) { s.style.pointerEvents = ''; });
   }
 
   function requestCamera() {
