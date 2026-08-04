@@ -11,6 +11,12 @@
 !/app.js
 !/assets
 !/retro
+# animations folder holds heavy design sources; whitelist ONLY the two files
+# the splash screen references. The big .mov + spaced-filename copies stay local.
+!/animations
+/animations/*
+!/animations/loading.gif
+!/animations/loading.webm
 
 # OS / editor junk (also inside assets/)
 Thumbs.db

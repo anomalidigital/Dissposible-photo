@@ -961,3 +961,23 @@
 
   show(0);
   injectDoodles();
+
+  // Splash: show for a minimum time (from page load) so the boot feels
+  // intentional, then cross-fade to the home page and remove the node so it
+  // never intercepts clicks again.
+  (function hideSplash() {
+    var splash = document.getElementById('splash');
+    if (!splash) return;
+    var MIN_MS = 1800;
+    function hide() {
+      splash.classList.add('hidden');
+      setTimeout(function() { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 650);
+    }
+    var start = performance.now();
+    function whenReady() {
+      var elapsed = performance.now() - start;
+      setTimeout(hide, Math.max(0, MIN_MS - elapsed));
+    }
+    if (document.readyState === 'complete') whenReady();
+    else window.addEventListener('load', whenReady, { once: true });
+  })();

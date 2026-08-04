@@ -1272,6 +1272,49 @@
     #s1b.tpl-landscape .bottom-bar { padding-top: 10px; }
 
     /* ============================================================ */
+    /* ==================== SPLASH / BOOT SCREEN ================== */
+    /* Shown while the app boots — hidden by app.js after a min display time.
+       Background matches the landing (bg-landing-page.png) so the fade into
+       the home page reads as one continuous scene, not a jarring swap. */
+    #splash {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+      background: #e8e8e8 url('assets/bg-landing-page.png') center / cover no-repeat;
+      transition: opacity .55s ease;
+    }
+    #splash.hidden { opacity: 0; pointer-events: none; }
+    .splash-inner {
+      display: flex; flex-direction: column; align-items: center; gap: 22px;
+      max-width: 320px; text-align: center;
+    }
+    .splash-title {
+      font-family: 'Bungee', sans-serif; font-size: 22px; letter-spacing: 3px;
+      color: #2c2c2c; text-shadow: 0 1px 0 rgba(255,255,255,.55);
+    }
+    .splash-anim {
+      width: 60%; max-width: 220px; height: auto;
+      /* soft drop so the animation lifts off the pattern bg */
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,.15));
+    }
+    .splash-text {
+      font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12.5px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: #2c2c2c; opacity: .8;
+    }
+    .splash-dots { display: flex; gap: 7px; margin-top: 2px; }
+    .splash-dots span {
+      width: 6px; height: 6px; border-radius: 50%; background: #ed4836;
+      animation: splashDot 1.4s ease-in-out infinite;
+    }
+    .splash-dots span:nth-child(2) { animation-delay: .18s; }
+    .splash-dots span:nth-child(3) { animation-delay: .36s; }
+    @keyframes splashDot {
+      0%, 60%, 100% { transform: scale(.5); opacity: .35; }
+      30% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ============================================================ */
     /* ================ TABLET / DESKTOP / TOUCH ================== */
     /* ============================================================ */
 
