@@ -14,6 +14,77 @@
   var flashSupported = false;
   var flashOn = false;
 
+  // ===== RESPONSIVE STAGE =====================================================
+  // The UI is authored against a fixed design box and then uniformly scaled, so
+  // one layout covers every screen it can land on: phone, tablet, laptop, kiosk.
+  //   * phone / narrow window -> edge to edge at 1x (exactly as before)
+  //   * anything roomier      -> the same box scaled UP and centred, framed as a
+  //                              device, instead of a phone-sized column adrift
+  //                              in the middle of a big screen.
+  // DESIGN_H is the shortest the column may get before the delivery screens
+  // start clipping (measured); the stage never goes below it.
+  var DESIGN_W = 430;      // design px
+  var DESIGN_H = 760;      // design px - minimum; the box grows past it if there is room
+  var DESIGN_H_MAX = 1040; // ...but stays phone-shaped rather than stretching forever
+  var MAX_SCALE = 1.8;
+
+  function appEl() { return document.querySelector('.app'); }
+
+  // Current stage scale: CSS px on screen per design px inside the app.
+  function appScale() {
+    var v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--app-scale'));
+    return (v && isFinite(v) && v > 0) ? v : 1;
+  }
+
+  function fitStage() {
+    var vw = window.innerWidth, vh = window.innerHeight;
+    // Room for a framed device around the column? (tablet portrait and up)
+    var framed = vw >= 600 && vh >= 560;
+    var padX = framed ? Math.min(56, Math.max(0, (vw - DESIGN_W) * 0.10)) : 0;
+    var padY = framed ? Math.min(48, Math.max(0, (vh - DESIGN_H) * 0.25)) : 0;
+    var availW = vw - padX * 2, availH = vh - padY * 2;
+    // Grow until either edge runs out; never shrink below 1x.
+    var scale = Math.min(availW / DESIGN_W, availH / DESIGN_H);
+    scale = Math.max(1, Math.min(scale, MAX_SCALE));
+    var w = Math.min(DESIGN_W, availW / scale);
+    var h = availH / scale;
+    if (framed) h = Math.min(h, DESIGN_H_MAX);
+
+    var r = document.documentElement.style;
+    if (!framed && scale === 1 && w >= vw - 0.5) {
+      // Edge-to-edge phone: hand sizing back to CSS - dvh follows the mobile
+      // URL bar far better than window.innerHeight does.
+      r.setProperty('--stage-w', '100vw');
+      r.setProperty('--stage-h', '100dvh');
+    } else {
+      r.setProperty('--stage-w', w.toFixed(2) + 'px');
+      r.setProperty('--stage-h', h.toFixed(2) + 'px');
+    }
+    r.setProperty('--app-scale', scale.toFixed(4));
+    r.setProperty('--stage-radius', framed ? '30px' : (scale > 1 ? '20px' : '0px'));
+    if (document.body) document.body.classList.toggle('framed', framed);
+  }
+
+  // Re-fit on resize / rotate. The confirm card is positioned in JS, so it has
+  // to be re-placed against the new stage or it drifts off the screen.
+  function onViewportChange() {
+    fitStage();
+    if (currentState === '1b') {
+      var st = document.getElementById('hand-stage');
+      if (st) {
+        var r = restTransform();
+        st.style.transition = 'none';
+        st.style.transformOrigin = '0 0';
+        st.style.transform = 'translate(' + r.tx + 'px,' + r.ty + 'px) scale(' + r.s + ')';
+      }
+    }
+  }
+
+  fitStage();
+  window.addEventListener('resize', onViewportChange);
+  window.addEventListener('orientationchange', onViewportChange);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', onViewportChange);
+
   // Per-frame box rects for the polaroid clip (fractions of the frame W/H);
   // the captured photo is drawn into rects[k] each frame so it rides the moving box.
   var POLAROID_RECTS = [[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1894,0.1888,0.6083,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1903,0.1888,0.6074,0.4818],[0.1875,0.1888,0.6097,0.4818],[0.1852,0.1888,0.6106,0.4818],[0.1833,0.1903,0.6074,0.4807],[0.1815,0.1888,0.6106,0.4818],[0.1852,0.184,0.6134,0.4866],[0.1889,0.181,0.6167,0.4896],[0.1921,0.1806,0.6157,0.49],[0.194,0.1858,0.6069,0.4833],[0.1917,0.194,0.5963,0.48],[0.187,0.1958,0.5968,0.4811],[0.1833,0.1977,0.5977,0.4811],[0.1833,0.2014,0.5931,0.4774],[0.1889,0.2051,0.5838,0.4703],[0.1921,0.207,0.5801,0.4662],[0.2028,0.2085,0.5694,0.4577],[0.2148,0.2107,0.5556,0.4488],[0.2204,0.214,0.5477,0.4403],[0.2269,0.2177,0.5384,0.4318],[0.2296,0.2188,0.5338,0.428],[0.2366,0.2218,0.525,0.4191],[0.2426,0.224,0.5157,0.4102],[0.2468,0.2281,0.5065,0.4039],[0.2505,0.2333,0.4954,0.3961],[0.2523,0.24,0.4847,0.3865],[0.2551,0.2441,0.4769,0.3798],[0.2556,0.2455,0.4731,0.3776],[0.2611,0.2496,0.462,0.3694],[0.2634,0.2511,0.4546,0.3646],[0.2671,0.2511,0.4468,0.3605],[0.2722,0.2582,0.438,0.3494],[0.275,0.2608,0.4343,0.3442],[0.2819,0.2622,0.4241,0.3383],[0.2861,0.2645,0.4162,0.3305],[0.2907,0.2667,0.4093,0.3257],[0.2954,0.2678,0.4009,0.3197],[0.3005,0.2708,0.3921,0.3108],[0.3028,0.2734,0.3866,0.3053],[0.3065,0.2737,0.3819,0.303],[0.3097,0.2763,0.375,0.2964],[0.3111,0.2778,0.3699,0.2919],[0.3153,0.2797,0.363,0.2878]];
@@ -470,9 +541,13 @@
     var sr = stage.getBoundingClientRect();
     var er = el.getBoundingClientRect();
     stage.style.transform = keep;
+    // Rects are measured on screen; the transform is applied inside the stage,
+    // so the offsets are divided back down by the stage scale. (`s` is a ratio,
+    // so it needs no conversion.)
+    var k = appScale();
     var s = target.width / er.width;
-    var tx = target.left - sr.left - s * (er.left - sr.left);
-    var ty = target.top - sr.top - s * (er.top - sr.top);
+    var tx = (target.left - sr.left - s * (er.left - sr.left)) / k;
+    var ty = (target.top - sr.top - s * (er.top - sr.top)) / k;
     return { t: 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')', tx: tx, ty: ty, s: s };
   }
 
@@ -481,17 +556,22 @@
   // screen. Orientation-aware: for a landscape template (slot wider than tall)
   // we allow a wider card so it doesn't crop, and lift it slightly higher.
   function restTransform() {
-    var vw = window.innerWidth, vh = window.innerHeight;
+    // Measured against the stage (not the window) so the card stays centred in
+    // the app on a tablet / desktop, where the stage is only part of the screen.
+    var app = appEl();
+    var ar = app ? app.getBoundingClientRect()
+                 : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+    var k = appScale();
     var slot = document.querySelector('.tpl-slot');
     var slotR = slot ? slot.getBoundingClientRect() : { width: 1, height: 1 };
     var isLandscape = slotR.width > slotR.height;
-    // Portrait template: fill ~78% of the viewport width, capped at 380px.
+    // Portrait template: fill ~78% of the stage width, capped at 380 design px.
     // Landscape template: allow up to 90% so both frames read clearly.
     var cardW = isLandscape
-      ? Math.min(vw * 0.90, 440)
-      : Math.min(vw * 0.78, 380);
-    var top = isLandscape ? vh * 0.18 : vh * 0.14;
-    return rectTransform(slot, { left: (vw - cardW) / 2, top: top, width: cardW });
+      ? Math.min(ar.width * 0.90, 440 * k)
+      : Math.min(ar.width * 0.78, 380 * k);
+    var top = ar.top + ar.height * (isLandscape ? 0.18 : 0.14);
+    return rectTransform(slot, { left: ar.left + (ar.width - cardW) / 2, top: top, width: cardW });
   }
 
   // Slot (template) centre in the hand-stage's own un-transformed pixels — the
@@ -572,7 +652,8 @@
     if (load) load.classList.remove('show'); // hide THIS frame's "UP NEXT" so the captured photo shows
 
     // Park the card off-screen below BEFORE s1b paints so nothing flashes.
-    var below = window.innerHeight;
+    // Stage px (offsetHeight ignores the stage's own scale transform).
+    var below = appEl() ? appEl().offsetHeight : window.innerHeight;
     stage.style.transition = 'none'; stage.style.transformOrigin = '0 0'; stage.style.opacity = '0';
     show('1b');
     var r0 = restTransform();
@@ -625,10 +706,14 @@
   function slidePreviewOff(dir, onDone) {
     var stage = document.getElementById('hand-stage');
     var r = restTransform();
+    // Travel far enough to clear the stage, in stage px to match r.tx / r.ty.
+    var app = appEl();
+    var stageW = app ? app.offsetWidth : window.innerWidth;
+    var stageH = app ? app.offsetHeight : window.innerHeight;
     var toX = r.tx, toY = r.ty, rot = 0, preX = 0, preY = 0, preRot = 0;
-    if (dir === 'down')  { toY = r.ty + window.innerHeight * 1.05; rot = -6;  preY = -8;  preRot = -2; }
-    if (dir === 'right') { toX = r.tx + window.innerWidth  * 1.20; rot =  14; preX = -12; preRot = -3; }
-    if (dir === 'up')    { toY = r.ty - window.innerHeight * 1.05; rot =  6;  preY =  8;  preRot =  2; }
+    if (dir === 'down')  { toY = r.ty + stageH * 1.05; rot = -6;  preY = -8;  preRot = -2; }
+    if (dir === 'right') { toX = r.tx + stageW * 1.20; rot =  14; preX = -12; preRot = -3; }
+    if (dir === 'up')    { toY = r.ty - stageH * 1.05; rot =  6;  preY =  8;  preRot =  2; }
     stage.style.transformOrigin = '0 0';
     stage.style.transition = 'transform 0.14s cubic-bezier(0.3, 0.7, 0.4, 1)';
     stage.style.transform = 'translate(' + (r.tx + preX) + 'px,' + (r.ty + preY) + 'px) scale(' + r.s + ') rotate(' + preRot + 'deg)';

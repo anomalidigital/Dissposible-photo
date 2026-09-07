@@ -12,17 +12,36 @@
       height: 100dvh;
     }
 
+    /* ---------------------------------------------------------------
+       RESPONSIVE STAGE
+       The whole UI is authored against one fixed "design box"
+       (--stage-w x --stage-h, in design px) and then uniformly scaled by
+       --app-scale, so the same layout fits any screen: a phone gets it
+       edge to edge at 1x, a tablet or a desktop gets a bigger, framed copy
+       instead of a phone-sized column stranded in the middle of the screen.
+       fitStage() in app.js recomputes these vars on load / resize /
+       orientation change; the values here are the phone defaults and the
+       no-JS fallback.
+    --------------------------------------------------------------- */
+    :root {
+      --stage-w: 100vw;
+      --stage-h: 100dvh;
+      --app-scale: 1;
+      --stage-radius: 0px;
+    }
+
     .app {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 100%;
-      height: 100dvh;
+      top: 50%;
+      left: 50%;
+      width: var(--stage-w);
+      height: var(--stage-h);
+      transform: translate(-50%, -50%) scale(var(--app-scale));
+      transform-origin: center center;
       display: flex;
       flex-direction: column;
-      max-width: 430px;
-      margin: 0 auto;
+      overflow: hidden;
+      border-radius: var(--stage-radius);
     }
 
     .state {
@@ -1276,7 +1295,9 @@
     /* Shown while the app boots — hidden by app.js after a min display time.
        Brand-orange gradient background (matches the reference). */
     #splash {
-      position: fixed; inset: 0; z-index: 9999;
+      /* absolute, not fixed: the splash sits inside .app so it fills the stage
+         (and its rounded corners) on a framed tablet / desktop too. */
+      position: absolute; inset: 0; z-index: 9999;
       display: flex; align-items: center; justify-content: center;
       padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
       background:
@@ -1332,22 +1353,21 @@
       -webkit-touch-callout: none;
     }
 
-    /* On wider viewports (tablet portrait, laptop, desktop, touch-screen), keep
-       the app in a phone-shaped column but present it as a framed "device" so the
-       dark sides read intentional and the layout stays consistent. */
-    @media (min-width: 520px) {
-      body { background: #08080a; }
-      .app {
-        max-width: 430px;
-        box-shadow:
-          0 0 0 8px #2a2a30,                   /* device bezel */
-          0 0 0 9px rgba(0,0,0,.6),
-          0 0 0 14px #444448,                  /* outer plastic ring */
-          0 30px 60px rgba(0,0,0,.7);
-        border-radius: 34px;
-      }
-      /* Landing background stays inside the framed device */
-      .landing { border-radius: 26px; }
+    /* On viewports with room to spare (tablet, laptop, desktop, kiosk screen)
+       fitStage() adds .framed: the scaled-up stage is presented as a device so
+       the space around it reads intentional. The bezel is drawn with spread
+       shadows in design px, so it scales with the stage. */
+    body.framed {
+      background:
+        radial-gradient(90% 70% at 50% 0%, rgba(237,72,54,.10) 0%, rgba(237,72,54,0) 60%),
+        #08080a;
+    }
+    body.framed .app {
+      box-shadow:
+        0 0 0 8px #2a2a30,                   /* device bezel */
+        0 0 0 9px rgba(0,0,0,.6),
+        0 0 0 14px #444448,                  /* outer plastic ring */
+        0 30px 60px rgba(0,0,0,.7);
     }
 
     /* Landscape mobiles / small tablets: give the viewfinder a bit less vertical
