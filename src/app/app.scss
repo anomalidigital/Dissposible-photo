@@ -1,0 +1,9 @@
+// Invisible layer that swallows taps while a transition is running.
+.shield {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: none;
+
+  &.is-on { display: block; }
+}

@@ -1,0 +1,53 @@
+<div class="dl">
+  <header class="dl-head">
+    <h2 class="dl-title">Thank you!</h2>
+    <p class="dl-sub">
+      Your photos are ready. Tap
+      <svg viewBox="0 0 24 24" aria-label="the save button" role="img">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+      </svg>
+      to save.
+    </p>
+  </header>
+
+  <div class="dl-row">
+    <figure class="print is-strip">
+      <div class="print-photo">
+        @if (keepsake().strip; as strip) {
+          <img [src]="strip.url" alt="Your photo strip" />
+        }
+      </div>
+      <figcaption>Photo strip</figcaption>
+      <button type="button" class="print-save" (click)="saveStrip()" [disabled]="!keepsake().strip" aria-label="Save photo strip">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+      </button>
+    </figure>
+
+    @for (photo of keepsake().photos; track $index) {
+      <figure class="print is-photo">
+        <div class="print-photo">
+          <img [src]="photo" [alt]="'Photo ' + ($index + 1)" />
+        </div>
+        <figcaption>Photo {{ $index + 1 }}</figcaption>
+        <button type="button" class="print-save" (click)="savePhoto($index)" [attr.aria-label]="'Save photo ' + ($index + 1)">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+        </button>
+      </figure>
+    }
+  </div>
+
+  <footer class="dl-actions">
+    <button type="button" class="btn btn-molded btn-molded-light" (click)="again.emit()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" /></svg>
+      Snap again
+    </button>
+    <button type="button" class="btn btn-molded btn-molded-primary" (click)="done.emit()">
+      Done
+      <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
+    </button>
+  </footer>
+</div>

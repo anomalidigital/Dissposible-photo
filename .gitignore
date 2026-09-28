@@ -1,23 +1,27 @@
-# This repo holds ONLY the app (HTML/CSS/JS) + the assets it actually uses.
+# This repo holds ONLY the photobooth app (Angular) + its deploy workflow.
 # Design sources, the logo archive, exports and OS junk stay local — not in the repo.
 
 # ignore everything in the project root by default...
 /*
 
-# ...then keep just the app and its asset folder
+# ...then keep just the Angular app
 !/.gitignore
-!/index.html
-!/styles.css
-!/app.js
-!/assets
+!/.github
+!/README.md
+!/angular.json
+!/package.json
+!/package-lock.json
+!/tsconfig.json
+!/tsconfig.app.json
+!/src
+!/public
 !/retro
-# animations folder holds heavy design sources; whitelist ONLY the two files
-# the splash screen references. The big .mov + spaced-filename copies stay local.
-!/animations
-/animations/*
-!/animations/loading.gif
-!/animations/loading.webm
 
-# OS / editor junk (also inside assets/)
+# build output, caches, dependencies
+/dist
+/.angular
+/node_modules
+
+# OS / editor junk
 Thumbs.db
 .DS_Store

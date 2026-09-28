@@ -1,0 +1,100 @@
+@use '../../../styles/tokens' as t;
+
+:host {
+  color: #fff;
+  @include t.plastic-ground;
+
+  &::before { @include t.film-grain(0.4); }
+}
+
+.proc {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 3vh, 26px);
+  padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+}
+
+// Brushed-metal mount around the print
+.proc-card {
+  width: min(72vw, 320px, (100dvh - 250px) * 2 / 3);
+  aspect-ratio: 2 / 3;
+  padding: 8px;
+  border-radius: 14px;
+  background: linear-gradient(150deg, #e9e9ed, #b4b4ba 45%, #76767c 52%, #aeaeb4 60%, #dcdce0);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -3px 5px rgba(0, 0, 0, 0.35);
+  animation: card-in 0.6s t.$ease-out 0.1s backwards;
+}
+
+.proc-print {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #151517;
+}
+
+// The finished strip "develops" like an instant print.
+.proc-strip {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: develop 1.5s ease-out both;
+}
+
+.proc-sheen {
+  position: absolute;
+  inset: -50%;
+  background: linear-gradient(225deg, transparent 40%, rgba(255, 255, 255, 0.03) 48%, rgba(255, 255, 255, 0.16) 50%, rgba(255, 255, 255, 0.03) 52%, transparent 60%);
+  animation: sheen 2.5s ease-in-out infinite;
+}
+
+.proc-status {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.proc-ring {
+  position: relative;
+  width: 56px;
+  height: 56px;
+
+  svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+
+  circle { fill: none; stroke-width: 3; }
+  .track { stroke: rgba(t.$lol-red, 0.14); }
+  .value { stroke: t.$lol-red; stroke-linecap: round; }
+
+  span {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: t.$lol-red;
+  }
+}
+
+@keyframes card-in {
+  from { opacity: 0; transform: scale(0.9); }
+}
+
+@keyframes develop {
+  from { opacity: 0.15; filter: brightness(1.7) saturate(0) contrast(0.6); }
+  to { opacity: 1; filter: none; }
+}
+
+@keyframes sheen {
+  from { transform: translate(50%, -50%); }
+  to { transform: translate(-50%, 50%); }
+}

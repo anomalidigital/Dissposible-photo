@@ -1,0 +1,280 @@
+@use 'styles/tokens' as t;
+
+// ---------------------------------------------------------------------------
+// Bootstrap 5.3, themed for LOL Photobooth. Only the modules the app uses are
+// compiled in (reboot, type, buttons, spinners, helpers, utilities).
+// ---------------------------------------------------------------------------
+@import 'bootstrap/scss/functions';
+
+$primary: t.$lol-red;
+$secondary: #6c6c72;
+$light: t.$ivory;
+$dark: #16161a;
+$body-bg: t.$garden-deep;
+$body-color: t.$ivory;
+$font-family-sans-serif: t.$font-ui;
+$font-weight-base: 600;
+$min-contrast-ratio: 3;
+$enable-rfs: false;
+$enable-smooth-scroll: false;
+$btn-font-weight: 800;
+$btn-border-radius: 14px;
+$btn-border-radius-lg: 999px;
+$btn-padding-y: 0.85rem;
+$btn-padding-x: 1.5rem;
+$btn-font-size: 0.9375rem;
+$btn-focus-width: 0.2rem;
+$btn-focus-box-shadow: 0 0 0 0.2rem rgba(t.$ivory, 0.55);
+
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/variables-dark';
+@import 'bootstrap/scss/maps';
+@import 'bootstrap/scss/mixins';
+@import 'bootstrap/scss/utilities';
+@import 'bootstrap/scss/root';
+@import 'bootstrap/scss/reboot';
+@import 'bootstrap/scss/type';
+@import 'bootstrap/scss/buttons';
+@import 'bootstrap/scss/spinners';
+@import 'bootstrap/scss/helpers';
+@import 'bootstrap/scss/utilities/api';
+
+// ---------------------------------------------------------------------------
+// App frame: one full-bleed stage, no device chrome. Every screen is a layer
+// that fills whatever viewport it lands on — phone, foldable, tablet, desktop.
+// ---------------------------------------------------------------------------
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+body {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+}
+
+app-root {
+  position: fixed;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  background: t.$garden-deep;
+}
+
+.screen {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+
+  &.is-shown { display: flex; }
+  &.is-raised { z-index: 5; }
+}
+
+button { touch-action: manipulation; }
+
+:focus-visible {
+  outline: 2px solid t.$ivory;
+  outline-offset: 3px;
+}
+
+// ---------------------------------------------------------------------------
+// Shared camera-body controls (camera, preview and download screens).
+// ---------------------------------------------------------------------------
+
+// Molded pill buttons on top of Bootstrap's .btn
+.btn-molded {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 50px;
+  border: 0;
+  text-shadow: 0 -1px 0 rgba(120, 20, 10, 0.45);
+  transition: transform 0.12s cubic-bezier(0.3, 0.6, 0.2, 1), box-shadow 0.12s ease, background 0.12s ease;
+
+  svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  &:active { transform: translateY(2px); }
+}
+
+.btn-molded-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-color: #fff;
+  background: linear-gradient(180deg, #fa6753 0%, t.$lol-red-deep 52%, #b8231f 100%);
+  box-shadow: 0 6px 14px rgba(207, 51, 32, 0.42), inset 0 1px 1px rgba(255, 255, 255, 0.5), inset 0 -3px 6px rgba(120, 20, 10, 0.5);
+
+  &:hover { background: linear-gradient(180deg, #ff735f 0%, #de302c 52%, #bf2622 100%); }
+  &:active {
+    background: linear-gradient(180deg, #d63f2c, #b3221e);
+    box-shadow: 0 2px 6px rgba(207, 51, 32, 0.3), inset 0 3px 9px rgba(110, 18, 10, 0.75);
+  }
+}
+
+.btn-molded-light {
+  --bs-btn-color: #b8231f;
+  --bs-btn-hover-color: #b8231f;
+  --bs-btn-active-color: #9c1d19;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+  background: linear-gradient(180deg, #ffffff, #ececef 50%, #d6d6da 100%);
+  box-shadow: 0 5px 11px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.95), inset 0 -2px 4px rgba(0, 0, 0, 0.16);
+
+  &:hover { background: linear-gradient(180deg, #ffffff, #f2f2f4 50%, #dddde1 100%); }
+  &:active {
+    background: linear-gradient(180deg, #dcdce0, #c6c6ca);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.18), inset 0 3px 8px rgba(0, 0, 0, 0.28);
+  }
+}
+
+// Brushed-chrome disc (back, flash, gallery, flip)
+.btn-disc {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #2b2b30;
+  background: linear-gradient(145deg, #fbfbfd 0%, #d2d2d6 42%, #9a9aa0 52%, #c4c4ca 60%, #eaeaee 100%);
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.95), inset 0 -2px 3px rgba(0, 0, 0, 0.28);
+  transition: transform 0.12s cubic-bezier(0.3, 0.6, 0.2, 1), box-shadow 0.12s ease, background 0.18s ease;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.9));
+  }
+
+  svg.is-solid { fill: currentColor; stroke: none; }
+
+  &:active {
+    background: linear-gradient(145deg, #c0c0c6, #a6a6ac 55%, #cacace);
+    box-shadow: inset 0 3px 7px rgba(0, 0, 0, 0.5);
+    transform: translateY(1px);
+  }
+
+  &.is-on {
+    color: #6b3a08;
+    background: linear-gradient(145deg, #ffe38a 0%, #ffb54a 45%, #c98a1a 100%);
+    box-shadow: 0 3px 10px rgba(255, 180, 80, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -2px 3px rgba(140, 80, 10, 0.4);
+  }
+
+  &.is-small {
+    width: 40px;
+    height: 40px;
+
+    svg { width: 18px; height: 18px; }
+  }
+}
+
+// Shutter: glossy red dome inside a chrome ring
+.btn-shutter {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 84px;
+  height: 84px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #f4f4f6, #bcbcc2 45%, #86868c 54%, #cacace);
+  box-shadow: 0 7px 17px rgba(0, 0, 0, 0.55), inset 0 1px 2px rgba(255, 255, 255, 0.95), inset 0 -3px 6px rgba(0, 0, 0, 0.32);
+  transition: transform 0.12s cubic-bezier(0.3, 0.6, 0.2, 1), box-shadow 0.12s ease, opacity 0.2s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle at 38% 30%, #ff8a78 0%, t.$lol-red 42%, #c52f1e 78%, #8f1f12 100%);
+    box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.5), inset 0 -6px 11px rgba(95, 16, 8, 0.7), 0 3px 6px rgba(0, 0, 0, 0.45);
+    transition: background 0.1s ease, box-shadow 0.1s ease, transform 0.1s cubic-bezier(0.4, 0.6, 0.2, 1);
+  }
+
+  svg {
+    position: relative;
+    z-index: 1;
+    width: 26px;
+    height: 26px;
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.9);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 1px 0 rgba(150, 25, 15, 0.6));
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5), inset 0 3px 7px rgba(0, 0, 0, 0.4);
+
+    &::before {
+      background: radial-gradient(circle at 40% 35%, #e8503e, #c52f1e 60%, #7e1b0f);
+      box-shadow: inset 0 4px 9px rgba(80, 12, 6, 0.85), inset 0 1px 2px rgba(255, 255, 255, 0.25);
+      transform: translate(-50%, -50%) scale(0.96);
+    }
+  }
+
+  &:disabled { opacity: 0.55; }
+}
+
+// LCD film counter ("1 of 2")
+.lcd-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  height: 32px;
+  padding: 0 16px;
+  border: 1px solid #050505;
+  border-radius: 7px;
+  font-family: t.$font-lcd;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: #ff5a44;
+  background: linear-gradient(180deg, #161618, #26262a);
+  text-shadow: 0 0 7px rgba(255, 80, 60, 0.65);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8), inset 0 -1px 0 rgba(255, 255, 255, 0.08), 0 1px 0 rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}

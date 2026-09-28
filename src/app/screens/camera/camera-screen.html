@@ -1,0 +1,87 @@
+<div class="cam-feed">
+  <video #video class="cam-video" [class.is-mirrored]="camera.facing() === 'user'" autoplay playsinline muted></video>
+</div>
+
+@if (camera.status() !== 'live') {
+  <div class="cam-state" [class.is-waiting]="camera.status() === 'starting' || camera.status() === 'idle'">
+    @switch (camera.status()) {
+      @case ('denied') {
+        <svg class="cam-state-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" /><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+        </svg>
+        <p>Camera access is off. Allow the camera for this site in your browser settings, then try again.</p>
+        <button type="button" class="btn btn-molded btn-molded-primary" (click)="camera.start()">Try again</button>
+      }
+      @case ('unavailable') {
+        <svg class="cam-state-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+          <line x1="2" y1="2" x2="22" y2="22" />
+        </svg>
+        <p>No camera is available on this device. You can still use a photo from your gallery.</p>
+        <button type="button" class="btn btn-molded btn-molded-light" (click)="pickFromGallery()">Choose a photo</button>
+      }
+      @default {
+        <div class="spinner-border" role="status"><span class="visually-hidden">Starting camera</span></div>
+        <p>Starting camera…</p>
+      }
+    }
+  </div>
+}
+
+<div #ui class="cam-ui">
+  <header class="cam-top">
+    <button type="button" class="btn-disc is-small" (click)="back.emit()" aria-label="Back to the start">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6" /></svg>
+    </button>
+    <div class="lcd-badge" aria-live="polite">{{ session.shotLabel() }}</div>
+    <button
+      type="button"
+      class="btn-disc is-small"
+      [class.is-on]="camera.torchOn()"
+      [class.invisible]="!camera.torchAvailable()"
+      [attr.aria-pressed]="camera.torchOn()"
+      (click)="camera.toggleTorch()"
+      aria-label="Flash"
+    >
+      <svg class="is-solid" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h6l-1 9 9-13h-6z" /></svg>
+    </button>
+  </header>
+
+  <div class="cam-zone">
+    <div #frame class="cam-frame" [class.is-live]="camera.status() === 'live'">
+      <i></i><i></i><i></i><i></i>
+    </div>
+    <p class="cam-hint" [class.invisible]="camera.status() !== 'live'">Fit everyone inside the frame</p>
+  </div>
+
+  <footer class="cam-bottom">
+    <button type="button" class="btn-disc" (click)="pickFromGallery()" aria-label="Choose a photo from your gallery">
+      <!-- Font Awesome 6 free "images" (solid) -->
+      <svg class="is-solid" viewBox="0 0 576 512" aria-hidden="true">
+        <path d="M160 32c-35.3 0-64 28.7-64 64l0 224c0 35.3 28.7 64 64 64l352 0c35.3 0 64-28.7 64-64l0-224c0-35.3-28.7-64-64-64L160 32zM396 138.7l96 144c4.9 7.4 5.4 16.8 1.2 24.6S480.9 320 472 320l-144 0-48 0-80 0c-9.2 0-17.6-5.3-21.6-13.6s-2.9-18.2 2.9-25.4l64-80c4.6-5.7 11.4-9 18.7-9s14.2 3.3 18.7 9l17.3 21.6 56-84C360.5 132 368 128 376 128s15.5 4 20 10.7zM192 128a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zM48 120c0-13.3-10.7-24-24-24S0 106.7 0 120L0 344c0 75.1 60.9 136 136 136l320 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-320 0c-48.6 0-88-39.4-88-88l0-224z" />
+      </svg>
+    </button>
+    <button
+      type="button"
+      class="btn-shutter"
+      [disabled]="camera.status() !== 'live' || shooting()"
+      (click)="shoot()"
+      aria-label="Take photo"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+        <circle cx="12" cy="13" r="4" />
+      </svg>
+    </button>
+    <button type="button" class="btn-disc" (click)="camera.flip()" aria-label="Switch between front and back camera">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5 9h2l1.2-2h7.6L17 9h2a1.5 1.5 0 0 1 1.5 1.5V17A1.5 1.5 0 0 1 19 18.5H5A1.5 1.5 0 0 1 3.5 17v-6.5A1.5 1.5 0 0 1 5 9z" />
+        <path d="M9 13.5a3 3 0 0 1 5.4-1.8" /><polyline points="14.6 10 14.4 11.7 12.7 11.5" />
+        <path d="M15 14a3 3 0 0 1-5.4 1.8" /><polyline points="9.4 17.6 9.6 15.9 11.3 16.1" />
+      </svg>
+    </button>
+  </footer>
+</div>
+
+<div #flash class="cam-flash" aria-hidden="true"></div>
+<input #gallery type="file" accept="image/*" class="d-none" (change)="onGalleryPick($event)" />

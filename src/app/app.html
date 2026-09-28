@@ -1,0 +1,34 @@
+<app-home
+  class="screen"
+  [class.is-shown]="isShown('home')"
+  [class.is-raised]="raised() === 'home'"
+  (start)="onStart($event)"
+/>
+<app-camera-screen
+  class="screen"
+  [class.is-shown]="isShown('camera')"
+  [class.is-raised]="raised() === 'camera'"
+  (captured)="onCaptured($event)"
+  (back)="onBack()"
+/>
+<app-confirm-screen
+  class="screen"
+  [class.is-shown]="isShown('confirm')"
+  [class.is-raised]="raised() === 'confirm'"
+  (retake)="onRetake()"
+  (accept)="onAccept()"
+/>
+<app-processing-screen
+  class="screen"
+  [class.is-shown]="isShown('processing')"
+  [class.is-raised]="raised() === 'processing'"
+/>
+<app-delivery-screen
+  class="screen"
+  [class.is-shown]="isShown('delivery')"
+  [class.is-raised]="raised() === 'delivery'"
+  (again)="onAgain()"
+  (done)="onDone()"
+/>
+
+<div class="shield" [class.is-on]="busy()" aria-hidden="true"></div>

@@ -1,0 +1,272 @@
+@use '../../../styles/tokens' as t;
+
+// Preview: the photo lands in the real strip template, held in a hand
+// (hand-back, template + photos, hand-front). The dark body is its own layer
+// so it can fade away while the card leaves, revealing what is underneath.
+
+:host { color: #fff; }
+
+.cf-backdrop {
+  position: absolute;
+  inset: 0;
+  @include t.plastic-ground;
+
+  &::before { @include t.film-grain(0.4); }
+}
+
+.cf {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-areas:
+    'top'
+    'hand'
+    'picker'
+    'actions';
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+}
+
+.cf-top {
+  grid-area: top;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  padding: max(14px, env(safe-area-inset-top)) 16px 6px;
+}
+
+// ---------------------------------------------------------- hand + card ----
+
+.hand-area {
+  grid-area: hand;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 4px 10px 0;
+  overflow: hidden;
+  container-type: size;
+  // The forearm melts into whatever is behind (the body, or the live camera
+  // while the card leaves). --fade-from is set just under the card by the component.
+  -webkit-mask-image: linear-gradient(to bottom, #000 var(--fade-from, 78%), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 var(--fade-from, 78%), transparent 100%);
+}
+
+// The stage keeps the hand art's exact proportions (1086 x 1448) and
+// "contains" inside the area; every layer is positioned in its percentages.
+.hand-stage {
+  position: relative;
+  flex: 0 0 auto;
+  width: min(100cqw, 100cqh * 0.75);
+  aspect-ratio: 1086 / 1448;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.hand-layer {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.hand-back {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hand-front {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+// Template position inside the grip (from the source PSD's frame slot).
+.tpl-slot {
+  position: absolute;
+  left: 24%;
+  top: 4.71%;
+  width: 44%;
+  height: 49.5%;
+  z-index: 2;
+}
+
+.frame-hole {
+  position: absolute;
+  left: 6.92%;
+  width: 87.92%;
+  overflow: hidden;
+  background: #0c0c0c;
+
+  &.hole-1 { top: 6.72%; height: 38.89%; }
+  &.hole-2 { top: 48.11%; height: 38.94%; }
+}
+
+.hole-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: hole-in 0.45s ease both;
+}
+
+.tpl-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.hole-next {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6%;
+  background: #16161b;
+
+  svg {
+    width: 24%;
+    max-width: 48px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: hole-pulse 1.9s ease-in-out infinite;
+  }
+
+  span {
+    font-size: clamp(7px, 1.2vmin, 11px);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.42);
+  }
+}
+
+@keyframes hole-in { from { opacity: 0; } }
+
+@keyframes hole-pulse {
+  0%, 100% { opacity: 0.32; transform: scale(0.95); }
+  50% { opacity: 0.62; transform: scale(1.03); }
+}
+
+// --------------------------------------------------------- look picker ----
+
+.cf-picker {
+  grid-area: picker;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: 12px;
+  padding: 10px 18px 6px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar { display: none; }
+}
+
+.look {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 12px;
+  font-weight: 800;
+  scroll-snap-align: center;
+
+  // Centres the row when it fits, scrolls from the edge when it does not.
+  &:first-child { margin-left: auto; }
+  &:last-child { margin-right: auto; }
+
+  &.is-active { color: #fff; }
+}
+
+.look-thumb {
+  display: block;
+  width: 58px;
+  height: 58px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #2a2a2f;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 4px 10px rgba(0, 0, 0, 0.35);
+  transition: box-shadow 0.2s ease, transform 0.25s t.$ease-out;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    animation: hole-in 0.3s ease both;
+  }
+
+  .look.is-active & {
+    transform: translateY(-3px);
+    box-shadow: 0 0 0 2px #fff, 0 0 0 5px rgba(t.$lol-red, 0.9), 0 8px 16px rgba(0, 0, 0, 0.45);
+  }
+}
+
+// ------------------------------------------------------------- actions ----
+
+.cf-actions {
+  grid-area: actions;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 12px 20px max(20px, env(safe-area-inset-bottom));
+
+  .btn { min-width: 132px; }
+}
+
+// Short landscape screens (phones on their side, smart displays): the hand
+// takes the left side, look picker + buttons stack on the right.
+@media (orientation: landscape) and (max-height: 560px) {
+  .cf {
+    grid-template-areas:
+      'hand top'
+      'hand picker'
+      'hand actions';
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 44%);
+    grid-template-rows: auto 1fr auto;
+  }
+
+  .cf-top { padding-top: max(12px, env(safe-area-inset-top)); }
+
+  .hand-area { padding-top: 10px; }
+
+  .cf-picker {
+    align-self: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    overflow: visible;
+
+    .look:first-child,
+    .look:last-child { margin: 0; }
+  }
+
+  .look-thumb { width: 50px; height: 50px; }
+
+  .cf-actions { padding-bottom: max(14px, env(safe-area-inset-bottom)); }
+}

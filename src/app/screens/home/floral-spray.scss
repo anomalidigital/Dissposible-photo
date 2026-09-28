@@ -1,0 +1,101 @@
+// Global on purpose (ViewEncapsulation.None): targets the generated SVG.
+
+app-floral-spray { display: block; }
+
+.fl-wrap,
+.fl-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+// After the bloom, the whole bouquet breathes from its corner — one slow,
+// composited rotation instead of animating hundreds of SVG nodes.
+.fl-svg {
+  overflow: visible;
+  transform-origin: 0 0;
+  animation: fl-sway 11s ease-in-out 2.6s infinite alternate;
+  will-change: transform;
+}
+
+.fl-leaf,
+.fl-ring,
+.fl-bud,
+.fl-dot {
+  transform-box: fill-box;
+  animation-delay: var(--d, 0s);
+  animation-fill-mode: both;
+}
+
+// Leaves unfurl from their base (their path starts at the local origin).
+.fl-leaf {
+  transform-origin: 0% 50%;
+  animation-name: fl-unfurl;
+  animation-duration: 0.95s;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+// Each petal ring opens from bud to bloom, outer rings first.
+.fl-ring {
+  transform-origin: 50% 50%;
+  animation-name: fl-bloom;
+  animation-duration: 1.2s;
+  animation-timing-function: cubic-bezier(0.16, 0.84, 0.24, 1);
+}
+
+.fl-bud {
+  transform-origin: 50% 100%;
+  animation-name: fl-unfurl-up;
+  animation-duration: 0.8s;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.fl-dot {
+  transform-origin: 50% 50%;
+  animation-name: fl-dot;
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+
+// Stems draw themselves on (pathLength="1" normalises the dash).
+.fl-stem {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: fl-draw 1.1s cubic-bezier(0.45, 0, 0.2, 1) var(--d, 0s) forwards;
+}
+
+@keyframes fl-bloom {
+  from { transform: scale(0.12) rotate(-32deg); opacity: 0; }
+  45% { opacity: 1; }
+  to { transform: none; opacity: 1; }
+}
+
+@keyframes fl-unfurl {
+  from { transform: scale(0, 0.35); opacity: 0; }
+  40% { opacity: 1; }
+  to { transform: none; opacity: 1; }
+}
+
+@keyframes fl-unfurl-up {
+  from { transform: scale(0.35, 0); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+@keyframes fl-dot {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+@keyframes fl-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes fl-sway {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(1.6deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fl-svg { animation: none; }
+  .fl-stem { stroke-dashoffset: 0; animation: none; }
+}

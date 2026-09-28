@@ -1,0 +1,20 @@
+<div class="proc">
+  <div class="proc-card">
+    <div class="proc-print">
+      @if (session.strip(); as strip) {
+        <img class="proc-strip" [src]="strip.url" alt="Your photo strip" />
+      }
+      <div class="proc-sheen" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <p class="proc-status" aria-live="polite">{{ status() }}</p>
+
+  <div class="proc-ring" role="progressbar" aria-label="Preparing your strip" [attr.aria-valuenow]="progress()" aria-valuemin="0" aria-valuemax="100">
+    <svg viewBox="0 0 56 56" aria-hidden="true">
+      <circle cx="28" cy="28" r="24" class="track" />
+      <circle cx="28" cy="28" r="24" class="value" [attr.stroke-dasharray]="ring" [attr.stroke-dashoffset]="dashOffset()" />
+    </svg>
+    <span>{{ progress() }}%</span>
+  </div>
+</div>

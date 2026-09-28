@@ -1,0 +1,54 @@
+// Design tokens + mixins shared by the global sheet and component styles.
+// Emits no CSS on its own — safe to @use from any component.
+
+// Brand
+$lol-red: #ee3734;        // sampled from the LOL Photobooth logo
+$lol-red-deep: #d42a26;   // CTA fill: keeps white text above 4.5:1
+$lol-red-dark: #a51d1a;
+
+// Wedding home — "night garden"
+$garden-ink: #10231b;
+$garden-deep: #08140f;
+$ivory: #f6eee2;
+$blush: #edb3a3;
+$sage: #8ea99a;
+
+// Camera body (dark moulded plastic)
+$plastic-hi: #303036;
+$plastic-mid: #202024;
+$plastic-lo: #141417;
+
+$font-ui: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+$font-names: 'Ballet', 'Pinyon Script', cursive;
+$font-text: 'Jost', 'Nunito', system-ui, sans-serif;
+$font-lcd: 'Bungee', 'Nunito', monospace;
+
+$ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+$ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+// Dark moulded-plastic ground used behind the camera-flow screens.
+@mixin plastic-ground {
+  background:
+    radial-gradient(120% 80% at 50% -10%, #3a3a40 0%, rgba(58, 58, 64, 0) 55%),
+    linear-gradient(168deg, $plastic-hi 0%, $plastic-mid 55%, $plastic-lo 100%);
+}
+
+// Fine film grain. The turbulence tile is rasterised once at 64px and repeated.
+@mixin film-grain($opacity: 0.4) {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: $opacity;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 64px 64px;
+}
+
+@mixin safe-top($min: 14px) {
+  padding-top: max(#{$min}, env(safe-area-inset-top));
+}
+
+@mixin safe-bottom($min: 18px) {
+  padding-bottom: max(#{$min}, env(safe-area-inset-bottom));
+}
