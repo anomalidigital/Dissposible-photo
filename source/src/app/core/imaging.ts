@@ -5,7 +5,7 @@ export const PHOTO_ASPECT = 1055 / 700;
 
 /** The printed strip template and its two transparent photo windows, in template pixels. */
 export const STRIP_TEMPLATE = {
-  src: 'assets/template-artworks.webp',
+  src: 'img/template-artworks.webp',
   width: 1200,
   height: 1800,
   holes: [

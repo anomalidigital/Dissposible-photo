@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:site": "ng build && node scripts/sync-site.mjs",
     "watch": "ng build --watch --configuration development"
   },
   "private": true,

@@ -7,7 +7,7 @@
 
   <div #area class="hand-area">
     <div #stage class="hand-stage">
-      <img class="art hand-layer hand-back" src="assets/hand-back.webp" alt="" draggable="false" />
+      <img class="art hand-layer hand-back" src="img/hand-back.webp" alt="" draggable="false" />
       <div #slot class="tpl-slot">
         @for (src of holes(); track $index) {
           <div class="frame-hole" [class.hole-1]="$index === 0" [class.hole-2]="$index === 1">
@@ -24,9 +24,9 @@
             }
           </div>
         }
-        <img class="art tpl-img" src="assets/template-artworks.webp" alt="" draggable="false" />
+        <img class="art tpl-img" src="img/template-artworks.webp" alt="" draggable="false" />
       </div>
-      <img class="art hand-layer hand-front" src="assets/hand-front.webp" alt="" draggable="false" />
+      <img class="art hand-layer hand-front" src="img/hand-front.webp" alt="" draggable="false" />
     </div>
   </div>
 
